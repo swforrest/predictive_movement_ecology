@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "predictive_movement_ecology"
+  title: "Predictive Movement Ecology"
   navbar:
     left:
       - href: index.qmd
