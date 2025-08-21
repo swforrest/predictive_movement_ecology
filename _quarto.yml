@@ -6,6 +6,7 @@ execute:
   freeze: auto
 
 website:
+  favicon: figures/next-step.png
   title: "Predictive Movement Ecology"
   navbar:
     left:
