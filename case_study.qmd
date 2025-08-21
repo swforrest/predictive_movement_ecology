@@ -1,0 +1,7 @@
+---
+title: "Case Study"
+author: "Scott Forrest"
+format: html
+---
+
+The tabs on the left navigate to different components of the case study.

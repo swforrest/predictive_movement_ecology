@@ -7,9 +7,16 @@
     "text": "About this site"
   },
   {
+    "objectID": "case_study.html",
+    "href": "case_study.html",
+    "title": "Case Study",
+    "section": "",
+    "text": "The tabs on the left navigate to different components of the case study."
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "predictive_movement_ecology",
+    "title": "Predictive Movement Ecology",
     "section": "",
     "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites."
   }

@@ -1,6 +1,9 @@
 project:
   type: website
   output-dir: docs
+  
+execute:
+  freeze: auto
 
 website:
   title: "Predictive Movement Ecology"
@@ -9,6 +12,7 @@ website:
       - href: index.qmd
         text: Home
       - about.qmd
+      - case_study.qmd
 
 format:
   html:
