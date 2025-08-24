@@ -1,2 +1,3 @@
-# predictive_movement_ecology
-For the review paper, Patterns to predictions: Movement ecology as a predictive science
+# Predictive Movement Ecology
+
+This repository accompanies the review paper, "Patterns to predictions: Movement ecology as a predictive science".
