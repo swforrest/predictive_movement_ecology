@@ -1,0 +1,1024 @@
+---
+title: "SSF responses"
+author: "Scott Forrest"
+date: "`r Sys.Date()`"
+execute: 
+  cache: false
+bibliography: paperpile.bib
+toc: true
+number-sections: false
+format: 
+  html:
+    # self-contained: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    code-line-numbers: true
+    code-overflow: scroll
+    fig-format: png
+    fig-dpi: 300
+  pdf:
+    geometry: 
+      - top=30mm
+      - left=30mm
+editor:
+  source
+abstract: |
+  In this script we demonstrate different approaches to including covariates in an SSF model. 
+---
+
+# Load required packages
+
+```{r}
+#| warning=FALSE
+
+library(tidyverse)
+packages <- c("amt", "sf", "terra", "RColorBrewer", "mgcv", "gratia")
+walk(packages, require, character.only = T)
+
+```
+
+# Import data and clean
+
+```{r}
+
+buffalo_data <- read_csv("data/buffalo.csv") 
+
+# remove individuals that have poor data quality or less than about 3 months of data. 
+# The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exclude it
+buffalo_data <- buffalo_data %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
+                                           2029, 2043, 2265, 2284, 2346))
+
+buffalo_data <- buffalo_data %>%  
+  group_by(node) %>% 
+  arrange(DateTime, .by_group = T) %>% 
+  distinct(DateTime, .keep_all = T) %>% 
+  arrange(node) %>% 
+  mutate(ID = node)
+
+buffalo_clean <- buffalo_data[, c(12, 2, 4, 3)]
+colnames(buffalo_clean) <- c("id", "time", "lon", "lat")
+attr(buffalo_clean$time, "tzone") <- "Australia/Queensland"
+head(buffalo_clean)
+tz(buffalo_clean$time)
+
+buffalo_ids <- unique(buffalo_clean$id)
+
+```
+
+# Create a step object 
+
+Use the `amt` package to create a trajectory object from the cleaned data. 
+
+```{r}
+#| label: make_track
+#| code-summary: "Create a trajectory object"
+
+buffalo_all <- buffalo_clean %>% mk_track(id = id,
+                                           lon,
+                                           lat, 
+                                           time, 
+                                           all_cols = T,
+                                           crs = 4326) %>% 
+  transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+# Geoscience Australia Lambert (https://epsg.io/3112)
+
+```
+
+## Plot the data spatially
+
+```{r}
+
+buffalo_all %>%
+  ggplot(aes(x = x_, y = y_, colour = id)) +
+  geom_point(alpha = 0.5, size = 0.1) + 
+  coord_fixed() +
+  scale_x_continuous("Easting (m)") +
+  scale_y_continuous("Northing (m)") +
+  scale_colour_viridis_d() +
+  theme_classic() +
+  theme(legend.position = "right") 
+
+# ggsave("outputs/data_prep/buffalo_djelk_map.png",
+#        width = 150, height = 150, units = "mm",  dpi = 600)
+
+```
+
+## Pick out a single individual
+
+```{r}
+
+which_buffalo <- "2022" # select a single buffalo ID
+
+buffalo_id <- buffalo_all %>% filter(id == which_buffalo)
+
+buffalo_id %>%
+  ggplot(aes(x = x_, y = y_, colour = t_)) +
+  geom_point(alpha = 0.5, size = 0.1) + 
+  coord_fixed() +
+  scale_x_continuous("Easting (m)") +
+  scale_y_continuous("Northing (m)") +
+  theme_classic()
+
+```
+
+# Import spatial covariate
+
+Although NDVI changes over time, and we have access to monthly layers, we will just select a single month here.
+
+```{r}
+
+ndvi <- rast("mapping/ndvi_aug_2018.tif")
+plot(ndvi, main = "NDVI August 2018")
+points(buffalo_id$x_, buffalo_id$y_, col = "red", pch = 16, cex = 0.5)
+ndvi
+
+```
+
+# Select local extent
+
+We just want to look at an area centred on a single location, which might be combined with our movement probability surface to generate a next-step probability surface.
+
+We'll centre the extent on an interesting looking part of the landscape, and then buffer it by 1500m (with a buffer of the cell resolution/2 to ensure there is a central cell), which contains most of the step lengths, and therefore most of the movement kernel.
+
+```{r}
+
+cell_resolution <- 25 # in metres
+
+buffalo_single_point <- buffalo_id %>% 
+  filter(t_ == min(t_)) # select the first time point
+
+buffer <- 1500 + (cell_resolution/2) # buffer in metres
+
+window_extent <- ext(buffalo_single_point$x_ - buffer, 
+                        buffalo_single_point$x_ + buffer, 
+                        buffalo_single_point$y_ - buffer, 
+                        buffalo_single_point$y_ + buffer)
+
+ndvi_window <- crop(ndvi, window_extent)
+
+# set the extent to 0 at the buffalo location
+ndvi_window <- shift(ndvi_window, 
+                    dx = -buffalo_single_point$x_, 
+                    dy = -buffalo_single_point$y_)
+
+# plot the NDVI layer with the buffalo location as the centre point
+plot(ndvi_window, main = paste0("NDVI - ID ", which_buffalo),
+     col = brewer.pal(9, "Greens"))
+points(x = 0, y = 0, col = "red")
+
+# Save the plot
+png(filename = paste0("outputs/ndvi_local_", which_buffalo, ".png"), 
+    width = 100, height = 100, units = "mm", res = 600)
+print(plot(ndvi_window, main = paste0("NDVI - ID ", which_buffalo),
+     col = brewer.pal(9, "Greens")))
+print(points(x = 0, y = 0, col = "red"))
+dev.off()
+
+
+# # create a NDVI df to plot with ggplot
+# ndvi_df <- as.data.frame(ndvi_window, xy = TRUE) 
+# 
+# ggplot() +
+#   geom_raster(data = ndvi_df, aes(x = x, y = y, fill = as.factor(cut(ndvi, breaks = 9)))) +
+#   scale_fill_brewer(palette = "Greens", direction = 1) +
+#   coord_fixed() +
+#   geom_point(aes(x = 0, y = 0), 
+#              colour = "red", size = 0.5) +
+#   labs(x = "Easting (m)", y = "Northing (m)", fill = "NDVI") +
+#   theme_classic()
+
+```
+
+## Sample random steps to fit models
+
+```{r}
+
+buffalo_id_steps <- buffalo_id %>% 
+  steps()
+
+# fitting step length and turning angle distributions to all locations
+gamma_dist <- fit_distr(buffalo_id_steps$sl_, "gamma")
+vonmises_dist <- fit_distr(buffalo_id_steps$ta_, "vonmises")
+
+# movement parameters
+gamma_dist$params$shape
+gamma_dist$params$scale
+vonmises_dist$params$kappa
+vonmises_dist$params$mu
+
+# sample random steps
+buffalo_ssf_data <- buffalo_id_steps %>% 
+  random_steps(n = 10, 
+                sl_dist = gamma_dist, 
+                ta_dist = vonmises_dist) %>%
+  extract_covariates(ndvi)  %>%
+  mutate(ndvi_sq = ndvi^2,
+         log_sl = log(sl_),
+         cos_ta = cos(ta_),
+         times = 1) # create a dummy column for times (used in a Cox PH model, but not relevant to an SSF) that all contain the same value
+
+```
+
+# Different SSF formulations
+
+Firstly, we want to pull out the range of NDVI values to plot the curves with.
+
+```{r}
+
+# histogram of NDVI values
+# hist(values(ndvi))
+
+# 1% and 99% quantiles of NDVI values
+ndvi_quantiles <- quantile(values(ndvi), probs = c(0.025, 0.975), na.rm = TRUE)
+ndvi_quantiles
+
+# plot across the range in the local window
+ndvi_values <- seq(ndvi_quantiles[1], 
+                   ndvi_quantiles[2], 
+                   length.out = 100)
+
+pred_data <- data.frame(ndvi = ndvi_values, 
+                        ndvi_sq = ndvi_values^2,
+                        sl_ = 0,
+                        log_sl = 0,
+                        cos_ta = 0)
+
+```
+
+## Linear covariate
+
+### Model formula
+
+$y \sim ndvi$
+
+### Fit model
+
+```{r}
+
+# fit an issf model
+ssf_linear <- amt::fit_issf(case_ ~ 
+                              ndvi + 
+                              sl_ + log_sl + cos_ta +
+                              strata(step_id_),
+                            data = buffalo_ssf_data)
+
+summary(ssf_linear)
+
+# fit an ssf gam model with parametric terms
+ssf_linear_gam <- mgcv::gam(cbind(times, step_id_) ~ 
+                              ndvi +
+                              sl_ + log_sl + cos_ta,
+                            data = buffalo_ssf_data,
+                            family = cox.ph,
+                            weight = case_)
+
+summary(ssf_linear_gam)
+
+```
+
+```{r}
+
+# Get predictions on log-scale with standard errors
+predictions <- predict(ssf_linear_gam, 
+                      newdata = pred_data, 
+                      type = "link",  # log-scale
+                      se.fit = TRUE)
+
+# Extract log RSS and standard errors
+log_rss <- predictions$fit
+se_log_rss <- predictions$se.fit
+
+# Calculate confidence intervals on log-scale
+log_rss_lower <- log_rss - 1.96 * se_log_rss
+log_rss_upper <- log_rss + 1.96 * se_log_rss
+
+# Transform to RSS scale
+rss <- exp(log_rss)
+rss_lower <- exp(log_rss_lower)
+rss_upper <- exp(log_rss_upper)
+
+# Create your dataframe
+ndvi_coef_df <- data.frame(
+  ndvi_values = ndvi_values,
+  log_rss = log_rss,
+  log_rss_lower = log_rss_lower,
+  log_rss_upper = log_rss_upper,
+  rss = rss,
+  rss_lower = rss_lower,
+  rss_upper = rss_upper
+)
+
+# plot the response curve
+ggplot(data = ndvi_coef_df) +
+  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey") +
+  geom_ribbon(aes(x = ndvi_values, ymin = rss_lower, ymax = rss_upper), 
+              fill = "grey70", alpha = 0.5) +
+  geom_line(aes(x = ndvi_values, y = rss), 
+            colour = "black", linewidth = 1) +
+  labs(x = "NDVI", y = "RSS") +
+  theme_classic() 
+
+```
+
+
+### Response curve
+
+```{r}
+
+# extract the NDVI coefficient and its standard error
+ndvi_coef <- ssf_linear$model$coefficients[1]
+ndvi_coef_se <- sqrt(diag(ssf_linear$model$var))[1]  # SE of coefficient
+
+# calculate the RSS for each NDVI value
+ndvi_coef_df <- data.frame(
+  ndvi_values = ndvi_values,
+  log_rss = ndvi_values * ndvi_coef,
+  rss = exp(ndvi_values * ndvi_coef),
+  se_prediction = abs(ndvi_values) * ndvi_coef_se  # SE of prediction at each NDVI value
+)
+
+# plot the response curve
+ggplot(data = ndvi_coef_df) +
+  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey") +
+  geom_ribbon(aes(x = ndvi_values, ymin = exp(log_rss - 1.96 * se_prediction), ymax = exp(log_rss + 1.96 * se_prediction)), 
+              fill = "grey70", alpha = 0.5) +
+  geom_line(aes(x = ndvi_values, y = rss), 
+            colour = "black", linewidth = 1) +
+  labs(x = "NDVI", y = "RSS") +
+  theme_classic() 
+
+ggsave(paste0("outputs/ndvi_linear_response_id", which_buffalo, ".png"),
+       width = 120, height = 100, units = "mm", dpi = 600)
+
+```
+
+### Plot habitat selection
+
+```{r}
+
+# calculate the RSS for the local NDVI values
+ndvi_linear <- exp(ndvi_window * ndvi_coef)
+
+# plot the habitat selection (spatial RSS)
+plot(ndvi_linear, main = "RSS - linear")
+
+# Save the plot
+png(filename = paste0("outputs/rss_linear_", which_buffalo, ".png"), 
+    width = 100, height = 80, units = "mm", res = 600)
+print(plot(ndvi_linear, main = "RSS - linear"))
+dev.off()
+
+```
+
+## Quadratic covariate
+
+### Model formula
+
+$y \sim ndvi + ndvi^2$
+
+### Fit model
+
+```{r}
+
+# fit an issf model
+ssf_quadratic <- amt::fit_issf(case_ ~ 
+                                 ndvi + 
+                                 ndvi_sq + 
+                                 sl_ + log_sl + cos_ta +
+                              strata(step_id_),
+                            data = buffalo_ssf_data)
+
+summary(ssf_quadratic)
+
+# fit an ssf gam model with parametric terms
+ssf_quadratic_gam <- mgcv::gam(cbind(times, step_id_) ~ 
+                                 ndvi + 
+                                 ndvi_sq +
+                               sl_ + log_sl + cos_ta,
+                               data = buffalo_ssf_data,
+                               family = cox.ph,
+                               weight = case_)
+
+summary(ssf_quadratic_gam)
+
+# Use the `predict` function to get predictions
+predictions <- predict(ssf_quadratic_gam, 
+                       newdata = pred_data, 
+                       type = "link", 
+                       se.fit = TRUE)
+
+```
+
+```{r}
+
+# Get predictions on log-scale with standard errors
+predictions <- predict(ssf_quadratic_gam, 
+                      newdata = pred_data, 
+                      type = "link",  # log-scale
+                      se.fit = TRUE)
+
+# Extract log RSS and standard errors
+log_rss <- predictions$fit
+se_log_rss <- predictions$se.fit
+
+# Calculate confidence intervals on log-scale
+log_rss_lower <- log_rss - 1.96 * se_log_rss
+log_rss_upper <- log_rss + 1.96 * se_log_rss
+
+# Transform to RSS scale
+rss <- exp(log_rss)
+rss_lower <- exp(log_rss_lower)
+rss_upper <- exp(log_rss_upper)
+
+# Create your dataframe
+ndvi_coef_df <- data.frame(
+  ndvi_values = ndvi_values,
+  log_rss = log_rss,
+  log_rss_lower = log_rss_lower,
+  log_rss_upper = log_rss_upper,
+  rss = rss,
+  rss_lower = rss_lower,
+  rss_upper = rss_upper
+)
+
+# plot the response curve
+ggplot(data = ndvi_coef_df) +
+  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey") +
+  geom_ribbon(aes(x = ndvi_values, ymin = rss_lower, ymax = rss_upper), 
+              fill = "grey70", alpha = 0.5) +
+  geom_line(aes(x = ndvi_values, y = rss), 
+            colour = "black", linewidth = 1) +
+  labs(x = "NDVI", y = "RSS") +
+  theme_classic() 
+
+ggsave(paste0("outputs/ndvi_quadratic_response_id", which_buffalo, ".png"),
+       width = 120, height = 100, units = "mm", dpi = 600)
+
+```
+
+### Response curve
+
+```{r}
+
+# extract the NDVI coefficient
+ndvi_coef <- ssf_quadratic$model$coefficients[1]
+ndvi_coef_sq <- ssf_quadratic$model$coefficients[2]
+
+ndvi_se = sqrt(diag(ssf_quadratic$model$var))[1]
+ndvi_sq_se = sqrt(diag(ssf_quadratic$model$var))[2]
+
+log_rss = (ndvi_values * ndvi_coef) + (ndvi_values^2 * ndvi_coef_sq)
+rss = exp(log_rss)
+
+# calculate the RSS for each NDVI value
+ndvi_coef_df <- data.frame(ndvi_values, log_rss, rss)
+
+# plot the response curve
+ggplot() +
+  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey") +
+  geom_line(data = ndvi_coef_df, aes(x = ndvi_values, y = rss), 
+            colour = "black", linewidth = 1) +
+  labs(x = "NDVI", y = "RSS") +
+  theme_classic() 
+
+# ggsave(paste0("outputs/ndvi_quadratic_response_id", which_buffalo, ".png"),
+#        width = 100, height = 100, units = "mm", dpi = 600)
+
+```
+
+### Plot habitat selection
+
+```{r}
+
+# extract the NDVI coefficient
+ndvi_coef <- ssf_quadratic$model$coefficients[1]
+ndvi_coef_sq <- ssf_quadratic$model$coefficients[2]
+
+# calculate the RSS for the local NDVI values
+ndvi_quadratic <- exp((ndvi_window * ndvi_coef) + 
+                        (ndvi_window^2 * ndvi_coef_sq))
+
+# plot the habitat selection (spatial RSS)
+plot(ndvi_quadratic, main = "RSS - quadratic")
+
+# Save the plot
+png(filename = paste0("outputs/rss_quadratic_", which_buffalo, ".png"), 
+    width = 100, height = 80, units = "mm", res = 600)
+print(plot(ndvi_quadratic, main = "RSS - quadratic"))
+dev.off()
+
+```
+
+## Smooth term
+
+Fit a GAM to the data, with a smooth term across the range of NDVI values [@Klappstein2024-ax].
+
+### Model formula
+
+$y \sim s(ndvi)$
+
+### Fit model
+
+```{r}
+
+# fit an ssf gam model
+ssf_gam <- mgcv::gam(cbind(times, step_id_) ~ 
+                       s(ndvi, bs = "tp", k = 10) +
+                       # s(ndvi) +
+                       sl_ + log_sl + cos_ta,
+                            data = buffalo_ssf_data,
+                            family = cox.ph,
+                            weight = case_)
+
+summary(ssf_gam)
+
+# coef(ssf_gam)[4]
+
+gam_smooths <- smooth_estimates(ssf_gam)
+
+```
+
+### Response curve
+
+```{r}
+
+# gratia::draw(ssf_gam, rug = FALSE) + 
+#   geom_hline(yintercept = 0, linetype = "dashed", colour = "grey") +
+#   labs(x = "NDVI", y = "log-RSS") +
+#   scale_x_continuous(limits = c(ndvi_quantiles[1], 0.5)) +
+#   scale_y_continuous(limits = c(-0.4, 0.4)) +
+#   theme_classic() 
+
+ggplot(data = gam_smooths) + 
+  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey") +
+  geom_ribbon(aes(x = ndvi, ymin = exp(.estimate - 1.96 * .se), ymax = exp(.estimate + 1.96 * .se)), 
+              fill = "grey70", alpha = 0.5) +
+  geom_line(aes(x = ndvi, y = exp(.estimate)), 
+            colour = "black", linewidth = 1) +
+  labs(x = "NDVI", y = "RSS") +
+  # scale_x_continuous(limits = c(ndvi_quantiles[1], 0.5)) +
+  # scale_y_continuous(limits = c(0.65, 1.3)) +
+  theme_classic() 
+
+# ggsave(paste0("outputs/ndvi_smooth_response_id", which_buffalo, ".png"),
+#        width = 120, height = 100, units = "mm", dpi = 600)
+
+```
+
+```{r}
+
+# Get predictions on log-scale with standard errors
+predictions <- predict(ssf_gam, 
+                      newdata = pred_data, 
+                      type = "link",  # log-scale
+                      se.fit = TRUE)
+
+# Extract log RSS and standard errors
+log_rss <- predictions$fit
+se_log_rss <- predictions$se.fit
+
+# Calculate confidence intervals on log-scale
+log_rss_lower <- log_rss - 1.96 * se_log_rss
+log_rss_upper <- log_rss + 1.96 * se_log_rss
+
+# Transform to RSS scale
+rss <- exp(log_rss)
+rss_lower <- exp(log_rss_lower)
+rss_upper <- exp(log_rss_upper)
+
+# Create your dataframe
+ndvi_coef_df <- data.frame(
+  ndvi_values = ndvi_values,
+  log_rss = log_rss,
+  log_rss_lower = log_rss_lower,
+  log_rss_upper = log_rss_upper,
+  rss = rss,
+  rss_lower = rss_lower,
+  rss_upper = rss_upper
+)
+
+# plot the response curve
+ggplot(data = ndvi_coef_df) +
+  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey") +
+  geom_ribbon(aes(x = ndvi_values, ymin = rss_lower, ymax = rss_upper), 
+              fill = "grey70", alpha = 0.5) +
+  geom_line(aes(x = ndvi_values, y = rss), 
+            colour = "black", linewidth = 1) +
+  labs(x = "NDVI", y = "RSS") +
+  theme_classic() 
+
+ggsave(paste0("outputs/ndvi_smooth_response_id", which_buffalo, ".png"),
+       width = 120, height = 100, units = "mm", dpi = 600)
+
+```
+
+### Plot habitat selection
+
+```{r}
+
+predicted_log_rss <- predict(ssf_gam, 
+                         newdata = data.frame(ndvi = values(ndvi_window), 
+                                                sl_ = 0, 
+                                                log_sl = 0, 
+                                                cos_ta = 0),, 
+                         type = "link")
+
+ndvi_gam <- ndvi_window
+values(ndvi_gam) <- exp(as.vector(predicted_log_rss))
+
+# Plot the predictions
+plot(ndvi_gam, main = "RSS - smooth term")
+
+# Save the plot
+png(filename = paste0("outputs/rss_smooth_", which_buffalo, ".png"), 
+    width = 100, height = 80, units = "mm", res = 600)
+print(plot(ndvi_gam, main = "RSS - smooth"))
+dev.off()
+
+```
+
+# Temporal dynamics
+
+## Harmonic regression
+
+```{r}
+
+buffalo_ssf_data <- buffalo_ssf_data %>% mutate(
+  
+  # create hour term
+  hour = lubridate::hour(t1_),
+  
+  # harmonic terms
+  sin_1_hour = sin(2 * pi * hour / 24),
+  cos_1_hour = cos(2 * pi * hour / 24),
+  sin_2_hour = sin(4 * pi * hour / 24),
+  cos_2_hour = cos(4 * pi * hour / 24),
+  
+)
+
+```
+
+### Fit model
+
+We'll fit it using the `mgcv` package, which allows us to use the `cox.ph` family for survival analysis, which is appropriate for SSF models, and we can use the `predict` function to get predictions on the log-scale.
+
+```{r}
+
+ssf_harmonics <- amt::fit_issf(case_ ~ 
+                                 ndvi +
+                                 ndvi:sin_1_hour + ndvi:cos_1_hour +
+                                 ndvi:sin_2_hour + ndvi:cos_2_hour +
+                                 sl_ + log_sl + cos_ta +
+                                 strata(step_id_),
+                               data = buffalo_ssf_data)
+
+summary(ssf_harmonics)
+
+```
+
+### Pull out the coefficent across time
+
+```{r}
+
+ndvi_harmonic_coef_reconstruction <- function(ssf_harmonic_model, hour) {
+  
+  ndvi_coef <- ssf_harmonic_model$model$coefficients["ndvi"]
+  ndvi_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_1_hour"]
+  ndvi_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_1_hour"]
+  ndvi_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_2_hour"]
+  ndvi_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_2_hour"]
+  
+  sin_1_hour <- sin(2 * pi * hour / 24)
+  cos_1_hour <- cos(2 * pi * hour / 24)
+  sin_2_hour <- sin(4 * pi * hour / 24)
+  cos_2_hour <- cos(4 * pi * hour / 24)
+  
+  coef <- as.numeric(ndvi_coef + 
+                       sin_1_hour * ndvi_sin_1_coef + 
+                       cos_1_hour * ndvi_cos_1_coef + 
+                       sin_2_hour * ndvi_sin_2_coef + 
+                       cos_2_hour * ndvi_cos_2_coef)
+  
+  return(coef)
+  
+}
+
+ndvi_temporal_coef_df <- data.frame(hour = seq(0, 23, length.out = 100))
+
+ndvi_temporal_coef_df$ndvi_coef <- sapply(ndvi_temporal_coef_df$hour, 
+                                            ndvi_harmonic_coef_reconstruction, 
+                                            ssf_harmonic_model = ssf_harmonics)
+
+# plot the response curve
+ggplot(data = ndvi_temporal_coef_df) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "grey") +
+  geom_line(aes(x = hour, y = ndvi_coef), 
+            colour = "black") +
+  labs(x = "Hour", y = "NDVI coefficient") +
+  theme_classic()
+
+```
+
+
+### Manually create the selection surface
+
+```{r}
+
+ndvi_harmonic_reconstruction <- function(ssf_harmonic_model, ndvi_value, hour) {
+  
+  ndvi_coef <- ssf_harmonic_model$model$coefficients["ndvi"]
+  ndvi_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_1_hour"]
+  ndvi_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_1_hour"]
+  ndvi_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_2_hour"]
+  ndvi_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_2_hour"]
+  
+  sin_1_hour <- sin(2 * pi * hour / 24)
+  cos_1_hour <- cos(2 * pi * hour / 24)
+  sin_2_hour <- sin(4 * pi * hour / 24)
+  cos_2_hour <- cos(4 * pi * hour / 24)
+  
+  log_rss <- as.numeric(ndvi_value * ndvi_coef + 
+                          ndvi_value * sin_1_hour * ndvi_sin_1_coef + 
+                          ndvi_value * cos_1_hour * ndvi_cos_1_coef + 
+                          ndvi_value * sin_2_hour * ndvi_sin_2_coef + 
+                          ndvi_value * cos_2_hour * ndvi_cos_2_coef)
+  
+  return(log_rss)
+  
+}
+
+# test function
+ndvi_harmonic_reconstruction(ssf_harmonics, 
+                             ndvi_values[1], 
+                             hour = 12)
+
+```
+
+### Create table of NDVI and hour values
+
+```{r}
+
+ndvi_hour_values <- expand.grid(ndvi = ndvi_values, 
+                                hour = seq(0, 23, length.out = length(ndvi_values)))
+
+ndvi_hour_values$ssf_linear_log_rss <- mapply(ndvi_harmonic_reconstruction, 
+                                    ssf_harmonic_model = list(ssf_harmonics), 
+                                    ndvi_value = ndvi_hour_values$ndvi, 
+                                    hour = ndvi_hour_values$hour)
+
+# plot the response curve
+ggplot(data = ndvi_hour_values) +
+  geom_point(aes(x = hour, y = ndvi, colour = ssf_linear_log_rss)) +
+  labs(x = "Hour", y = "NDVI", colour = "log RSS") +
+  scale_colour_viridis_c() +
+  theme_classic() 
+
+# ggsave(paste0("outputs/ndvi_harmonic_response_id", which_buffalo, ".png"),
+#        width = 120, height = 100, units = "mm", dpi = 600)
+
+```
+
+## Fit model with quadratic terms
+
+```{r}
+
+ssf_harmonics_quadratic <- amt::fit_issf(case_ ~ 
+                                 
+                                 # linear terms
+                                 ndvi + 
+                                 ndvi:sin_1_hour + ndvi:cos_1_hour +
+                                 ndvi:sin_2_hour + ndvi:cos_2_hour +
+                                 
+                                 # quadratic terms
+                                 ndvi_sq +
+                                 ndvi_sq:sin_1_hour + ndvi_sq:cos_1_hour +
+                                 ndvi_sq:sin_2_hour + ndvi_sq:cos_2_hour +
+                                 
+                                 sl_ + log_sl + cos_ta +
+                                 strata(step_id_),
+                               data = buffalo_ssf_data)
+
+summary(ssf_harmonics_quadratic)
+
+```
+
+### Pull out the coefficent across time
+
+```{r}
+
+# this one doesn't make sense as the linear and quadrative coefs shouldn't be added
+
+# ndvi_harmonic_coef_reconstruction <- function(ssf_harmonic_model, hour) {
+#   
+#   # linear terms
+#   ndvi_coef <- ssf_harmonic_model$model$coefficients["ndvi"]
+#   ndvi_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_1_hour"]
+#   ndvi_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_1_hour"]
+#   ndvi_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_2_hour"]
+#   ndvi_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_2_hour"]
+#   
+#   # quadratic terms
+#   ndvi_sq_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq"]
+#   ndvi_sq_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:sin_1_hour"]
+#   ndvi_sq_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:cos_1_hour"]
+#   ndvi_sq_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:sin_2_hour"]
+#   ndvi_sq_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:cos_2_hour"]
+#   
+#   sin_1_hour <- sin(2 * pi * hour / 24)
+#   cos_1_hour <- cos(2 * pi * hour / 24)
+#   sin_2_hour <- sin(4 * pi * hour / 24)
+#   cos_2_hour <- cos(4 * pi * hour / 24)
+#   
+#   linear_part <- ndvi_coef + 
+#     sin_1_hour * ndvi_sin_1_coef + 
+#     cos_1_hour * ndvi_cos_1_coef + 
+#     sin_2_hour * ndvi_sin_2_coef + 
+#     cos_2_hour * ndvi_cos_2_coef
+#   
+#   ndvi_sq_value <- ndvi_value^2
+#   
+#   quadratic_part <- ndvi_sq_coef + 
+#     sin_1_hour * ndvi_sq_sin_1_coef + 
+#     cos_1_hour * ndvi_sq_cos_1_coef + 
+#     sin_2_hour * ndvi_sq_sin_2_coef + 
+#     cos_2_hour * ndvi_sq_cos_2_coef
+#   
+#   return(as.numeric(linear_part + quadratic_part))
+#   
+# }
+# 
+# ndvi_temporal_coef_df <- data.frame(hour = seq(0, 23, length.out = 100))
+# 
+# ndvi_temporal_coef_df$ndvi_coef <- sapply(ndvi_temporal_coef_df$hour, 
+#                                             ndvi_harmonic_coef_reconstruction, 
+#                                             ssf_harmonic_model = ssf_harmonics_quadratic)
+# 
+# # plot the response curve
+# ggplot(data = ndvi_temporal_coef_df) +
+#   geom_hline(yintercept = 0, linetype = "dashed", colour = "grey") +
+#   geom_line(aes(x = hour, y = ndvi_coef), 
+#             colour = "black") +
+#   labs(x = "Hour", y = "NDVI coefficient") +
+#   theme_classic()
+
+```
+
+### Manually create the selection surface
+
+```{r}
+
+ndvi_harmonic_reconstruction <- function(ssf_harmonic_model, ndvi_value, hour) {
+  
+  # linear terms
+  ndvi_coef <- ssf_harmonic_model$model$coefficients["ndvi"]
+  ndvi_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_1_hour"]
+  ndvi_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_1_hour"]
+  ndvi_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_2_hour"]
+  ndvi_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_2_hour"]
+  
+  # quadratic terms
+  ndvi_sq_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq"]
+  ndvi_sq_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:sin_1_hour"]
+  ndvi_sq_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:cos_1_hour"]
+  ndvi_sq_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:sin_2_hour"]
+  ndvi_sq_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:cos_2_hour"]
+  
+  sin_1_hour <- sin(2 * pi * hour / 24)
+  cos_1_hour <- cos(2 * pi * hour / 24)
+  sin_2_hour <- sin(4 * pi * hour / 24)
+  cos_2_hour <- cos(4 * pi * hour / 24)
+  
+  linear_part <- ndvi_value * ndvi_coef + 
+    ndvi_value * sin_1_hour * ndvi_sin_1_coef + 
+    ndvi_value * cos_1_hour * ndvi_cos_1_coef + 
+    ndvi_value * sin_2_hour * ndvi_sin_2_coef + 
+    ndvi_value * cos_2_hour * ndvi_cos_2_coef
+  
+  ndvi_sq_value <- ndvi_value^2
+  
+  quadratic_part <- ndvi_sq_value * ndvi_sq_coef + 
+    ndvi_sq_value * sin_1_hour * ndvi_sq_sin_1_coef + 
+    ndvi_sq_value * cos_1_hour * ndvi_sq_cos_1_coef + 
+    ndvi_sq_value * sin_2_hour * ndvi_sq_sin_2_coef + 
+    ndvi_sq_value * cos_2_hour * ndvi_sq_cos_2_coef
+  
+  return(as.numeric(linear_part + quadratic_part))
+  
+}
+
+# test function
+ndvi_harmonic_reconstruction(ssf_harmonics_quadratic, ndvi_values[1], hour = 12)
+
+```
+
+### Create table of NDVI and hour values
+
+```{r}
+
+ndvi_hour_values <- expand.grid(ndvi = ndvi_values, 
+                                hour = seq(0, 23, length.out = length(ndvi_values)))
+
+ndvi_hour_values$ssf_quadratic_log_rss <- mapply(ndvi_harmonic_reconstruction, 
+                                    ssf_harmonic_model = list(ssf_harmonics_quadratic), 
+                                    ndvi_value = ndvi_hour_values$ndvi, 
+                                    hour = ndvi_hour_values$hour)
+
+# plot the response curve
+ggplot(data = ndvi_hour_values) +
+  geom_point(aes(x = hour, y = ndvi, colour = ssf_quadratic_log_rss)) +
+  labs(x = "Hour", y = "NDVI", colour = "log RSS") +
+  scale_colour_viridis_c() +
+  theme_classic() 
+
+# ggsave(paste0("outputs/ndvi_harmonic_response_id", which_buffalo, ".png"),
+#        width = 120, height = 100, units = "mm", dpi = 600)
+
+```
+
+## Temporal dynamics with smooth terms
+
+```{r}
+
+# fit an ssf gam model
+ssf_gam_temporal <- mgcv::gam(cbind(times, step_id_) ~ 
+                       s(hour, by = ndvi, bs = "cc", k = 10) +
+                       sl_ + log_sl + cos_ta,
+                     data = buffalo_ssf_data,
+                     family = cox.ph,
+                     weight = case_)
+
+summary(ssf_gam_temporal)
+
+gam_smooths <- smooth_estimates(ssf_gam_temporal)
+
+gratia::draw(ssf_gam_temporal, rug = FALSE)
+
+```
+
+## Fit 2D GAM smooth
+
+### Prepare prediction data
+
+```{r}
+
+ndvi_hour_values <- ndvi_hour_values %>% mutate(
+  sl_ = 0,
+  log_sl = 0,
+  cos_ta = 0
+)
+
+```
+
+### Response curve
+
+```{r}
+
+# Get predictions on log-scale with standard errors
+predictions <- predict(ssf_gam_temporal, 
+                      newdata = ndvi_hour_values, 
+                      type = "link",  # log-scale
+                      se.fit = TRUE)
+
+# Extract log RSS and standard errors
+log_rss <- predictions$fit
+se_log_rss <- predictions$se.fit
+
+# Calculate confidence intervals on log-scale
+log_rss_lower <- log_rss - 1.96 * se_log_rss
+log_rss_upper <- log_rss + 1.96 * se_log_rss
+
+# Transform to RSS scale
+rss <- exp(log_rss)
+rss_lower <- exp(log_rss_lower)
+rss_upper <- exp(log_rss_upper)
+
+# # Create your dataframe
+# ndvi_coef_df <- data.frame(
+#   ndvi_values = ndvi_values,
+#   log_rss = log_rss,
+#   log_rss_lower = log_rss_lower,
+#   log_rss_upper = log_rss_upper,
+#   rss = rss,
+#   rss_lower = rss_lower,
+#   rss_upper = rss_upper
+# )
+
+ndvi_hour_values <- ndvi_hour_values %>% mutate(
+  gam_log_rss = as.numeric(predictions$fit),
+  gam_rss = exp(gam_log_rss),
+  gam_log_rss_lower = as.numeric(log_rss_lower),
+  gam_log_rss_upper = as.numeric(log_rss_upper)
+)
+
+# plot the selection surface
+ggplot(data = ndvi_hour_values) +
+  geom_point(aes(x = hour, y = ndvi, colour = gam_log_rss)) +
+  labs(x = "Hour", y = "NDVI", colour = "log RSS") +
+  scale_colour_viridis_c() +
+  theme_classic() 
+
+# ggsave(paste0("outputs/ndvi_harmonic_response_id", which_buffalo, ".png"),
+#        width = 120, height = 100, units = "mm", dpi = 600)
+
+```

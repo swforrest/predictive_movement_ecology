@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Scott Forrest">
+<meta name="dcterms.date" content="2025-08-22">
+
+<title>SSF responses – Predictive Movement Ecology</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./figures/next-step.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Predictive Movement Ecology</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./case_study.html"> 
+<span class="menu-text">Case Study</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load-required-packages" id="toc-load-required-packages" class="nav-link active" data-scroll-target="#load-required-packages">Load required packages</a></li>
+  <li><a href="#import-data-and-clean" id="toc-import-data-and-clean" class="nav-link" data-scroll-target="#import-data-and-clean">Import data and clean</a></li>
+  <li><a href="#create-a-step-object" id="toc-create-a-step-object" class="nav-link" data-scroll-target="#create-a-step-object">Create a step object</a>
+  <ul class="collapse">
+  <li><a href="#plot-the-data-spatially" id="toc-plot-the-data-spatially" class="nav-link" data-scroll-target="#plot-the-data-spatially">Plot the data spatially</a></li>
+  <li><a href="#pick-out-a-single-individual" id="toc-pick-out-a-single-individual" class="nav-link" data-scroll-target="#pick-out-a-single-individual">Pick out a single individual</a></li>
+  </ul></li>
+  <li><a href="#import-spatial-covariate" id="toc-import-spatial-covariate" class="nav-link" data-scroll-target="#import-spatial-covariate">Import spatial covariate</a></li>
+  <li><a href="#select-local-extent" id="toc-select-local-extent" class="nav-link" data-scroll-target="#select-local-extent">Select local extent</a>
+  <ul class="collapse">
+  <li><a href="#sample-random-steps-to-fit-models" id="toc-sample-random-steps-to-fit-models" class="nav-link" data-scroll-target="#sample-random-steps-to-fit-models">Sample random steps to fit models</a></li>
+  </ul></li>
+  <li><a href="#different-ssf-formulations" id="toc-different-ssf-formulations" class="nav-link" data-scroll-target="#different-ssf-formulations">Different SSF formulations</a>
+  <ul class="collapse">
+  <li><a href="#linear-covariate" id="toc-linear-covariate" class="nav-link" data-scroll-target="#linear-covariate">Linear covariate</a>
+  <ul class="collapse">
+  <li><a href="#model-formula" id="toc-model-formula" class="nav-link" data-scroll-target="#model-formula">Model formula</a></li>
+  <li><a href="#fit-model" id="toc-fit-model" class="nav-link" data-scroll-target="#fit-model">Fit model</a></li>
+  <li><a href="#response-curve" id="toc-response-curve" class="nav-link" data-scroll-target="#response-curve">Response curve</a></li>
+  <li><a href="#plot-habitat-selection" id="toc-plot-habitat-selection" class="nav-link" data-scroll-target="#plot-habitat-selection">Plot habitat selection</a></li>
+  </ul></li>
+  <li><a href="#quadratic-covariate" id="toc-quadratic-covariate" class="nav-link" data-scroll-target="#quadratic-covariate">Quadratic covariate</a>
+  <ul class="collapse">
+  <li><a href="#model-formula-1" id="toc-model-formula-1" class="nav-link" data-scroll-target="#model-formula-1">Model formula</a></li>
+  <li><a href="#fit-model-1" id="toc-fit-model-1" class="nav-link" data-scroll-target="#fit-model-1">Fit model</a></li>
+  <li><a href="#response-curve-1" id="toc-response-curve-1" class="nav-link" data-scroll-target="#response-curve-1">Response curve</a></li>
+  <li><a href="#plot-habitat-selection-1" id="toc-plot-habitat-selection-1" class="nav-link" data-scroll-target="#plot-habitat-selection-1">Plot habitat selection</a></li>
+  </ul></li>
+  <li><a href="#smooth-term" id="toc-smooth-term" class="nav-link" data-scroll-target="#smooth-term">Smooth term</a>
+  <ul class="collapse">
+  <li><a href="#model-formula-2" id="toc-model-formula-2" class="nav-link" data-scroll-target="#model-formula-2">Model formula</a></li>
+  <li><a href="#fit-model-2" id="toc-fit-model-2" class="nav-link" data-scroll-target="#fit-model-2">Fit model</a></li>
+  <li><a href="#response-curve-2" id="toc-response-curve-2" class="nav-link" data-scroll-target="#response-curve-2">Response curve</a></li>
+  <li><a href="#plot-habitat-selection-2" id="toc-plot-habitat-selection-2" class="nav-link" data-scroll-target="#plot-habitat-selection-2">Plot habitat selection</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="ssf_responses.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">SSF responses</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Scott Forrest </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 22, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>In this script we demonstrate different approaches to including covariates in an SSF model.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<section id="load-required-packages" class="level1">
+<h1>Load required packages</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2"></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"amt"</span>, <span class="st">"sf"</span>, <span class="st">"terra"</span>, <span class="st">"RColorBrewer"</span>, <span class="st">"mgcv"</span>, <span class="st">"gratia"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">walk</span>(packages, require, <span class="at">character.only =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="import-data-and-clean" class="level1">
+<h1>Import data and clean</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>buffalo_data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/buffalo.csv"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 133161 Columns: 11
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "," chr
+(2): node, dates dbl (7): ...1, lat, lon, height, accuracy, heading, speed dttm
+(2): timestamp, DateTime
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># remove individuals that have poor data quality or less than about 3 months of data. </span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="co"># The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exclude it</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>buffalo_data <span class="ot">&lt;-</span> buffalo_data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>node <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"2014.GPS_COMPACT copy.csv"</span>, </span>
+<span id="cb4-4"><a href="#cb4-4"></a>                                           <span class="dv">2029</span>, <span class="dv">2043</span>, <span class="dv">2265</span>, <span class="dv">2284</span>, <span class="dv">2346</span>))</span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a>buffalo_data <span class="ot">&lt;-</span> buffalo_data <span class="sc">%&gt;%</span>  </span>
+<span id="cb4-7"><a href="#cb4-7"></a>  <span class="fu">group_by</span>(node) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-8"><a href="#cb4-8"></a>  <span class="fu">arrange</span>(DateTime, <span class="at">.by_group =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">distinct</span>(DateTime, <span class="at">.keep_all =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-10"><a href="#cb4-10"></a>  <span class="fu">arrange</span>(node) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-11"><a href="#cb4-11"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> node)</span>
+<span id="cb4-12"><a href="#cb4-12"></a></span>
+<span id="cb4-13"><a href="#cb4-13"></a>buffalo_clean <span class="ot">&lt;-</span> buffalo_data[, <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">3</span>)]</span>
+<span id="cb4-14"><a href="#cb4-14"></a><span class="fu">colnames</span>(buffalo_clean) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"time"</span>, <span class="st">"lon"</span>, <span class="st">"lat"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="fu">attr</span>(buffalo_clean<span class="sc">$</span>time, <span class="st">"tzone"</span>) <span class="ot">&lt;-</span> <span class="st">"Australia/Queensland"</span></span>
+<span id="cb4-16"><a href="#cb4-16"></a><span class="fu">head</span>(buffalo_clean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["id"],"name":[1],"type":["chr"],"align":["left"]},{"label":["time"],"name":[2],"type":["dttm"],"align":["right"]},{"label":["lon"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["lat"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"2005","2":"2018-07-25 10:04:02.050139","3":"134.3780","4":"-12.30136"},{"1":"2005","2":"2018-07-25 11:04:23.050139","3":"134.3782","4":"-12.29955"},{"1":"2005","2":"2018-07-25 12:04:39.050139","3":"134.3778","4":"-12.29940"},{"1":"2005","2":"2018-07-25 13:04:17.050873","3":"134.3765","4":"-12.29893"},{"1":"2005","2":"2018-07-25 14:04:39.050873","3":"134.3770","4":"-12.29924"},{"1":"2005","2":"2018-07-25 15:04:27.050873","3":"134.3754","4":"-12.29897"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">tz</span>(buffalo_clean<span class="sc">$</span>time)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Australia/Queensland"</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>buffalo_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(buffalo_clean<span class="sc">$</span>id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="create-a-step-object" class="level1">
+<h1>Create a step object</h1>
+<p>Use the <code>amt</code> package to create a trajectory object from the cleaned data.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Create a trajectory object</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>buffalo_all <span class="ot">&lt;-</span> buffalo_clean <span class="sc">%&gt;%</span> <span class="fu">mk_track</span>(<span class="at">id =</span> id,</span>
+<span id="cb8-2"><a href="#cb8-2"></a>                                           lon,</span>
+<span id="cb8-3"><a href="#cb8-3"></a>                                           lat, </span>
+<span id="cb8-4"><a href="#cb8-4"></a>                                           time, </span>
+<span id="cb8-5"><a href="#cb8-5"></a>                                           <span class="at">all_cols =</span> T,</span>
+<span id="cb8-6"><a href="#cb8-6"></a>                                           <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-7"><a href="#cb8-7"></a>  <span class="fu">transform_coords</span>(<span class="at">crs_to =</span> <span class="dv">3112</span>, <span class="at">crs_from =</span> <span class="dv">4326</span>) <span class="co"># Transformation to GDA94 / </span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co"># Geoscience Australia Lambert (https://epsg.io/3112)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="plot-the-data-spatially" class="level2">
+<h2 class="anchored" data-anchor-id="plot-the-data-spatially">Plot the data spatially</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>buffalo_all <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_, <span class="at">y =</span> y_, <span class="at">colour =</span> id)) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">"Easting (m)"</span>) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Northing (m)"</span>) <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a>  <span class="fu">scale_colour_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># ggsave("outputs/data_prep/buffalo_djelk_map.png",</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="co">#        width = 150, height = 150, units = "mm",  dpi = 600)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="pick-out-a-single-individual" class="level2">
+<h2 class="anchored" data-anchor-id="pick-out-a-single-individual">Pick out a single individual</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>buffalo_id <span class="ot">&lt;-</span> buffalo_all <span class="sc">%&gt;%</span> <span class="fu">filter</span>(id <span class="sc">==</span> <span class="st">"2014"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a>buffalo_id <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_, <span class="at">y =</span> y_, <span class="at">colour =</span> t_)) <span class="sc">+</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb11-6"><a href="#cb11-6"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">"Easting (m)"</span>) <span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Northing (m)"</span>) <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="import-spatial-covariate" class="level1">
+<h1>Import spatial covariate</h1>
+<p>Although NDVI changes over time, and we have access to monthly layers, we will just select a single month here.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>ndvi <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/ndvi_aug_2018.tif"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="fu">plot</span>(ndvi, <span class="at">main =</span> <span class="st">"NDVI August 2018"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="fu">points</span>(buffalo_id<span class="sc">$</span>x_, buffalo_id<span class="sc">$</span>y_, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>ndvi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>class       : SpatRaster 
+dimensions  : 2280, 2400, 1  (nrow, ncol, nlyr)
+resolution  : 25, 25  (x, y)
+extent      : 0, 60000, -1463000, -1406000  (xmin, xmax, ymin, ymax)
+coord. ref. : GDA94 / Geoscience Australia Lambert (EPSG:3112) 
+source      : ndvi_aug_2018.tif 
+name        :       ndvi 
+min value   : -0.5441047 
+max value   :  0.8086554 </code></pre>
+</div>
+</div>
+</section>
+<section id="select-local-extent" class="level1">
+<h1>Select local extent</h1>
+<p>We just want to look at an area centred on a single location, which might be combined with our movement probability surface to generate a next-step probability surface.</p>
+<p>We’ll centre the extent on an interesting looking part of the landscape, and then buffer it by 1500m, which contains most of the step lengths, and therefore most of the movement kernel.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>buffalo_single_point <span class="ot">&lt;-</span> buffalo_id <span class="sc">%&gt;%</span> </span>
+<span id="cb15-2"><a href="#cb15-2"></a>  <span class="fu">filter</span>(t_ <span class="sc">==</span> <span class="fu">min</span>(t_)) <span class="co"># select the first time point</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a></span>
+<span id="cb15-4"><a href="#cb15-4"></a>buffer <span class="ot">&lt;-</span> <span class="fl">1512.5</span> <span class="co"># buffer in metres</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a></span>
+<span id="cb15-6"><a href="#cb15-6"></a>window_extent <span class="ot">&lt;-</span> <span class="fu">ext</span>(buffalo_single_point<span class="sc">$</span>x_ <span class="sc">-</span> buffer, </span>
+<span id="cb15-7"><a href="#cb15-7"></a>                        buffalo_single_point<span class="sc">$</span>x_ <span class="sc">+</span> buffer, </span>
+<span id="cb15-8"><a href="#cb15-8"></a>                        buffalo_single_point<span class="sc">$</span>y_ <span class="sc">-</span> buffer, </span>
+<span id="cb15-9"><a href="#cb15-9"></a>                        buffalo_single_point<span class="sc">$</span>y_ <span class="sc">+</span> buffer)</span>
+<span id="cb15-10"><a href="#cb15-10"></a></span>
+<span id="cb15-11"><a href="#cb15-11"></a>ndvi_window <span class="ot">&lt;-</span> <span class="fu">crop</span>(ndvi, window_extent)</span>
+<span id="cb15-12"><a href="#cb15-12"></a></span>
+<span id="cb15-13"><a href="#cb15-13"></a><span class="co"># set the extent to 0 at the buffalo location</span></span>
+<span id="cb15-14"><a href="#cb15-14"></a>ndvi_window <span class="ot">&lt;-</span> <span class="fu">shift</span>(ndvi_window, </span>
+<span id="cb15-15"><a href="#cb15-15"></a>                    <span class="at">dx =</span> <span class="sc">-</span>buffalo_single_point<span class="sc">$</span>x_, </span>
+<span id="cb15-16"><a href="#cb15-16"></a>                    <span class="at">dy =</span> <span class="sc">-</span>buffalo_single_point<span class="sc">$</span>y_)</span>
+<span id="cb15-17"><a href="#cb15-17"></a></span>
+<span id="cb15-18"><a href="#cb15-18"></a><span class="co"># plot the NDVI layer with the buffalo location as the centre point</span></span>
+<span id="cb15-19"><a href="#cb15-19"></a><span class="fu">plot</span>(ndvi_window, <span class="at">main =</span> <span class="st">"NDVI - local extent"</span>,</span>
+<span id="cb15-20"><a href="#cb15-20"></a>     <span class="at">col =</span> <span class="fu">brewer.pal</span>(<span class="dv">9</span>, <span class="st">"Greens"</span>))</span>
+<span id="cb15-21"><a href="#cb15-21"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># create a NDVI df to plot with ggplot</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a>ndvi_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(ndvi_window, <span class="at">xy =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb16-3"><a href="#cb16-3"></a></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5"></a>  <span class="fu">geom_raster</span>(<span class="at">data =</span> ndvi_df, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">fill =</span> <span class="fu">as.factor</span>(<span class="fu">cut</span>(ndvi, <span class="at">breaks =</span> <span class="dv">9</span>)))) <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>, <span class="at">direction =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb16-7"><a href="#cb16-7"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb16-8"><a href="#cb16-8"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>), </span>
+<span id="cb16-9"><a href="#cb16-9"></a>             <span class="at">colour =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb16-10"><a href="#cb16-10"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Easting (m)"</span>, <span class="at">y =</span> <span class="st">"Northing (m)"</span>, <span class="at">fill =</span> <span class="st">"NDVI"</span>) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11"></a>  <span class="fu">theme_classic</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="sample-random-steps-to-fit-models" class="level2">
+<h2 class="anchored" data-anchor-id="sample-random-steps-to-fit-models">Sample random steps to fit models</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id <span class="sc">%&gt;%</span> </span>
+<span id="cb17-2"><a href="#cb17-2"></a>  <span class="fu">steps</span>()</span>
+<span id="cb17-3"><a href="#cb17-3"></a></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="co"># fitting step length and turning angle distributions to all locations</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a>gamma_dist <span class="ot">&lt;-</span> <span class="fu">fit_distr</span>(buffalo_id_steps<span class="sc">$</span>sl_, <span class="st">"gamma"</span>)</span>
+<span id="cb17-6"><a href="#cb17-6"></a>vonmises_dist <span class="ot">&lt;-</span> <span class="fu">fit_distr</span>(buffalo_id_steps<span class="sc">$</span>ta_, <span class="st">"vonmises"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7"></a></span>
+<span id="cb17-8"><a href="#cb17-8"></a><span class="co"># movement parameters</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a>gamma_dist<span class="sc">$</span>params<span class="sc">$</span>shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3452605</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>gamma_dist<span class="sc">$</span>params<span class="sc">$</span>scale</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1023.96</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>vonmises_dist<span class="sc">$</span>params<span class="sc">$</span>kappa</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.0483029</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a>vonmises_dist<span class="sc">$</span>params<span class="sc">$</span>mu</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Circular Data: 
+Type = angles 
+Units = radians 
+Template = none 
+Modulo = asis 
+Zero = 0 
+Rotation = counter 
+[1] 0</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="co"># sample random steps</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a>buffalo_ssf_data <span class="ot">&lt;-</span> buffalo_id_steps <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3"></a>  <span class="fu">random_steps</span>(<span class="at">n =</span> <span class="dv">10</span>, </span>
+<span id="cb25-4"><a href="#cb25-4"></a>                <span class="at">sl_dist =</span> gamma_dist, </span>
+<span id="cb25-5"><a href="#cb25-5"></a>                <span class="at">ta_dist =</span> vonmises_dist) <span class="sc">%&gt;%</span></span>
+<span id="cb25-6"><a href="#cb25-6"></a>  <span class="fu">mutate</span>(<span class="at">log_sl =</span> <span class="fu">log</span>(sl_),</span>
+<span id="cb25-7"><a href="#cb25-7"></a>         <span class="at">cos_ta =</span> <span class="fu">cos</span>(ta_)) <span class="sc">%&gt;%</span></span>
+<span id="cb25-8"><a href="#cb25-8"></a>  <span class="fu">extract_covariates</span>(ndvi) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="different-ssf-formulations" class="level1">
+<h1>Different SSF formulations</h1>
+<p>Firstly, we want to pull out the range of NDVI values to plot the curves with.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="co"># histogram of NDVI values</span></span>
+<span id="cb26-2"><a href="#cb26-2"></a><span class="fu">hist</span>(<span class="fu">values</span>(ndvi))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="co"># 1% and 99% quantiles of NDVI values</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a>ndvi_quantiles <span class="ot">&lt;-</span> <span class="fu">quantile</span>(<span class="fu">values</span>(ndvi), <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb27-3"><a href="#cb27-3"></a>ndvi_quantiles</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1%        99% 
+0.09036818 0.68761911 </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="co"># plot across the range in the local window</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a>ndvi_values <span class="ot">&lt;-</span> <span class="fu">seq</span>(ndvi_quantiles[<span class="dv">1</span>], </span>
+<span id="cb29-3"><a href="#cb29-3"></a>                   ndvi_quantiles[<span class="dv">2</span>], </span>
+<span id="cb29-4"><a href="#cb29-4"></a>                   <span class="at">length.out =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="linear-covariate" class="level2">
+<h2 class="anchored" data-anchor-id="linear-covariate">Linear covariate</h2>
+<section id="model-formula" class="level3">
+<h3 class="anchored" data-anchor-id="model-formula">Model formula</h3>
+<p><span class="math inline">\(y \sim ndvi\)</span></p>
+</section>
+<section id="fit-model" class="level3">
+<h3 class="anchored" data-anchor-id="fit-model">Fit model</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="co"># fit an issf model</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a>ssf_linear <span class="ot">&lt;-</span> amt<span class="sc">::</span><span class="fu">fit_issf</span>(case_ <span class="sc">~</span> </span>
+<span id="cb30-3"><a href="#cb30-3"></a>                              ndvi <span class="sc">+</span> </span>
+<span id="cb30-4"><a href="#cb30-4"></a>                              sl_ <span class="sc">+</span> log_sl <span class="sc">+</span> cos_ta <span class="sc">+</span></span>
+<span id="cb30-5"><a href="#cb30-5"></a>                              <span class="fu">strata</span>(step_id_),</span>
+<span id="cb30-6"><a href="#cb30-6"></a>                            <span class="at">data =</span> buffalo_ssf_data)</span>
+<span id="cb30-7"><a href="#cb30-7"></a></span>
+<span id="cb30-8"><a href="#cb30-8"></a><span class="fu">summary</span>(ssf_linear)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(rep(1, 72270L), case_) ~ ndvi + sl_ + log_sl + 
+    cos_ta + strata(step_id_), data = data, method = "exact")
+
+  n= 72270, number of events= 6570 
+
+             coef  exp(coef)   se(coef)      z Pr(&gt;|z|)  
+ndvi   -4.525e-01  6.361e-01  2.081e-01 -2.174   0.0297 *
+sl_     1.161e-05  1.000e+00  2.496e-05  0.465   0.6418  
+log_sl  8.098e-04  1.001e+00  5.191e-03  0.156   0.8760  
+cos_ta -1.292e-02  9.872e-01  1.827e-02 -0.707   0.4794  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+       exp(coef) exp(-coef) lower .95 upper .95
+ndvi      0.6361     1.5722    0.4230    0.9565
+sl_       1.0000     1.0000    1.0000    1.0001
+log_sl    1.0008     0.9992    0.9907    1.0110
+cos_ta    0.9872     1.0130    0.9524    1.0231
+
+Concordance= 0.502  (se = 0.004 )
+Likelihood ratio test= 5.59  on 4 df,   p=0.2
+Wald test            = 5.6  on 4 df,   p=0.2
+Score (logrank) test = 5.6  on 4 df,   p=0.2</code></pre>
+</div>
+</div>
+</section>
+<section id="response-curve" class="level3">
+<h3 class="anchored" data-anchor-id="response-curve">Response curve</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a><span class="co"># extract the NDVI coefficient</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a>ndvi_coef <span class="ot">&lt;-</span> ssf_linear<span class="sc">$</span>model<span class="sc">$</span>coefficients[<span class="dv">1</span>]</span>
+<span id="cb32-3"><a href="#cb32-3"></a></span>
+<span id="cb32-4"><a href="#cb32-4"></a><span class="co"># calculate the RSS for each NDVI value</span></span>
+<span id="cb32-5"><a href="#cb32-5"></a>ndvi_coef_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ndvi_values, </span>
+<span id="cb32-6"><a href="#cb32-6"></a>                 <span class="st">"log_rss"</span> <span class="ot">=</span> ndvi_values <span class="sc">*</span> ndvi_coef,</span>
+<span id="cb32-7"><a href="#cb32-7"></a>                 <span class="st">"rss"</span> <span class="ot">=</span> <span class="fu">exp</span>(ndvi_values <span class="sc">*</span> ndvi_coef))</span>
+<span id="cb32-8"><a href="#cb32-8"></a></span>
+<span id="cb32-9"><a href="#cb32-9"></a><span class="co"># plot the response curve</span></span>
+<span id="cb32-10"><a href="#cb32-10"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb32-11"><a href="#cb32-11"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb32-12"><a href="#cb32-12"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> ndvi_coef_df, <span class="fu">aes</span>(<span class="at">x =</span> ndvi_values, <span class="at">y =</span> rss), </span>
+<span id="cb32-13"><a href="#cb32-13"></a>            <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb32-14"><a href="#cb32-14"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"NDVI"</span>, <span class="at">y =</span> <span class="st">"RSS"</span>) <span class="sc">+</span></span>
+<span id="cb32-15"><a href="#cb32-15"></a>  <span class="fu">theme_classic</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="plot-habitat-selection" class="level3">
+<h3 class="anchored" data-anchor-id="plot-habitat-selection">Plot habitat selection</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a><span class="co"># calculate the RSS for the local NDVI values</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a>ndvi_linear <span class="ot">&lt;-</span> <span class="fu">exp</span>(ndvi_window <span class="sc">*</span> ndvi_coef)</span>
+<span id="cb34-3"><a href="#cb34-3"></a></span>
+<span id="cb34-4"><a href="#cb34-4"></a><span class="co"># plot the habitat selection (spatial RSS)</span></span>
+<span id="cb34-5"><a href="#cb34-5"></a><span class="fu">plot</span>(ndvi_linear, <span class="at">main =</span> <span class="st">"RSS - linear coefficient"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="quadratic-covariate" class="level2">
+<h2 class="anchored" data-anchor-id="quadratic-covariate">Quadratic covariate</h2>
+<section id="model-formula-1" class="level3">
+<h3 class="anchored" data-anchor-id="model-formula-1">Model formula</h3>
+<p><span class="math inline">\(y \sim ndvi + ndvi^2\)</span></p>
+</section>
+<section id="fit-model-1" class="level3">
+<h3 class="anchored" data-anchor-id="fit-model-1">Fit model</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="co"># fit an issf model</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a>ssf_quadratic <span class="ot">&lt;-</span> amt<span class="sc">::</span><span class="fu">fit_issf</span>(case_ <span class="sc">~</span> </span>
+<span id="cb35-3"><a href="#cb35-3"></a>                                 ndvi <span class="sc">+</span> <span class="fu">I</span>(ndvi<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb35-4"><a href="#cb35-4"></a>                                 sl_ <span class="sc">+</span> log_sl <span class="sc">+</span> cos_ta <span class="sc">+</span></span>
+<span id="cb35-5"><a href="#cb35-5"></a>                              <span class="fu">strata</span>(step_id_),</span>
+<span id="cb35-6"><a href="#cb35-6"></a>                            <span class="at">data =</span> buffalo_ssf_data)</span>
+<span id="cb35-7"><a href="#cb35-7"></a></span>
+<span id="cb35-8"><a href="#cb35-8"></a><span class="fu">summary</span>(ssf_quadratic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = Surv(rep(1, 72270L), case_) ~ ndvi + I(ndvi^2) + 
+    sl_ + log_sl + cos_ta + strata(step_id_), data = data, method = "exact")
+
+  n= 72270, number of events= 6570 
+
+                coef  exp(coef)   se(coef)      z Pr(&gt;|z|)  
+ndvi       1.310e+00  3.708e+00  9.293e-01  1.410   0.1585  
+I(ndvi^2) -2.909e+00  5.453e-02  1.496e+00 -1.945   0.0518 .
+sl_        1.086e-05  1.000e+00  2.497e-05  0.435   0.6635  
+log_sl     8.897e-04  1.001e+00  5.192e-03  0.171   0.8639  
+cos_ta    -1.289e-02  9.872e-01  1.827e-02 -0.706   0.4803  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+          exp(coef) exp(-coef) lower .95 upper .95
+ndvi        3.70795     0.2697  0.599987    22.915
+I(ndvi^2)   0.05453    18.3387  0.002907     1.023
+sl_         1.00001     1.0000  0.999962     1.000
+log_sl      1.00089     0.9991  0.990757     1.011
+cos_ta      0.98719     1.0130  0.952465     1.023
+
+Concordance= 0.508  (se = 0.004 )
+Likelihood ratio test= 9.42  on 5 df,   p=0.09
+Wald test            = 9.27  on 5 df,   p=0.1
+Score (logrank) test = 9.27  on 5 df,   p=0.1</code></pre>
+</div>
+</div>
+</section>
+<section id="response-curve-1" class="level3">
+<h3 class="anchored" data-anchor-id="response-curve-1">Response curve</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a><span class="co"># extract the NDVI coefficient</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a>ndvi_coef <span class="ot">&lt;-</span> ssf_quadratic<span class="sc">$</span>model<span class="sc">$</span>coefficients[<span class="dv">1</span>]</span>
+<span id="cb37-3"><a href="#cb37-3"></a>ndvi_coef_sq <span class="ot">&lt;-</span> ssf_quadratic<span class="sc">$</span>model<span class="sc">$</span>coefficients[<span class="dv">2</span>]</span>
+<span id="cb37-4"><a href="#cb37-4"></a></span>
+<span id="cb37-5"><a href="#cb37-5"></a>log_rss <span class="ot">=</span> (ndvi_values <span class="sc">*</span> ndvi_coef) <span class="sc">+</span> (ndvi_values<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> ndvi_coef_sq)</span>
+<span id="cb37-6"><a href="#cb37-6"></a>rss <span class="ot">=</span> <span class="fu">exp</span>(log_rss)</span>
+<span id="cb37-7"><a href="#cb37-7"></a></span>
+<span id="cb37-8"><a href="#cb37-8"></a><span class="co"># calculate the RSS for each NDVI value</span></span>
+<span id="cb37-9"><a href="#cb37-9"></a>ndvi_coef_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ndvi_values, log_rss, rss)</span>
+<span id="cb37-10"><a href="#cb37-10"></a></span>
+<span id="cb37-11"><a href="#cb37-11"></a><span class="co"># plot the response curve</span></span>
+<span id="cb37-12"><a href="#cb37-12"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb37-13"><a href="#cb37-13"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb37-14"><a href="#cb37-14"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> ndvi_coef_df, <span class="fu">aes</span>(<span class="at">x =</span> ndvi_values, <span class="at">y =</span> rss), </span>
+<span id="cb37-15"><a href="#cb37-15"></a>            <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb37-16"><a href="#cb37-16"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"NDVI"</span>, <span class="at">y =</span> <span class="st">"RSS"</span>) <span class="sc">+</span></span>
+<span id="cb37-17"><a href="#cb37-17"></a>  <span class="fu">theme_classic</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="plot-habitat-selection-1" class="level3">
+<h3 class="anchored" data-anchor-id="plot-habitat-selection-1">Plot habitat selection</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a><span class="co"># calculate the RSS for the local NDVI values</span></span>
+<span id="cb38-2"><a href="#cb38-2"></a>ndvi_quadratic <span class="ot">&lt;-</span> <span class="fu">exp</span>((ndvi_window <span class="sc">*</span> ndvi_coef) <span class="sc">+</span> </span>
+<span id="cb38-3"><a href="#cb38-3"></a>                        (ndvi_window<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> ndvi_coef_sq))</span>
+<span id="cb38-4"><a href="#cb38-4"></a></span>
+<span id="cb38-5"><a href="#cb38-5"></a><span class="co"># plot the habitat selection (spatial RSS)</span></span>
+<span id="cb38-6"><a href="#cb38-6"></a><span class="fu">plot</span>(ndvi_quadratic, <span class="at">main =</span> <span class="st">"RSS - quadratic coefficient"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="smooth-term" class="level2">
+<h2 class="anchored" data-anchor-id="smooth-term">Smooth term</h2>
+<p>Fit a GAM to the data, with a smooth term across the range of NDVI values <span class="citation" data-cites="Klappstein2024-ax">(<a href="#ref-Klappstein2024-ax" role="doc-biblioref">Klappstein et al. 2024</a>)</span>.</p>
+<section id="model-formula-2" class="level3">
+<h3 class="anchored" data-anchor-id="model-formula-2">Model formula</h3>
+<p><span class="math inline">\(y \sim s(ndvi)\)</span></p>
+</section>
+<section id="fit-model-2" class="level3">
+<h3 class="anchored" data-anchor-id="fit-model-2">Fit model</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a><span class="co"># create a dummy variable create a dummy column for times (used in a Cox PH model, but not relevant to an SSF) that all contain the same value.</span></span>
+<span id="cb39-2"><a href="#cb39-2"></a>buffalo_ssf_data<span class="sc">$</span>times <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># dummy time variable</span></span>
+<span id="cb39-3"><a href="#cb39-3"></a></span>
+<span id="cb39-4"><a href="#cb39-4"></a><span class="co"># fit an issf model</span></span>
+<span id="cb39-5"><a href="#cb39-5"></a>ssf_gam <span class="ot">&lt;-</span> mgcv<span class="sc">::</span><span class="fu">gam</span>(<span class="fu">cbind</span>(times, step_id_) <span class="sc">~</span> </span>
+<span id="cb39-6"><a href="#cb39-6"></a>                       <span class="co"># s(ndvi, bs = "tp", k = 10) +</span></span>
+<span id="cb39-7"><a href="#cb39-7"></a>                       <span class="fu">s</span>(ndvi) <span class="sc">+</span></span>
+<span id="cb39-8"><a href="#cb39-8"></a>                       sl_ <span class="sc">+</span> log_sl <span class="sc">+</span> cos_ta,</span>
+<span id="cb39-9"><a href="#cb39-9"></a>                            <span class="at">data =</span> buffalo_ssf_data,</span>
+<span id="cb39-10"><a href="#cb39-10"></a>                            <span class="at">family =</span> cox.ph,</span>
+<span id="cb39-11"><a href="#cb39-11"></a>                            <span class="at">weight =</span> case_)</span>
+<span id="cb39-12"><a href="#cb39-12"></a></span>
+<span id="cb39-13"><a href="#cb39-13"></a><span class="fu">summary</span>(ssf_gam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Family: Cox PH 
+Link function: identity 
+
+Formula:
+cbind(times, step_id_) ~ s(ndvi) + sl_ + log_sl + cos_ta
+
+Parametric coefficients:
+         Estimate Std. Error z value Pr(&gt;|z|)
+sl_     1.065e-05  2.500e-05   0.426    0.670
+log_sl  2.152e-03  5.208e-03   0.413    0.680
+cos_ta -1.357e-02  1.827e-02  -0.743    0.458
+
+Approximate significance of smooth terms:
+          edf Ref.df Chi.sq p-value    
+s(ndvi) 7.825  8.577  64.73  &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Deviance explained = 0.114%
+-REML =  15754  Scale est. = 1         n = 72270</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a><span class="co"># coef(ssf_gam)[4]</span></span>
+<span id="cb41-2"><a href="#cb41-2"></a></span>
+<span id="cb41-3"><a href="#cb41-3"></a>gam_smooths <span class="ot">&lt;-</span> <span class="fu">smooth_estimates</span>(ssf_gam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="response-curve-2" class="level3">
+<h3 class="anchored" data-anchor-id="response-curve-2">Response curve</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>gratia<span class="sc">::</span><span class="fu">draw</span>(ssf_gam, <span class="at">rug =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> </span>
+<span id="cb42-2"><a href="#cb42-2"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb42-3"><a href="#cb42-3"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"NDVI"</span>, <span class="at">y =</span> <span class="st">"log-RSS"</span>) <span class="sc">+</span></span>
+<span id="cb42-4"><a href="#cb42-4"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(ndvi_quantiles[<span class="dv">1</span>], <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb42-5"><a href="#cb42-5"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.4</span>, <span class="fl">0.4</span>)) <span class="sc">+</span></span>
+<span id="cb42-6"><a href="#cb42-6"></a>  <span class="fu">theme_classic</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 42 rows containing missing values or values outside the scale range
+(`geom_line()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> gam_smooths) <span class="sc">+</span> </span>
+<span id="cb44-2"><a href="#cb44-2"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb44-3"><a href="#cb44-3"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">x =</span> ndvi, <span class="at">ymin =</span> <span class="fu">exp</span>(.estimate <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> .se), <span class="at">ymax =</span> <span class="fu">exp</span>(.estimate <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> .se)), </span>
+<span id="cb44-4"><a href="#cb44-4"></a>              <span class="at">fill =</span> <span class="st">"grey70"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb44-5"><a href="#cb44-5"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> ndvi, <span class="at">y =</span> <span class="fu">exp</span>(.estimate)), </span>
+<span id="cb44-6"><a href="#cb44-6"></a>            <span class="at">colour =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb44-7"><a href="#cb44-7"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"NDVI"</span>, <span class="at">y =</span> <span class="st">"RSS"</span>) <span class="sc">+</span></span>
+<span id="cb44-8"><a href="#cb44-8"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(ndvi_quantiles[<span class="dv">1</span>], <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb44-9"><a href="#cb44-9"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">1.5</span>)) <span class="sc">+</span></span>
+<span id="cb44-10"><a href="#cb44-10"></a>  <span class="fu">theme_classic</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 42 rows containing missing values or values outside the scale range
+(`geom_line()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-16-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="plot-habitat-selection-2" class="level3">
+<h3 class="anchored" data-anchor-id="plot-habitat-selection-2">Plot habitat selection</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>predicted_log_rss <span class="ot">&lt;-</span> <span class="fu">predict</span>(ssf_gam, </span>
+<span id="cb46-2"><a href="#cb46-2"></a>                         <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">ndvi =</span> <span class="fu">values</span>(ndvi_window), </span>
+<span id="cb46-3"><a href="#cb46-3"></a>                                              <span class="at">sl_ =</span> <span class="dv">0</span>,</span>
+<span id="cb46-4"><a href="#cb46-4"></a>                                              <span class="at">log_sl =</span> <span class="dv">0</span>, </span>
+<span id="cb46-5"><a href="#cb46-5"></a>                                              <span class="at">cos_ta =</span> <span class="dv">0</span>), </span>
+<span id="cb46-6"><a href="#cb46-6"></a>                       <span class="at">type =</span> <span class="st">"link"</span>)</span>
+<span id="cb46-7"><a href="#cb46-7"></a></span>
+<span id="cb46-8"><a href="#cb46-8"></a>ndvi_gam <span class="ot">&lt;-</span> ndvi_window</span>
+<span id="cb46-9"><a href="#cb46-9"></a><span class="fu">values</span>(ndvi_gam) <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">as.vector</span>(predicted_log_rss))</span>
+<span id="cb46-10"><a href="#cb46-10"></a></span>
+<span id="cb46-11"><a href="#cb46-11"></a><span class="co"># Plot the predictions</span></span>
+<span id="cb46-12"><a href="#cb46-12"></a><span class="fu">plot</span>(ndvi_gam, <span class="at">main =</span> <span class="st">"RSS - smooth term"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ssf_responses_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+<!-- -->
+
+
+</section>
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Klappstein2024-ax" class="csl-entry" role="listitem">
+Klappstein, Natasha J, Théo Michelot, John Fieberg, Eric J Pedersen, and Joanna Mills Flemming. 2024. <span>“Step Selection Functions with Non‐linear and Random Effects.”</span> <em>Methods in Ecology and Evolution</em>, June. <a href="https://doi.org/10.1111/2041-210x.14367">https://doi.org/10.1111/2041-210x.14367</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb47" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb47-1"><a href="#cb47-1"></a><span class="co">---</span></span>
+<span id="cb47-2"><a href="#cb47-2"></a><span class="an">title:</span><span class="co"> "SSF responses"</span></span>
+<span id="cb47-3"><a href="#cb47-3"></a><span class="an">author:</span><span class="co"> "Scott Forrest"</span></span>
+<span id="cb47-4"><a href="#cb47-4"></a><span class="an">date:</span><span class="co"> "`r Sys.Date()`"</span></span>
+<span id="cb47-5"><a href="#cb47-5"></a><span class="an">execute:</span><span class="co"> </span></span>
+<span id="cb47-6"><a href="#cb47-6"></a><span class="co">  cache: false</span></span>
+<span id="cb47-7"><a href="#cb47-7"></a><span class="an">bibliography:</span><span class="co"> paperpile.bib</span></span>
+<span id="cb47-8"><a href="#cb47-8"></a><span class="an">toc:</span><span class="co"> true</span></span>
+<span id="cb47-9"><a href="#cb47-9"></a><span class="an">number-sections:</span><span class="co"> false</span></span>
+<span id="cb47-10"><a href="#cb47-10"></a><span class="an">format:</span><span class="co"> </span></span>
+<span id="cb47-11"><a href="#cb47-11"></a><span class="co">  html:</span></span>
+<span id="cb47-12"><a href="#cb47-12"></a><span class="co">    # self-contained: true</span></span>
+<span id="cb47-13"><a href="#cb47-13"></a><span class="co">    code-fold: show</span></span>
+<span id="cb47-14"><a href="#cb47-14"></a><span class="co">    code-tools: true</span></span>
+<span id="cb47-15"><a href="#cb47-15"></a><span class="co">    df-print: paged</span></span>
+<span id="cb47-16"><a href="#cb47-16"></a><span class="co">    code-line-numbers: true</span></span>
+<span id="cb47-17"><a href="#cb47-17"></a><span class="co">    code-overflow: scroll</span></span>
+<span id="cb47-18"><a href="#cb47-18"></a><span class="co">    fig-format: png</span></span>
+<span id="cb47-19"><a href="#cb47-19"></a><span class="co">    fig-dpi: 300</span></span>
+<span id="cb47-20"><a href="#cb47-20"></a><span class="co">  pdf:</span></span>
+<span id="cb47-21"><a href="#cb47-21"></a><span class="co">    geometry: </span></span>
+<span id="cb47-22"><a href="#cb47-22"></a><span class="co">      - top=30mm</span></span>
+<span id="cb47-23"><a href="#cb47-23"></a><span class="co">      - left=30mm</span></span>
+<span id="cb47-24"><a href="#cb47-24"></a><span class="an">editor:</span></span>
+<span id="cb47-25"><a href="#cb47-25"></a><span class="co">  source</span></span>
+<span id="cb47-26"><a href="#cb47-26"></a><span class="an">abstract:</span><span class="co"> |</span></span>
+<span id="cb47-27"><a href="#cb47-27"></a><span class="co">  In this script we demonstrate different approaches to including covariates in an SSF model. </span></span>
+<span id="cb47-28"><a href="#cb47-28"></a><span class="co">---</span></span>
+<span id="cb47-29"><a href="#cb47-29"></a></span>
+<span id="cb47-30"><a href="#cb47-30"></a><span class="fu"># Load required packages</span></span>
+<span id="cb47-31"><a href="#cb47-31"></a></span>
+<span id="cb47-34"><a href="#cb47-34"></a><span class="in">```{r}</span></span>
+<span id="cb47-35"><a href="#cb47-35"></a><span class="co">#| warning=FALSE</span></span>
+<span id="cb47-36"><a href="#cb47-36"></a></span>
+<span id="cb47-37"><a href="#cb47-37"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb47-38"><a href="#cb47-38"></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"amt"</span>, <span class="st">"sf"</span>, <span class="st">"terra"</span>, <span class="st">"RColorBrewer"</span>, <span class="st">"mgcv"</span>, <span class="st">"gratia"</span>)</span>
+<span id="cb47-39"><a href="#cb47-39"></a><span class="fu">walk</span>(packages, require, <span class="at">character.only =</span> T)</span>
+<span id="cb47-40"><a href="#cb47-40"></a></span>
+<span id="cb47-41"><a href="#cb47-41"></a><span class="in">```</span></span>
+<span id="cb47-42"><a href="#cb47-42"></a></span>
+<span id="cb47-43"><a href="#cb47-43"></a><span class="fu"># Import data and clean</span></span>
+<span id="cb47-44"><a href="#cb47-44"></a></span>
+<span id="cb47-47"><a href="#cb47-47"></a><span class="in">```{r}</span></span>
+<span id="cb47-48"><a href="#cb47-48"></a>buffalo_data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/buffalo.csv"</span>) </span>
+<span id="cb47-49"><a href="#cb47-49"></a></span>
+<span id="cb47-50"><a href="#cb47-50"></a><span class="co"># remove individuals that have poor data quality or less than about 3 months of data. </span></span>
+<span id="cb47-51"><a href="#cb47-51"></a><span class="co"># The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exclude it</span></span>
+<span id="cb47-52"><a href="#cb47-52"></a>buffalo_data <span class="ot">&lt;-</span> buffalo_data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>node <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"2014.GPS_COMPACT copy.csv"</span>, </span>
+<span id="cb47-53"><a href="#cb47-53"></a>                                           <span class="dv">2029</span>, <span class="dv">2043</span>, <span class="dv">2265</span>, <span class="dv">2284</span>, <span class="dv">2346</span>))</span>
+<span id="cb47-54"><a href="#cb47-54"></a></span>
+<span id="cb47-55"><a href="#cb47-55"></a>buffalo_data <span class="ot">&lt;-</span> buffalo_data <span class="sc">%&gt;%</span>  </span>
+<span id="cb47-56"><a href="#cb47-56"></a>  <span class="fu">group_by</span>(node) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-57"><a href="#cb47-57"></a>  <span class="fu">arrange</span>(DateTime, <span class="at">.by_group =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-58"><a href="#cb47-58"></a>  <span class="fu">distinct</span>(DateTime, <span class="at">.keep_all =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-59"><a href="#cb47-59"></a>  <span class="fu">arrange</span>(node) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-60"><a href="#cb47-60"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> node)</span>
+<span id="cb47-61"><a href="#cb47-61"></a></span>
+<span id="cb47-62"><a href="#cb47-62"></a>buffalo_clean <span class="ot">&lt;-</span> buffalo_data[, <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">3</span>)]</span>
+<span id="cb47-63"><a href="#cb47-63"></a><span class="fu">colnames</span>(buffalo_clean) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"time"</span>, <span class="st">"lon"</span>, <span class="st">"lat"</span>)</span>
+<span id="cb47-64"><a href="#cb47-64"></a><span class="fu">attr</span>(buffalo_clean<span class="sc">$</span>time, <span class="st">"tzone"</span>) <span class="ot">&lt;-</span> <span class="st">"Australia/Queensland"</span></span>
+<span id="cb47-65"><a href="#cb47-65"></a><span class="fu">head</span>(buffalo_clean)</span>
+<span id="cb47-66"><a href="#cb47-66"></a><span class="fu">tz</span>(buffalo_clean<span class="sc">$</span>time)</span>
+<span id="cb47-67"><a href="#cb47-67"></a></span>
+<span id="cb47-68"><a href="#cb47-68"></a>buffalo_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(buffalo_clean<span class="sc">$</span>id)</span>
+<span id="cb47-69"><a href="#cb47-69"></a></span>
+<span id="cb47-70"><a href="#cb47-70"></a><span class="in">```</span></span>
+<span id="cb47-71"><a href="#cb47-71"></a></span>
+<span id="cb47-72"><a href="#cb47-72"></a><span class="fu"># Create a step object </span></span>
+<span id="cb47-73"><a href="#cb47-73"></a></span>
+<span id="cb47-74"><a href="#cb47-74"></a>Use the <span class="in">`amt`</span> package to create a trajectory object from the cleaned data. </span>
+<span id="cb47-75"><a href="#cb47-75"></a></span>
+<span id="cb47-78"><a href="#cb47-78"></a><span class="in">```{r}</span></span>
+<span id="cb47-79"><a href="#cb47-79"></a><span class="co">#| label: make_track</span></span>
+<span id="cb47-80"><a href="#cb47-80"></a><span class="co">#| code-summary: "Create a trajectory object"</span></span>
+<span id="cb47-81"><a href="#cb47-81"></a></span>
+<span id="cb47-82"><a href="#cb47-82"></a>buffalo_all <span class="ot">&lt;-</span> buffalo_clean <span class="sc">%&gt;%</span> <span class="fu">mk_track</span>(<span class="at">id =</span> id,</span>
+<span id="cb47-83"><a href="#cb47-83"></a>                                           lon,</span>
+<span id="cb47-84"><a href="#cb47-84"></a>                                           lat, </span>
+<span id="cb47-85"><a href="#cb47-85"></a>                                           time, </span>
+<span id="cb47-86"><a href="#cb47-86"></a>                                           <span class="at">all_cols =</span> T,</span>
+<span id="cb47-87"><a href="#cb47-87"></a>                                           <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb47-88"><a href="#cb47-88"></a>  <span class="fu">transform_coords</span>(<span class="at">crs_to =</span> <span class="dv">3112</span>, <span class="at">crs_from =</span> <span class="dv">4326</span>) <span class="co"># Transformation to GDA94 / </span></span>
+<span id="cb47-89"><a href="#cb47-89"></a><span class="co"># Geoscience Australia Lambert (https://epsg.io/3112)</span></span>
+<span id="cb47-90"><a href="#cb47-90"></a></span>
+<span id="cb47-91"><a href="#cb47-91"></a><span class="in">```</span></span>
+<span id="cb47-92"><a href="#cb47-92"></a></span>
+<span id="cb47-93"><a href="#cb47-93"></a><span class="fu">## Plot the data spatially</span></span>
+<span id="cb47-94"><a href="#cb47-94"></a></span>
+<span id="cb47-97"><a href="#cb47-97"></a><span class="in">```{r}</span></span>
+<span id="cb47-98"><a href="#cb47-98"></a>buffalo_all <span class="sc">%&gt;%</span></span>
+<span id="cb47-99"><a href="#cb47-99"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_, <span class="at">y =</span> y_, <span class="at">colour =</span> id)) <span class="sc">+</span></span>
+<span id="cb47-100"><a href="#cb47-100"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb47-101"><a href="#cb47-101"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb47-102"><a href="#cb47-102"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">"Easting (m)"</span>) <span class="sc">+</span></span>
+<span id="cb47-103"><a href="#cb47-103"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Northing (m)"</span>) <span class="sc">+</span></span>
+<span id="cb47-104"><a href="#cb47-104"></a>  <span class="fu">scale_colour_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb47-105"><a href="#cb47-105"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb47-106"><a href="#cb47-106"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) </span>
+<span id="cb47-107"><a href="#cb47-107"></a></span>
+<span id="cb47-108"><a href="#cb47-108"></a><span class="co"># ggsave("outputs/data_prep/buffalo_djelk_map.png",</span></span>
+<span id="cb47-109"><a href="#cb47-109"></a><span class="co">#        width = 150, height = 150, units = "mm",  dpi = 600)</span></span>
+<span id="cb47-110"><a href="#cb47-110"></a></span>
+<span id="cb47-111"><a href="#cb47-111"></a><span class="in">```</span></span>
+<span id="cb47-112"><a href="#cb47-112"></a></span>
+<span id="cb47-113"><a href="#cb47-113"></a><span class="fu">## Pick out a single individual</span></span>
+<span id="cb47-114"><a href="#cb47-114"></a></span>
+<span id="cb47-117"><a href="#cb47-117"></a><span class="in">```{r}</span></span>
+<span id="cb47-118"><a href="#cb47-118"></a>buffalo_id <span class="ot">&lt;-</span> buffalo_all <span class="sc">%&gt;%</span> <span class="fu">filter</span>(id <span class="sc">==</span> <span class="st">"2014"</span>)</span>
+<span id="cb47-119"><a href="#cb47-119"></a></span>
+<span id="cb47-120"><a href="#cb47-120"></a>buffalo_id <span class="sc">%&gt;%</span></span>
+<span id="cb47-121"><a href="#cb47-121"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_, <span class="at">y =</span> y_, <span class="at">colour =</span> t_)) <span class="sc">+</span></span>
+<span id="cb47-122"><a href="#cb47-122"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb47-123"><a href="#cb47-123"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb47-124"><a href="#cb47-124"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">"Easting (m)"</span>) <span class="sc">+</span></span>
+<span id="cb47-125"><a href="#cb47-125"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Northing (m)"</span>) <span class="sc">+</span></span>
+<span id="cb47-126"><a href="#cb47-126"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb47-127"><a href="#cb47-127"></a></span>
+<span id="cb47-128"><a href="#cb47-128"></a><span class="in">```</span></span>
+<span id="cb47-129"><a href="#cb47-129"></a></span>
+<span id="cb47-130"><a href="#cb47-130"></a><span class="fu"># Import spatial covariate</span></span>
+<span id="cb47-131"><a href="#cb47-131"></a></span>
+<span id="cb47-132"><a href="#cb47-132"></a>Although NDVI changes over time, and we have access to monthly layers, we will just select a single month here.</span>
+<span id="cb47-133"><a href="#cb47-133"></a></span>
+<span id="cb47-136"><a href="#cb47-136"></a><span class="in">```{r}</span></span>
+<span id="cb47-137"><a href="#cb47-137"></a>ndvi <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/ndvi_aug_2018.tif"</span>)</span>
+<span id="cb47-138"><a href="#cb47-138"></a><span class="fu">plot</span>(ndvi, <span class="at">main =</span> <span class="st">"NDVI August 2018"</span>)</span>
+<span id="cb47-139"><a href="#cb47-139"></a><span class="fu">points</span>(buffalo_id<span class="sc">$</span>x_, buffalo_id<span class="sc">$</span>y_, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span>
+<span id="cb47-140"><a href="#cb47-140"></a>ndvi</span>
+<span id="cb47-141"><a href="#cb47-141"></a></span>
+<span id="cb47-142"><a href="#cb47-142"></a><span class="in">```</span></span>
+<span id="cb47-143"><a href="#cb47-143"></a></span>
+<span id="cb47-144"><a href="#cb47-144"></a><span class="fu"># Select local extent</span></span>
+<span id="cb47-145"><a href="#cb47-145"></a></span>
+<span id="cb47-146"><a href="#cb47-146"></a>We just want to look at an area centred on a single location, which might be combined with our movement probability surface to generate a next-step probability surface.</span>
+<span id="cb47-147"><a href="#cb47-147"></a></span>
+<span id="cb47-148"><a href="#cb47-148"></a>We'll centre the extent on an interesting looking part of the landscape, and then buffer it by 1500m, which contains most of the step lengths, and therefore most of the movement kernel.</span>
+<span id="cb47-149"><a href="#cb47-149"></a></span>
+<span id="cb47-152"><a href="#cb47-152"></a><span class="in">```{r}</span></span>
+<span id="cb47-153"><a href="#cb47-153"></a>buffalo_single_point <span class="ot">&lt;-</span> buffalo_id <span class="sc">%&gt;%</span> </span>
+<span id="cb47-154"><a href="#cb47-154"></a>  <span class="fu">filter</span>(t_ <span class="sc">==</span> <span class="fu">min</span>(t_)) <span class="co"># select the first time point</span></span>
+<span id="cb47-155"><a href="#cb47-155"></a></span>
+<span id="cb47-156"><a href="#cb47-156"></a>buffer <span class="ot">&lt;-</span> <span class="fl">1512.5</span> <span class="co"># buffer in metres</span></span>
+<span id="cb47-157"><a href="#cb47-157"></a></span>
+<span id="cb47-158"><a href="#cb47-158"></a>window_extent <span class="ot">&lt;-</span> <span class="fu">ext</span>(buffalo_single_point<span class="sc">$</span>x_ <span class="sc">-</span> buffer, </span>
+<span id="cb47-159"><a href="#cb47-159"></a>                        buffalo_single_point<span class="sc">$</span>x_ <span class="sc">+</span> buffer, </span>
+<span id="cb47-160"><a href="#cb47-160"></a>                        buffalo_single_point<span class="sc">$</span>y_ <span class="sc">-</span> buffer, </span>
+<span id="cb47-161"><a href="#cb47-161"></a>                        buffalo_single_point<span class="sc">$</span>y_ <span class="sc">+</span> buffer)</span>
+<span id="cb47-162"><a href="#cb47-162"></a></span>
+<span id="cb47-163"><a href="#cb47-163"></a>ndvi_window <span class="ot">&lt;-</span> <span class="fu">crop</span>(ndvi, window_extent)</span>
+<span id="cb47-164"><a href="#cb47-164"></a></span>
+<span id="cb47-165"><a href="#cb47-165"></a><span class="co"># set the extent to 0 at the buffalo location</span></span>
+<span id="cb47-166"><a href="#cb47-166"></a>ndvi_window <span class="ot">&lt;-</span> <span class="fu">shift</span>(ndvi_window, </span>
+<span id="cb47-167"><a href="#cb47-167"></a>                    <span class="at">dx =</span> <span class="sc">-</span>buffalo_single_point<span class="sc">$</span>x_, </span>
+<span id="cb47-168"><a href="#cb47-168"></a>                    <span class="at">dy =</span> <span class="sc">-</span>buffalo_single_point<span class="sc">$</span>y_)</span>
+<span id="cb47-169"><a href="#cb47-169"></a></span>
+<span id="cb47-170"><a href="#cb47-170"></a><span class="co"># plot the NDVI layer with the buffalo location as the centre point</span></span>
+<span id="cb47-171"><a href="#cb47-171"></a><span class="fu">plot</span>(ndvi_window, <span class="at">main =</span> <span class="st">"NDVI - local extent"</span>,</span>
+<span id="cb47-172"><a href="#cb47-172"></a>     <span class="at">col =</span> <span class="fu">brewer.pal</span>(<span class="dv">9</span>, <span class="st">"Greens"</span>))</span>
+<span id="cb47-173"><a href="#cb47-173"></a><span class="fu">points</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb47-174"><a href="#cb47-174"></a></span>
+<span id="cb47-175"><a href="#cb47-175"></a><span class="co"># create a NDVI df to plot with ggplot</span></span>
+<span id="cb47-176"><a href="#cb47-176"></a>ndvi_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(ndvi_window, <span class="at">xy =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb47-177"><a href="#cb47-177"></a></span>
+<span id="cb47-178"><a href="#cb47-178"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb47-179"><a href="#cb47-179"></a>  <span class="fu">geom_raster</span>(<span class="at">data =</span> ndvi_df, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">fill =</span> <span class="fu">as.factor</span>(<span class="fu">cut</span>(ndvi, <span class="at">breaks =</span> <span class="dv">9</span>)))) <span class="sc">+</span></span>
+<span id="cb47-180"><a href="#cb47-180"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>, <span class="at">direction =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb47-181"><a href="#cb47-181"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb47-182"><a href="#cb47-182"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>), </span>
+<span id="cb47-183"><a href="#cb47-183"></a>             <span class="at">colour =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb47-184"><a href="#cb47-184"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Easting (m)"</span>, <span class="at">y =</span> <span class="st">"Northing (m)"</span>, <span class="at">fill =</span> <span class="st">"NDVI"</span>) <span class="sc">+</span></span>
+<span id="cb47-185"><a href="#cb47-185"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb47-186"><a href="#cb47-186"></a></span>
+<span id="cb47-187"><a href="#cb47-187"></a><span class="in">```</span></span>
+<span id="cb47-188"><a href="#cb47-188"></a></span>
+<span id="cb47-189"><a href="#cb47-189"></a><span class="fu">## Sample random steps to fit models</span></span>
+<span id="cb47-190"><a href="#cb47-190"></a></span>
+<span id="cb47-193"><a href="#cb47-193"></a><span class="in">```{r}</span></span>
+<span id="cb47-194"><a href="#cb47-194"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id <span class="sc">%&gt;%</span> </span>
+<span id="cb47-195"><a href="#cb47-195"></a>  <span class="fu">steps</span>()</span>
+<span id="cb47-196"><a href="#cb47-196"></a></span>
+<span id="cb47-197"><a href="#cb47-197"></a><span class="co"># fitting step length and turning angle distributions to all locations</span></span>
+<span id="cb47-198"><a href="#cb47-198"></a>gamma_dist <span class="ot">&lt;-</span> <span class="fu">fit_distr</span>(buffalo_id_steps<span class="sc">$</span>sl_, <span class="st">"gamma"</span>)</span>
+<span id="cb47-199"><a href="#cb47-199"></a>vonmises_dist <span class="ot">&lt;-</span> <span class="fu">fit_distr</span>(buffalo_id_steps<span class="sc">$</span>ta_, <span class="st">"vonmises"</span>)</span>
+<span id="cb47-200"><a href="#cb47-200"></a></span>
+<span id="cb47-201"><a href="#cb47-201"></a><span class="co"># movement parameters</span></span>
+<span id="cb47-202"><a href="#cb47-202"></a>gamma_dist<span class="sc">$</span>params<span class="sc">$</span>shape</span>
+<span id="cb47-203"><a href="#cb47-203"></a>gamma_dist<span class="sc">$</span>params<span class="sc">$</span>scale</span>
+<span id="cb47-204"><a href="#cb47-204"></a>vonmises_dist<span class="sc">$</span>params<span class="sc">$</span>kappa</span>
+<span id="cb47-205"><a href="#cb47-205"></a>vonmises_dist<span class="sc">$</span>params<span class="sc">$</span>mu</span>
+<span id="cb47-206"><a href="#cb47-206"></a></span>
+<span id="cb47-207"><a href="#cb47-207"></a><span class="co"># sample random steps</span></span>
+<span id="cb47-208"><a href="#cb47-208"></a>buffalo_ssf_data <span class="ot">&lt;-</span> buffalo_id_steps <span class="sc">%&gt;%</span> </span>
+<span id="cb47-209"><a href="#cb47-209"></a>  <span class="fu">random_steps</span>(<span class="at">n =</span> <span class="dv">10</span>, </span>
+<span id="cb47-210"><a href="#cb47-210"></a>                <span class="at">sl_dist =</span> gamma_dist, </span>
+<span id="cb47-211"><a href="#cb47-211"></a>                <span class="at">ta_dist =</span> vonmises_dist) <span class="sc">%&gt;%</span></span>
+<span id="cb47-212"><a href="#cb47-212"></a>  <span class="fu">mutate</span>(<span class="at">log_sl =</span> <span class="fu">log</span>(sl_),</span>
+<span id="cb47-213"><a href="#cb47-213"></a>         <span class="at">cos_ta =</span> <span class="fu">cos</span>(ta_)) <span class="sc">%&gt;%</span></span>
+<span id="cb47-214"><a href="#cb47-214"></a>  <span class="fu">extract_covariates</span>(ndvi) </span>
+<span id="cb47-215"><a href="#cb47-215"></a></span>
+<span id="cb47-216"><a href="#cb47-216"></a><span class="in">```</span></span>
+<span id="cb47-217"><a href="#cb47-217"></a></span>
+<span id="cb47-218"><a href="#cb47-218"></a><span class="fu"># Different SSF formulations</span></span>
+<span id="cb47-219"><a href="#cb47-219"></a></span>
+<span id="cb47-220"><a href="#cb47-220"></a>Firstly, we want to pull out the range of NDVI values to plot the curves with.</span>
+<span id="cb47-221"><a href="#cb47-221"></a></span>
+<span id="cb47-224"><a href="#cb47-224"></a><span class="in">```{r}</span></span>
+<span id="cb47-225"><a href="#cb47-225"></a><span class="co"># histogram of NDVI values</span></span>
+<span id="cb47-226"><a href="#cb47-226"></a><span class="fu">hist</span>(<span class="fu">values</span>(ndvi))</span>
+<span id="cb47-227"><a href="#cb47-227"></a></span>
+<span id="cb47-228"><a href="#cb47-228"></a><span class="co"># 1% and 99% quantiles of NDVI values</span></span>
+<span id="cb47-229"><a href="#cb47-229"></a>ndvi_quantiles <span class="ot">&lt;-</span> <span class="fu">quantile</span>(<span class="fu">values</span>(ndvi), <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb47-230"><a href="#cb47-230"></a>ndvi_quantiles</span>
+<span id="cb47-231"><a href="#cb47-231"></a></span>
+<span id="cb47-232"><a href="#cb47-232"></a><span class="co"># plot across the range in the local window</span></span>
+<span id="cb47-233"><a href="#cb47-233"></a>ndvi_values <span class="ot">&lt;-</span> <span class="fu">seq</span>(ndvi_quantiles[<span class="dv">1</span>], </span>
+<span id="cb47-234"><a href="#cb47-234"></a>                   ndvi_quantiles[<span class="dv">2</span>], </span>
+<span id="cb47-235"><a href="#cb47-235"></a>                   <span class="at">length.out =</span> <span class="dv">100</span>)</span>
+<span id="cb47-236"><a href="#cb47-236"></a></span>
+<span id="cb47-237"><a href="#cb47-237"></a><span class="in">```</span></span>
+<span id="cb47-238"><a href="#cb47-238"></a></span>
+<span id="cb47-239"><a href="#cb47-239"></a><span class="fu">## Linear covariate</span></span>
+<span id="cb47-240"><a href="#cb47-240"></a></span>
+<span id="cb47-241"><a href="#cb47-241"></a><span class="fu">### Model formula</span></span>
+<span id="cb47-242"><a href="#cb47-242"></a></span>
+<span id="cb47-243"><a href="#cb47-243"></a>$y \sim ndvi$</span>
+<span id="cb47-244"><a href="#cb47-244"></a></span>
+<span id="cb47-245"><a href="#cb47-245"></a><span class="fu">### Fit model</span></span>
+<span id="cb47-246"><a href="#cb47-246"></a></span>
+<span id="cb47-249"><a href="#cb47-249"></a><span class="in">```{r}</span></span>
+<span id="cb47-250"><a href="#cb47-250"></a><span class="co"># fit an issf model</span></span>
+<span id="cb47-251"><a href="#cb47-251"></a>ssf_linear <span class="ot">&lt;-</span> amt<span class="sc">::</span><span class="fu">fit_issf</span>(case_ <span class="sc">~</span> </span>
+<span id="cb47-252"><a href="#cb47-252"></a>                              ndvi <span class="sc">+</span> </span>
+<span id="cb47-253"><a href="#cb47-253"></a>                              sl_ <span class="sc">+</span> log_sl <span class="sc">+</span> cos_ta <span class="sc">+</span></span>
+<span id="cb47-254"><a href="#cb47-254"></a>                              <span class="fu">strata</span>(step_id_),</span>
+<span id="cb47-255"><a href="#cb47-255"></a>                            <span class="at">data =</span> buffalo_ssf_data)</span>
+<span id="cb47-256"><a href="#cb47-256"></a></span>
+<span id="cb47-257"><a href="#cb47-257"></a><span class="fu">summary</span>(ssf_linear)</span>
+<span id="cb47-258"><a href="#cb47-258"></a></span>
+<span id="cb47-259"><a href="#cb47-259"></a><span class="in">```</span></span>
+<span id="cb47-260"><a href="#cb47-260"></a></span>
+<span id="cb47-261"><a href="#cb47-261"></a><span class="fu">### Response curve</span></span>
+<span id="cb47-262"><a href="#cb47-262"></a></span>
+<span id="cb47-265"><a href="#cb47-265"></a><span class="in">```{r}</span></span>
+<span id="cb47-266"><a href="#cb47-266"></a><span class="co"># extract the NDVI coefficient</span></span>
+<span id="cb47-267"><a href="#cb47-267"></a>ndvi_coef <span class="ot">&lt;-</span> ssf_linear<span class="sc">$</span>model<span class="sc">$</span>coefficients[<span class="dv">1</span>]</span>
+<span id="cb47-268"><a href="#cb47-268"></a></span>
+<span id="cb47-269"><a href="#cb47-269"></a><span class="co"># calculate the RSS for each NDVI value</span></span>
+<span id="cb47-270"><a href="#cb47-270"></a>ndvi_coef_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ndvi_values, </span>
+<span id="cb47-271"><a href="#cb47-271"></a>                 <span class="st">"log_rss"</span> <span class="ot">=</span> ndvi_values <span class="sc">*</span> ndvi_coef,</span>
+<span id="cb47-272"><a href="#cb47-272"></a>                 <span class="st">"rss"</span> <span class="ot">=</span> <span class="fu">exp</span>(ndvi_values <span class="sc">*</span> ndvi_coef))</span>
+<span id="cb47-273"><a href="#cb47-273"></a></span>
+<span id="cb47-274"><a href="#cb47-274"></a><span class="co"># plot the response curve</span></span>
+<span id="cb47-275"><a href="#cb47-275"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb47-276"><a href="#cb47-276"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb47-277"><a href="#cb47-277"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> ndvi_coef_df, <span class="fu">aes</span>(<span class="at">x =</span> ndvi_values, <span class="at">y =</span> rss), </span>
+<span id="cb47-278"><a href="#cb47-278"></a>            <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb47-279"><a href="#cb47-279"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"NDVI"</span>, <span class="at">y =</span> <span class="st">"RSS"</span>) <span class="sc">+</span></span>
+<span id="cb47-280"><a href="#cb47-280"></a>  <span class="fu">theme_classic</span>() </span>
+<span id="cb47-281"><a href="#cb47-281"></a></span>
+<span id="cb47-282"><a href="#cb47-282"></a><span class="in">```</span></span>
+<span id="cb47-283"><a href="#cb47-283"></a></span>
+<span id="cb47-284"><a href="#cb47-284"></a><span class="fu">### Plot habitat selection</span></span>
+<span id="cb47-285"><a href="#cb47-285"></a></span>
+<span id="cb47-288"><a href="#cb47-288"></a><span class="in">```{r}</span></span>
+<span id="cb47-289"><a href="#cb47-289"></a><span class="co"># calculate the RSS for the local NDVI values</span></span>
+<span id="cb47-290"><a href="#cb47-290"></a>ndvi_linear <span class="ot">&lt;-</span> <span class="fu">exp</span>(ndvi_window <span class="sc">*</span> ndvi_coef)</span>
+<span id="cb47-291"><a href="#cb47-291"></a></span>
+<span id="cb47-292"><a href="#cb47-292"></a><span class="co"># plot the habitat selection (spatial RSS)</span></span>
+<span id="cb47-293"><a href="#cb47-293"></a><span class="fu">plot</span>(ndvi_linear, <span class="at">main =</span> <span class="st">"RSS - linear coefficient"</span>)</span>
+<span id="cb47-294"><a href="#cb47-294"></a></span>
+<span id="cb47-295"><a href="#cb47-295"></a><span class="in">```</span></span>
+<span id="cb47-296"><a href="#cb47-296"></a></span>
+<span id="cb47-297"><a href="#cb47-297"></a><span class="fu">## Quadratic covariate</span></span>
+<span id="cb47-298"><a href="#cb47-298"></a></span>
+<span id="cb47-299"><a href="#cb47-299"></a><span class="fu">### Model formula</span></span>
+<span id="cb47-300"><a href="#cb47-300"></a></span>
+<span id="cb47-301"><a href="#cb47-301"></a>$y \sim ndvi + ndvi^2$</span>
+<span id="cb47-302"><a href="#cb47-302"></a></span>
+<span id="cb47-303"><a href="#cb47-303"></a><span class="fu">### Fit model</span></span>
+<span id="cb47-304"><a href="#cb47-304"></a></span>
+<span id="cb47-307"><a href="#cb47-307"></a><span class="in">```{r}</span></span>
+<span id="cb47-308"><a href="#cb47-308"></a><span class="co"># fit an issf model</span></span>
+<span id="cb47-309"><a href="#cb47-309"></a>ssf_quadratic <span class="ot">&lt;-</span> amt<span class="sc">::</span><span class="fu">fit_issf</span>(case_ <span class="sc">~</span> </span>
+<span id="cb47-310"><a href="#cb47-310"></a>                                 ndvi <span class="sc">+</span> <span class="fu">I</span>(ndvi<span class="sc">^</span><span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb47-311"><a href="#cb47-311"></a>                                 sl_ <span class="sc">+</span> log_sl <span class="sc">+</span> cos_ta <span class="sc">+</span></span>
+<span id="cb47-312"><a href="#cb47-312"></a>                              <span class="fu">strata</span>(step_id_),</span>
+<span id="cb47-313"><a href="#cb47-313"></a>                            <span class="at">data =</span> buffalo_ssf_data)</span>
+<span id="cb47-314"><a href="#cb47-314"></a></span>
+<span id="cb47-315"><a href="#cb47-315"></a><span class="fu">summary</span>(ssf_quadratic)</span>
+<span id="cb47-316"><a href="#cb47-316"></a></span>
+<span id="cb47-317"><a href="#cb47-317"></a><span class="in">```</span></span>
+<span id="cb47-318"><a href="#cb47-318"></a></span>
+<span id="cb47-319"><a href="#cb47-319"></a><span class="fu">### Response curve</span></span>
+<span id="cb47-320"><a href="#cb47-320"></a></span>
+<span id="cb47-323"><a href="#cb47-323"></a><span class="in">```{r}</span></span>
+<span id="cb47-324"><a href="#cb47-324"></a><span class="co"># extract the NDVI coefficient</span></span>
+<span id="cb47-325"><a href="#cb47-325"></a>ndvi_coef <span class="ot">&lt;-</span> ssf_quadratic<span class="sc">$</span>model<span class="sc">$</span>coefficients[<span class="dv">1</span>]</span>
+<span id="cb47-326"><a href="#cb47-326"></a>ndvi_coef_sq <span class="ot">&lt;-</span> ssf_quadratic<span class="sc">$</span>model<span class="sc">$</span>coefficients[<span class="dv">2</span>]</span>
+<span id="cb47-327"><a href="#cb47-327"></a></span>
+<span id="cb47-328"><a href="#cb47-328"></a>log_rss <span class="ot">=</span> (ndvi_values <span class="sc">*</span> ndvi_coef) <span class="sc">+</span> (ndvi_values<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> ndvi_coef_sq)</span>
+<span id="cb47-329"><a href="#cb47-329"></a>rss <span class="ot">=</span> <span class="fu">exp</span>(log_rss)</span>
+<span id="cb47-330"><a href="#cb47-330"></a></span>
+<span id="cb47-331"><a href="#cb47-331"></a><span class="co"># calculate the RSS for each NDVI value</span></span>
+<span id="cb47-332"><a href="#cb47-332"></a>ndvi_coef_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ndvi_values, log_rss, rss)</span>
+<span id="cb47-333"><a href="#cb47-333"></a></span>
+<span id="cb47-334"><a href="#cb47-334"></a><span class="co"># plot the response curve</span></span>
+<span id="cb47-335"><a href="#cb47-335"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb47-336"><a href="#cb47-336"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb47-337"><a href="#cb47-337"></a>  <span class="fu">geom_line</span>(<span class="at">data =</span> ndvi_coef_df, <span class="fu">aes</span>(<span class="at">x =</span> ndvi_values, <span class="at">y =</span> rss), </span>
+<span id="cb47-338"><a href="#cb47-338"></a>            <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb47-339"><a href="#cb47-339"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"NDVI"</span>, <span class="at">y =</span> <span class="st">"RSS"</span>) <span class="sc">+</span></span>
+<span id="cb47-340"><a href="#cb47-340"></a>  <span class="fu">theme_classic</span>() </span>
+<span id="cb47-341"><a href="#cb47-341"></a></span>
+<span id="cb47-342"><a href="#cb47-342"></a><span class="in">```</span></span>
+<span id="cb47-343"><a href="#cb47-343"></a></span>
+<span id="cb47-344"><a href="#cb47-344"></a><span class="fu">### Plot habitat selection</span></span>
+<span id="cb47-345"><a href="#cb47-345"></a></span>
+<span id="cb47-348"><a href="#cb47-348"></a><span class="in">```{r}</span></span>
+<span id="cb47-349"><a href="#cb47-349"></a><span class="co"># calculate the RSS for the local NDVI values</span></span>
+<span id="cb47-350"><a href="#cb47-350"></a>ndvi_quadratic <span class="ot">&lt;-</span> <span class="fu">exp</span>((ndvi_window <span class="sc">*</span> ndvi_coef) <span class="sc">+</span> </span>
+<span id="cb47-351"><a href="#cb47-351"></a>                        (ndvi_window<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> ndvi_coef_sq))</span>
+<span id="cb47-352"><a href="#cb47-352"></a></span>
+<span id="cb47-353"><a href="#cb47-353"></a><span class="co"># plot the habitat selection (spatial RSS)</span></span>
+<span id="cb47-354"><a href="#cb47-354"></a><span class="fu">plot</span>(ndvi_quadratic, <span class="at">main =</span> <span class="st">"RSS - quadratic coefficient"</span>)</span>
+<span id="cb47-355"><a href="#cb47-355"></a></span>
+<span id="cb47-356"><a href="#cb47-356"></a><span class="in">```</span></span>
+<span id="cb47-357"><a href="#cb47-357"></a></span>
+<span id="cb47-358"><a href="#cb47-358"></a><span class="fu">## Smooth term</span></span>
+<span id="cb47-359"><a href="#cb47-359"></a></span>
+<span id="cb47-360"><a href="#cb47-360"></a>Fit a GAM to the data, with a smooth term across the range of NDVI values <span class="co">[</span><span class="ot">@Klappstein2024-ax</span><span class="co">]</span>.</span>
+<span id="cb47-361"><a href="#cb47-361"></a></span>
+<span id="cb47-362"><a href="#cb47-362"></a><span class="fu">### Model formula</span></span>
+<span id="cb47-363"><a href="#cb47-363"></a></span>
+<span id="cb47-364"><a href="#cb47-364"></a>$y \sim s(ndvi)$</span>
+<span id="cb47-365"><a href="#cb47-365"></a></span>
+<span id="cb47-366"><a href="#cb47-366"></a><span class="fu">### Fit model</span></span>
+<span id="cb47-367"><a href="#cb47-367"></a></span>
+<span id="cb47-370"><a href="#cb47-370"></a><span class="in">```{r}</span></span>
+<span id="cb47-371"><a href="#cb47-371"></a><span class="co"># create a dummy variable create a dummy column for times (used in a Cox PH model, but not relevant to an SSF) that all contain the same value.</span></span>
+<span id="cb47-372"><a href="#cb47-372"></a>buffalo_ssf_data<span class="sc">$</span>times <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># dummy time variable</span></span>
+<span id="cb47-373"><a href="#cb47-373"></a></span>
+<span id="cb47-374"><a href="#cb47-374"></a><span class="co"># fit an issf model</span></span>
+<span id="cb47-375"><a href="#cb47-375"></a>ssf_gam <span class="ot">&lt;-</span> mgcv<span class="sc">::</span><span class="fu">gam</span>(<span class="fu">cbind</span>(times, step_id_) <span class="sc">~</span> </span>
+<span id="cb47-376"><a href="#cb47-376"></a>                       <span class="co"># s(ndvi, bs = "tp", k = 10) +</span></span>
+<span id="cb47-377"><a href="#cb47-377"></a>                       <span class="fu">s</span>(ndvi) <span class="sc">+</span></span>
+<span id="cb47-378"><a href="#cb47-378"></a>                       sl_ <span class="sc">+</span> log_sl <span class="sc">+</span> cos_ta,</span>
+<span id="cb47-379"><a href="#cb47-379"></a>                            <span class="at">data =</span> buffalo_ssf_data,</span>
+<span id="cb47-380"><a href="#cb47-380"></a>                            <span class="at">family =</span> cox.ph,</span>
+<span id="cb47-381"><a href="#cb47-381"></a>                            <span class="at">weight =</span> case_)</span>
+<span id="cb47-382"><a href="#cb47-382"></a></span>
+<span id="cb47-383"><a href="#cb47-383"></a><span class="fu">summary</span>(ssf_gam)</span>
+<span id="cb47-384"><a href="#cb47-384"></a></span>
+<span id="cb47-385"><a href="#cb47-385"></a><span class="co"># coef(ssf_gam)[4]</span></span>
+<span id="cb47-386"><a href="#cb47-386"></a></span>
+<span id="cb47-387"><a href="#cb47-387"></a>gam_smooths <span class="ot">&lt;-</span> <span class="fu">smooth_estimates</span>(ssf_gam)</span>
+<span id="cb47-388"><a href="#cb47-388"></a></span>
+<span id="cb47-389"><a href="#cb47-389"></a><span class="in">```</span></span>
+<span id="cb47-390"><a href="#cb47-390"></a></span>
+<span id="cb47-391"><a href="#cb47-391"></a><span class="fu">### Response curve</span></span>
+<span id="cb47-392"><a href="#cb47-392"></a></span>
+<span id="cb47-395"><a href="#cb47-395"></a><span class="in">```{r}</span></span>
+<span id="cb47-396"><a href="#cb47-396"></a>gratia<span class="sc">::</span><span class="fu">draw</span>(ssf_gam, <span class="at">rug =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> </span>
+<span id="cb47-397"><a href="#cb47-397"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb47-398"><a href="#cb47-398"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"NDVI"</span>, <span class="at">y =</span> <span class="st">"log-RSS"</span>) <span class="sc">+</span></span>
+<span id="cb47-399"><a href="#cb47-399"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(ndvi_quantiles[<span class="dv">1</span>], <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb47-400"><a href="#cb47-400"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.4</span>, <span class="fl">0.4</span>)) <span class="sc">+</span></span>
+<span id="cb47-401"><a href="#cb47-401"></a>  <span class="fu">theme_classic</span>() </span>
+<span id="cb47-402"><a href="#cb47-402"></a></span>
+<span id="cb47-403"><a href="#cb47-403"></a><span class="fu">ggplot</span>(<span class="at">data =</span> gam_smooths) <span class="sc">+</span> </span>
+<span id="cb47-404"><a href="#cb47-404"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb47-405"><a href="#cb47-405"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">x =</span> ndvi, <span class="at">ymin =</span> <span class="fu">exp</span>(.estimate <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> .se), <span class="at">ymax =</span> <span class="fu">exp</span>(.estimate <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> .se)), </span>
+<span id="cb47-406"><a href="#cb47-406"></a>              <span class="at">fill =</span> <span class="st">"grey70"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb47-407"><a href="#cb47-407"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> ndvi, <span class="at">y =</span> <span class="fu">exp</span>(.estimate)), </span>
+<span id="cb47-408"><a href="#cb47-408"></a>            <span class="at">colour =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb47-409"><a href="#cb47-409"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"NDVI"</span>, <span class="at">y =</span> <span class="st">"RSS"</span>) <span class="sc">+</span></span>
+<span id="cb47-410"><a href="#cb47-410"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(ndvi_quantiles[<span class="dv">1</span>], <span class="fl">0.5</span>)) <span class="sc">+</span></span>
+<span id="cb47-411"><a href="#cb47-411"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">1.5</span>)) <span class="sc">+</span></span>
+<span id="cb47-412"><a href="#cb47-412"></a>  <span class="fu">theme_classic</span>() </span>
+<span id="cb47-413"><a href="#cb47-413"></a></span>
+<span id="cb47-414"><a href="#cb47-414"></a><span class="in">```</span></span>
+<span id="cb47-415"><a href="#cb47-415"></a></span>
+<span id="cb47-416"><a href="#cb47-416"></a><span class="fu">### Plot habitat selection</span></span>
+<span id="cb47-417"><a href="#cb47-417"></a></span>
+<span id="cb47-420"><a href="#cb47-420"></a><span class="in">```{r}</span></span>
+<span id="cb47-421"><a href="#cb47-421"></a>predicted_log_rss <span class="ot">&lt;-</span> <span class="fu">predict</span>(ssf_gam, </span>
+<span id="cb47-422"><a href="#cb47-422"></a>                         <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">ndvi =</span> <span class="fu">values</span>(ndvi_window), </span>
+<span id="cb47-423"><a href="#cb47-423"></a>                                              <span class="at">sl_ =</span> <span class="dv">0</span>,</span>
+<span id="cb47-424"><a href="#cb47-424"></a>                                              <span class="at">log_sl =</span> <span class="dv">0</span>, </span>
+<span id="cb47-425"><a href="#cb47-425"></a>                                              <span class="at">cos_ta =</span> <span class="dv">0</span>), </span>
+<span id="cb47-426"><a href="#cb47-426"></a>                       <span class="at">type =</span> <span class="st">"link"</span>)</span>
+<span id="cb47-427"><a href="#cb47-427"></a></span>
+<span id="cb47-428"><a href="#cb47-428"></a>ndvi_gam <span class="ot">&lt;-</span> ndvi_window</span>
+<span id="cb47-429"><a href="#cb47-429"></a><span class="fu">values</span>(ndvi_gam) <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">as.vector</span>(predicted_log_rss))</span>
+<span id="cb47-430"><a href="#cb47-430"></a></span>
+<span id="cb47-431"><a href="#cb47-431"></a><span class="co"># Plot the predictions</span></span>
+<span id="cb47-432"><a href="#cb47-432"></a><span class="fu">plot</span>(ndvi_gam, <span class="at">main =</span> <span class="st">"RSS - smooth term"</span>)</span>
+<span id="cb47-433"><a href="#cb47-433"></a></span>
+<span id="cb47-434"><a href="#cb47-434"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
