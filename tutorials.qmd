@@ -7,3 +7,4 @@ In the sidebar to the left there are a number of scripts and tutorials that you 
 These include:
 - **Data preparation**: Scripts to help you clean and preprocess your data for analysis.
 - **Exploratory data analysis**: Step-by-step guides on how to create various types of visualizations
+- ... to complete
