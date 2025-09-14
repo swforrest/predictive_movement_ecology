@@ -1,5 +1,5 @@
 ---
-title: "SSF responses"
+title: "SSF Formulations"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 
@@ -163,15 +163,19 @@ ndvi_window <- shift(ndvi_window,
                     dy = -buffalo_single_point$y_)
 
 # plot the NDVI layer with the buffalo location as the centre point
-plot(ndvi_window, main = paste0("NDVI - ID ", which_buffalo),
-     col = brewer.pal(9, "Greens"))
+plot(ndvi_window, 
+     # main = paste0("NDVI"),
+     col = brewer.pal(9, "Greens"), 
+     plg=list(x="top", title="NDVI", tics="out", cex=.8))
 points(x = 0, y = 0, col = "red")
 
 # Save the plot
 png(filename = paste0("outputs/ndvi_local_", which_buffalo, ".png"), 
     width = 100, height = 100, units = "mm", res = 600)
-print(plot(ndvi_window, main = paste0("NDVI - ID ", which_buffalo),
-     col = brewer.pal(9, "Greens")))
+print(plot(ndvi_window, 
+     # main = paste0("NDVI"),
+     col = brewer.pal(9, "Greens"), 
+     plg=list(x="top", title="NDVI", tics="out", cex=.8)))
 print(points(x = 0, y = 0, col = "red"))
 dev.off()
 
@@ -264,6 +268,7 @@ ssf_linear <- amt::fit_issf(case_ ~
                             data = buffalo_ssf_data)
 
 summary(ssf_linear)
+AIC(ssf_linear)
 
 # fit an ssf gam model with parametric terms
 ssf_linear_gam <- mgcv::gam(cbind(times, step_id_) ~ 
@@ -274,6 +279,7 @@ ssf_linear_gam <- mgcv::gam(cbind(times, step_id_) ~
                             weight = case_)
 
 summary(ssf_linear_gam)
+AIC(ssf_linear_gam)
 
 ```
 
@@ -390,6 +396,7 @@ ssf_quadratic <- amt::fit_issf(case_ ~
                             data = buffalo_ssf_data)
 
 summary(ssf_quadratic)
+AIC(ssf_quadratic)
 
 # fit an ssf gam model with parametric terms
 ssf_quadratic_gam <- mgcv::gam(cbind(times, step_id_) ~ 
@@ -401,6 +408,7 @@ ssf_quadratic_gam <- mgcv::gam(cbind(times, step_id_) ~
                                weight = case_)
 
 summary(ssf_quadratic_gam)
+AIC(ssf_quadratic_gam)
 
 # Use the `predict` function to get predictions
 predictions <- predict(ssf_quadratic_gam, 
@@ -532,6 +540,7 @@ ssf_gam <- mgcv::gam(cbind(times, step_id_) ~
                             weight = case_)
 
 summary(ssf_gam)
+AIC(ssf_gam)
 
 # coef(ssf_gam)[4]
 
@@ -674,6 +683,7 @@ ssf_harmonics <- amt::fit_issf(case_ ~
                                data = buffalo_ssf_data)
 
 summary(ssf_harmonics)
+AIC(ssf_harmonics)
 
 ```
 
@@ -720,6 +730,45 @@ ggplot(data = ndvi_temporal_coef_df) +
 
 ```
 
+```{r}
+
+# Coefficient names we need
+coef_names <- c("ndvi",
+                "ndvi:sin_1_hour","ndvi:cos_1_hour",
+                "ndvi:sin_2_hour","ndvi:cos_2_hour")
+
+# coefficients and V from the underlying clogit model
+beta <- coef(ssf_harmonics$model)[coef_names]
+V    <- vcov(ssf_harmonics$model)[coef_names, coef_names, drop = FALSE]
+
+# Build design for each hour
+ndvi_temporal_ci <- tibble(hour = seq(0, 23, length.out = 200)) %>%
+  mutate(
+    sin_1 = sin(2 * pi * hour / 24),
+    cos_1 = cos(2 * pi * hour / 24),
+    sin_2 = sin(4 * pi * hour / 24),
+    cos_2 = cos(4 * pi * hour / 24)
+  ) %>%
+  rowwise() %>%
+  mutate(
+    x = list(c(1, sin_1, cos_1, sin_2, cos_2)),
+    est = as.numeric(matrix(unlist(x), nrow = 1) %*% beta),
+    se  = sqrt(as.numeric(matrix(unlist(x), nrow = 1) %*% V %*% matrix(unlist(x), ncol = 1))),
+    lo  = est - 1.96 * se,
+    hi  = est + 1.96 * se
+  ) %>%
+  ungroup() %>%
+  select(hour, est, lo, hi)
+
+# Plot with ribbon
+ggplot(ndvi_temporal_ci, aes(x = hour)) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "grey60") +
+  geom_ribbon(aes(ymin = lo, ymax = hi), alpha = 0.2) +
+  geom_line(aes(y = est)) +
+  labs(x = "Hour", y = "NDVI coefficient", fill = NULL) +
+  theme_classic()
+
+```
 
 ### Manually create the selection surface
 
@@ -774,8 +823,21 @@ ggplot(data = ndvi_hour_values) +
   scale_colour_viridis_c() +
   theme_classic() 
 
-# ggsave(paste0("outputs/ndvi_harmonic_response_id", which_buffalo, ".png"),
-#        width = 120, height = 100, units = "mm", dpi = 600)
+max_abs_colour <- max(abs(range(ndvi_hour_values$ssf_linear_log_rss)))
+
+# plot the selection surface
+ggplot(data = ndvi_hour_values,
+       aes(x = hour, y = ndvi, fill = ssf_linear_log_rss)) +
+  geom_raster() +
+  labs(title = "harmonics(ndvi)", x = "Hour", y = "NDVI", fill = "log-RSS") +
+  geom_contour(aes(z = ssf_linear_log_rss), colour = "black") +
+  scale_fill_distiller(palette = "RdBu", type = "div",
+    limits = c(-max_abs_colour, max_abs_colour)) +   # symmetric around 0) 
+  coord_cartesian(expand = FALSE) +
+  theme_bw() 
+
+ggsave(paste0("outputs/ndvi_harmonic_response_id", which_buffalo, ".png"),
+       width = 120, height = 60, units = "mm", dpi = 600)
 
 ```
 
@@ -800,64 +862,64 @@ ssf_harmonics_quadratic <- amt::fit_issf(case_ ~
                                data = buffalo_ssf_data)
 
 summary(ssf_harmonics_quadratic)
+AIC(ssf_harmonics_quadratic)
 
 ```
 
-### Pull out the coefficent across time
+### Pull out the coefficents across time
 
 ```{r}
 
-# this one doesn't make sense as the linear and quadrative coefs shouldn't be added
-
 # ndvi_harmonic_coef_reconstruction <- function(ssf_harmonic_model, hour) {
-#   
+# 
 #   # linear terms
 #   ndvi_coef <- ssf_harmonic_model$model$coefficients["ndvi"]
 #   ndvi_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_1_hour"]
 #   ndvi_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_1_hour"]
 #   ndvi_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_2_hour"]
 #   ndvi_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_2_hour"]
-#   
+# 
 #   # quadratic terms
 #   ndvi_sq_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq"]
 #   ndvi_sq_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:sin_1_hour"]
 #   ndvi_sq_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:cos_1_hour"]
 #   ndvi_sq_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:sin_2_hour"]
 #   ndvi_sq_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:cos_2_hour"]
-#   
+# 
 #   sin_1_hour <- sin(2 * pi * hour / 24)
 #   cos_1_hour <- cos(2 * pi * hour / 24)
 #   sin_2_hour <- sin(4 * pi * hour / 24)
 #   cos_2_hour <- cos(4 * pi * hour / 24)
-#   
-#   linear_part <- ndvi_coef + 
-#     sin_1_hour * ndvi_sin_1_coef + 
-#     cos_1_hour * ndvi_cos_1_coef + 
-#     sin_2_hour * ndvi_sin_2_coef + 
+# 
+#   linear_part <- ndvi_coef +
+#     sin_1_hour * ndvi_sin_1_coef +
+#     cos_1_hour * ndvi_cos_1_coef +
+#     sin_2_hour * ndvi_sin_2_coef +
 #     cos_2_hour * ndvi_cos_2_coef
-#   
-#   ndvi_sq_value <- ndvi_value^2
-#   
-#   quadratic_part <- ndvi_sq_coef + 
-#     sin_1_hour * ndvi_sq_sin_1_coef + 
-#     cos_1_hour * ndvi_sq_cos_1_coef + 
-#     sin_2_hour * ndvi_sq_sin_2_coef + 
+# 
+#   quadratic_part <- ndvi_sq_coef +
+#     sin_1_hour * ndvi_sq_sin_1_coef +
+#     cos_1_hour * ndvi_sq_cos_1_coef +
+#     sin_2_hour * ndvi_sq_sin_2_coef +
 #     cos_2_hour * ndvi_sq_cos_2_coef
 #   
-#   return(as.numeric(linear_part + quadratic_part))
-#   
+#   return(c(
+#     linear_coef = as.numeric(linear_part),
+#     quadratic_coef = as.numeric(quadratic_part)
+#   ))
+# 
 # }
 # 
 # ndvi_temporal_coef_df <- data.frame(hour = seq(0, 23, length.out = 100))
 # 
-# ndvi_temporal_coef_df$ndvi_coef <- sapply(ndvi_temporal_coef_df$hour, 
-#                                             ndvi_harmonic_coef_reconstruction, 
+# ndvi_temporal_coef_df$ndvi_coef <- sapply(ndvi_temporal_coef_df$hour,
+#                                             ndvi_harmonic_coef_reconstruction,
 #                                             ssf_harmonic_model = ssf_harmonics_quadratic)
 # 
 # # plot the response curve
 # ggplot(data = ndvi_temporal_coef_df) +
 #   geom_hline(yintercept = 0, linetype = "dashed", colour = "grey") +
-#   geom_line(aes(x = hour, y = ndvi_coef), 
+#   geom_line(aes(x = hour, y = ndvi_coef),
 #             colour = "black") +
 #   labs(x = "Hour", y = "NDVI coefficient") +
 #   theme_classic()
@@ -931,8 +993,21 @@ ggplot(data = ndvi_hour_values) +
   scale_colour_viridis_c() +
   theme_classic() 
 
-# ggsave(paste0("outputs/ndvi_harmonic_response_id", which_buffalo, ".png"),
-#        width = 120, height = 100, units = "mm", dpi = 600)
+max_abs_colour <- max(abs(range(ndvi_hour_values$ssf_quadratic_log_rss)))
+
+# plot the selection surface
+ggplot(data = ndvi_hour_values,
+       aes(x = hour, y = ndvi, fill = ssf_quadratic_log_rss)) +
+  geom_raster() +
+  labs(title = "harmonics(hour + hour^2)", x = "Hour", y = "NDVI", fill = "log-RSS") +
+  geom_contour(aes(z = ssf_quadratic_log_rss), colour = "black") +
+  scale_fill_distiller(palette = "RdBu", type = "div",
+                       limits = c(-max_abs_colour, max_abs_colour)) +
+  coord_cartesian(expand = FALSE) +
+  theme_bw() 
+
+ggsave(paste0("outputs/ndvi_harmonic_quadratic_response_id", which_buffalo, ".png"),
+       width = 120, height = 60, units = "mm", dpi = 600)
 
 ```
 
@@ -949,6 +1024,7 @@ ssf_gam_temporal <- mgcv::gam(cbind(times, step_id_) ~
                      weight = case_)
 
 summary(ssf_gam_temporal)
+AIC(ssf_gam_temporal)
 
 gam_smooths <- smooth_estimates(ssf_gam_temporal)
 
@@ -956,11 +1032,20 @@ gratia::draw(ssf_gam_temporal, rug = FALSE)
 
 ```
 
-## Fit 2D GAM smooth
-
 ### Prepare prediction data
 
 ```{r}
+
+
+
+```
+
+### Response curve
+
+```{r}
+
+ndvi_hour_values <- expand.grid(ndvi = ndvi_values, 
+                                hour = seq(0, 23, length.out = length(ndvi_values)))
 
 ndvi_hour_values <- ndvi_hour_values %>% mutate(
   sl_ = 0,
@@ -968,11 +1053,7 @@ ndvi_hour_values <- ndvi_hour_values %>% mutate(
   cos_ta = 0
 )
 
-```
-
-### Response curve
-
-```{r}
+ndvi_hour_values
 
 # Get predictions on log-scale with standard errors
 predictions <- predict(ssf_gam_temporal, 
@@ -981,34 +1062,101 @@ predictions <- predict(ssf_gam_temporal,
                       se.fit = TRUE)
 
 # Extract log RSS and standard errors
-log_rss <- predictions$fit
-se_log_rss <- predictions$se.fit
+gam_log_rss <- predictions$fit
+gam_se_log_rss <- predictions$se.fit
 
 # Calculate confidence intervals on log-scale
-log_rss_lower <- log_rss - 1.96 * se_log_rss
-log_rss_upper <- log_rss + 1.96 * se_log_rss
+gam_log_rss_lower <- gam_log_rss - 1.96 * gam_se_log_rss
+gam_log_rss_upper <- gam_log_rss + 1.96 * gam_se_log_rss
 
 # Transform to RSS scale
-rss <- exp(log_rss)
-rss_lower <- exp(log_rss_lower)
-rss_upper <- exp(log_rss_upper)
-
-# # Create your dataframe
-# ndvi_coef_df <- data.frame(
-#   ndvi_values = ndvi_values,
-#   log_rss = log_rss,
-#   log_rss_lower = log_rss_lower,
-#   log_rss_upper = log_rss_upper,
-#   rss = rss,
-#   rss_lower = rss_lower,
-#   rss_upper = rss_upper
-# )
+rss <- exp(gam_log_rss)
+rss_lower <- exp(gam_log_rss_lower)
+rss_upper <- exp(gam_log_rss_upper)
 
 ndvi_hour_values <- ndvi_hour_values %>% mutate(
-  gam_log_rss = as.numeric(predictions$fit),
+  gam_log_rss = gam_log_rss,
   gam_rss = exp(gam_log_rss),
-  gam_log_rss_lower = as.numeric(log_rss_lower),
-  gam_log_rss_upper = as.numeric(log_rss_upper)
+  gam_log_rss_lower = as.numeric(gam_log_rss_lower),
+  gam_log_rss_upper = as.numeric(gam_log_rss_upper)
+)
+
+max_abs_colour <- max(abs(range(ndvi_hour_values$gam_log_rss)))
+
+# plot the selection surface
+ggplot(data = ndvi_hour_values,
+       aes(x = hour, y = ndvi, fill = gam_log_rss)) +
+  geom_raster() +
+  labs(title = "s(hour, by = ndvi)", x = "Hour", y = "NDVI", fill = "log-RSS") +
+  geom_contour(aes(z = gam_log_rss), colour = "black") +
+  scale_fill_distiller(palette = "RdBu", type = "div",
+                       limits = c(-max_abs_colour, max_abs_colour)) +
+  coord_cartesian(expand = FALSE) +
+  theme_bw() 
+
+ggsave(paste0("outputs/ndvi_linear_gam_response_id", which_buffalo, ".png"),
+       width = 120, height = 60, units = "mm", dpi = 600)
+
+```
+
+## Fit 2D GAM smooth
+
+```{r}
+
+# fit an ssf gam model
+ssf_gam2d_temporal2 <- mgcv::gam(cbind(times, step_id_) ~ 
+                                  te(hour, ndvi, bs = c("cc", "cr"), k = c(8, 10)) +
+                       sl_ + log_sl + cos_ta,
+                     data = buffalo_ssf_data,
+                     family = cox.ph,
+                     weight = case_)
+
+summary(ssf_gam2d_temporal2)
+AIC(ssf_gam2d_temporal2)
+
+```
+
+
+```{r}
+
+gratia::draw(ssf_gam2d_temporal2, rug = FALSE)
+
+gam_smooths <- smooth_estimates(ssf_gam2d_temporal2)
+filtered_gam_smooths <- gam_smooths %>% filter(ndvi > 0.14 & ndvi < 0.6)
+
+gratia::draw(filtered_gam_smooths) +
+  coord_cartesian(expand = FALSE) +
+  labs(x = "Hour", y = "NDVI") +
+  theme_bw()
+
+
+ndvi_hour_values <- expand.grid(ndvi = ndvi_values, 
+                                hour = seq(0, 23, length.out = length(ndvi_values)))
+
+ndvi_hour_values <- ndvi_hour_values %>% mutate(
+  sl_ = 0,
+  log_sl = 0,
+  cos_ta = 0
+)
+
+predictions <- predict(ssf_gam2d_temporal2, 
+                      newdata = ndvi_hour_values, 
+                      type = "link",  # log-scale
+                      se.fit = TRUE)
+
+# Extract log RSS and standard errors
+gam_log_rss <- predictions$fit
+gam_se_log_rss <- predictions$se.fit
+
+# Calculate confidence intervals on log-scale
+gam_log_rss_lower <- gam_log_rss - 1.96 * gam_se_log_rss
+gam_log_rss_upper <- gam_log_rss + 1.96 * gam_se_log_rss
+
+ndvi_hour_values <- ndvi_hour_values %>% mutate(
+  gam_log_rss = gam_log_rss,
+  gam_rss = exp(gam_log_rss),
+  gam_log_rss_lower = as.numeric(gam_log_rss_lower),
+  gam_log_rss_upper = as.numeric(gam_log_rss_upper)
 )
 
 # plot the selection surface
@@ -1018,7 +1166,323 @@ ggplot(data = ndvi_hour_values) +
   scale_colour_viridis_c() +
   theme_classic() 
 
-# ggsave(paste0("outputs/ndvi_harmonic_response_id", which_buffalo, ".png"),
-#        width = 120, height = 100, units = "mm", dpi = 600)
+
+gratia::draw(filtered_gam_smooths) +
+  coord_cartesian(expand = FALSE) +
+  labs(x = "Hour", y = "NDVI") +
+  theme_bw()
+
+
+max_abs_colour <- max(abs(range(ndvi_hour_values$gam_log_rss)))
+
+# plot the selection surface
+ggplot(data = ndvi_hour_values,
+       aes(x = hour, y = ndvi, fill = gam_log_rss)) +
+  geom_raster() +
+  labs(title = "te(hour, ndvi)", x = "Hour", y = "NDVI", fill = "log-RSS") +
+  geom_contour(aes(z = gam_log_rss), colour = "black") +
+  scale_fill_distiller(palette = "RdBu", type = "div",
+                       limits = c(-max_abs_colour, max_abs_colour)) +
+  coord_cartesian(expand = FALSE) +
+  theme_bw() 
+
+ggsave(paste0("outputs/ndvi_tensor_gam_response_id", which_buffalo, ".png"),
+       width = 120, height = 60, units = "mm", dpi = 600)
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+ggplot(data = gam_smooths %>% filter(ndvi > 0.14 & ndvi < 0.6),
+       aes(x = hour, y = ndvi, z = .estimate)) +
+  geom_contour_filled() +
+  labs(x = "Hour", y = "NDVI", fill = "Effect") +
+  coord_cartesian(expand = FALSE) +
+  theme_minimal()
+
+
+filtered_gam_smooths <- gam_smooths %>% filter(ndvi > 0.14 & ndvi < 0.6)
+
+ggplot(data = filtered_gam_smooths,
+       aes(hour, ndvi)) +
+  geom_contour_filled(aes(z = .estimate)) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate > 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "black", alpha = 1) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate < 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "red", alpha = 1) +
+  # scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0) +
+  scale_fill_viridis_d(option = "D") +
+  labs(x = "Hour", y = "NDVI", fill = "Effect") +
+  coord_cartesian(expand = FALSE) +
+  theme_bw()
+
+
+ggplot(data = filtered_gam_smooths,
+       aes(hour, ndvi)) +
+  geom_raster(aes(fill = .estimate), interpolate = TRUE) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate > 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "black", alpha = 1) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate < 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "red", alpha = 1) +
+  # scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0) +
+  scale_fill_viridis_c(option = "D") +
+  labs(x = "Hour", y = "NDVI", fill = "Effect") +
+  coord_cartesian(expand = FALSE) +
+  theme_bw()
+
+```
+
+
+
+```{r}
+
+# fit an ssf gam model
+ssf_gam2d_temporal <- mgcv::gam(cbind(times, step_id_) ~ 
+                       te(hour, ndvi) +
+                       sl_ + log_sl + cos_ta,
+                     data = buffalo_ssf_data,
+                     family = cox.ph,
+                     weight = case_)
+
+summary(ssf_gam2d_temporal)
+
+gam_smooths <- smooth_estimates(ssf_gam2d_temporal)
+
+filtered_gam_smooths <- gam_smooths %>% filter(ndvi > 0.14 & ndvi < 0.6)
+
+gratia::draw(filtered_gam_smooths) +
+  coord_cartesian(expand = FALSE) +
+  labs(x = "Hour", y = "NDVI") +
+  theme_bw()
+
+
+filtered_gam_smooths <- gam_smooths %>% filter(ndvi > 0.14 & ndvi < 0.6)
+
+ggplot(data = filtered_gam_smooths,
+       aes(hour, ndvi)) +
+  geom_contour_filled(aes(z = .estimate)) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate > 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "black", alpha = 1) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate < 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "red", alpha = 1) +
+  # scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0) +
+  scale_fill_viridis_d(option = "D") +
+  labs(x = "Hour", y = "NDVI", fill = "Effect") +
+  coord_cartesian(expand = FALSE) +
+  theme_bw()
+
+
+ggplot(data = filtered_gam_smooths,
+       aes(hour, ndvi)) +
+  geom_raster(aes(fill = .estimate), interpolate = TRUE) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate > 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "black", alpha = 1) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate < 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "red", alpha = 1) +
+  # scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0) +
+  scale_fill_viridis_c(option = "D") +
+  labs(x = "Hour", y = "NDVI", fill = "Effect") +
+  coord_cartesian(expand = FALSE) +
+  theme_bw()
+
+```
+
+
+```{r}
+
+# fit an ssf gam model
+ssf_gam2d_temporal3 <- mgcv::gam(cbind(times, step_id_) ~ 
+                                  te(hour, ndvi, bs = c("cc", "tp"), k = c(8, 10)) +
+                       sl_ + log_sl + cos_ta,
+                     data = buffalo_ssf_data,
+                     family = cox.ph,
+                     weight = case_)
+
+summary(ssf_gam2d_temporal3)
+
+gratia::draw(ssf_gam2d_temporal3, rug = FALSE)
+
+gam_smooths <- smooth_estimates(ssf_gam2d_temporal3)
+filtered_gam_smooths <- gam_smooths %>% filter(ndvi > 0.14 & ndvi < 0.6)
+
+gratia::draw(filtered_gam_smooths) +
+  coord_cartesian(expand = FALSE) +
+  labs(x = "Hour", y = "NDVI") +
+  theme_bw()
+
+
+
+filtered_gam_smooths <- gam_smooths %>% filter(ndvi > 0.14 & ndvi < 0.6)
+
+# Bin into 11 equal-width intervals (you could also use quantile bins)
+filtered_gam_smooths <- filtered_gam_smooths %>%
+  mutate(estimate_bin = cut(.estimate, breaks = 11, include.lowest = TRUE))
+
+# Get 11-colour diverging palette, centred at 0
+palette <- brewer.pal(11, "RdBu")  # ensures blue = high, red = low
+palette <- rev(brewer.pal(11, "RdBu"))  # ensures blue = low, red = high
+
+ggplot(data = filtered_gam_smooths,
+       aes(hour, ndvi)) +
+  
+  geom_contour_filled(aes(z = .estimate)) +
+  # geom_raster(aes(fill = .estimate), interpolate = TRUE) +
+  
+  # scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0) +
+  
+  # scale_fill_gradient2(
+  #   low = brewer.pal(11, "RdBu")[11],  # blue
+  #   mid = "white",
+  #   high = brewer.pal(11, "RdBu")[1],  # red
+  #   midpoint = 0,                      # centre at 0
+  #   name = "Value"
+  # ) +
+  
+  scale_fill_manual(
+    values = palette,
+    name = "Binned z"
+  ) +
+  
+  # scale_fill_viridis_d(option = "D") +
+  
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate > 0),
+               aes(z = .estimate), binwidth = 0.5,
+               colour = "black", alpha = 1) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate < 0),
+               aes(z = .estimate), binwidth = 0.5,
+               colour = "red", alpha = 1) +
+  labs(x = "Hour", y = "NDVI", fill = "Effect") +
+  coord_cartesian(expand = FALSE) +
+  theme_bw()
+
+
+ggplot(data = filtered_gam_smooths,
+       aes(hour, ndvi)) +
+  geom_raster(aes(fill = .estimate), interpolate = TRUE) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate > 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "black", alpha = 1) +
+  geom_contour(data =  filtered_gam_smooths %>% filter(.estimate < 0),
+               aes(z = .estimate), binwidth = 0.25,
+               colour = "red", alpha = 1) +
+  # scale_fill_gradient2(low = "red", mid = "white", high = "blue", midpoint = 0) +
+  scale_fill_viridis_c(option = "D") +
+  labs(x = "Hour", y = "NDVI", fill = "Effect") +
+  coord_cartesian(expand = FALSE) +
+  theme_bw()
+
+
+```
+
+
+```{r}
+
+# fit an ssf gam model
+ssf_gam2d_temporal4 <- mgcv::gam(cbind(times, step_id_) ~ 
+                                   s(hour, bs = "cc", k = 8) + 
+                                   s(ndvi, k = 10) + 
+                                   ti(hour, ndvi, bs = c("cc", "cr"), k = c(8, 10)) +
+                       sl_ + log_sl + cos_ta,
+                     data = buffalo_ssf_data,
+                     family = cox.ph,
+                     weight = case_)
+
+summary(ssf_gam2d_temporal4)
+
+gam_smooths <- smooth_estimates(ssf_gam2d_temporal4)
+
+gratia::draw(ssf_gam2d_temporal4, rug = FALSE)
+
+# main effects
+draw(ssf_gam2d_temporal4, select = "s(hour)", rug = FALSE)
+draw(ssf_gam2d_temporal4, select = "s(ndvi)", rug = FALSE)
+
+# the pure interaction surface
+draw(ssf_gam2d_temporal4, select = "ti(hour,ndvi)", rug = FALSE)
+
+
+# Evaluate the interaction surface on a grid
+E <- smooth_estimates(ssf_gam2d_temporal4, smooth = "ti(hour,ndvi)", n = 80)
+
+ggplot(E, aes(x = hour, y = ndvi, z = .estimate)) +
+  geom_contour_filled() +
+  labs(x = "Hour", y = "NDVI", fill = "Effect") +
+  theme_minimal()
+
+```
+
+
+
+```{r}
+
+# fit an ssf gam model
+ssf_gam2d_temporal_hour_int <- mgcv::gam(cbind(times, step_id_) ~ 
+                                   # s(hour, bs = "cc", k = 8) + 
+                                   s(ndvi, k = 10) + 
+                                   ti(hour, ndvi, bs = c("cc", "cr"), k = c(8, 10)) +
+                       sl_ + log_sl + cos_ta,
+                     data = buffalo_ssf_data,
+                     family = cox.ph,
+                     weight = case_)
+
+summary(ssf_gam2d_temporal_hour_int)
+
+gam_smooths <- smooth_estimates(ssf_gam2d_temporal_hour_int)
+
+gratia::draw(ssf_gam2d_temporal_hour_int, rug = FALSE)
+
+# main effects
+# draw(ssf_gam2d_temporal_hour_int, select = "s(hour)", rug = FALSE)
+draw(ssf_gam2d_temporal_hour_int, select = "s(ndvi)", rug = FALSE) +
+  scale_y_continuous(limits = c(-2, 1))
+
+# the pure interaction surface
+draw(ssf_gam2d_temporal_hour_int, select = "ti(hour,ndvi)", rug = FALSE)
+
+```
+
+
+```{r}
+
+# fit an ssf gam model
+ssf_gam2d_temporal5 <- mgcv::gam(cbind(times, step_id_) ~ 
+                                   s(ndvi, k = 10) +
+                                   s(hour, by = ndvi, bs = "cc", k = 8) + 
+                       sl_ + log_sl + cos_ta,
+                     data = buffalo_ssf_data,
+                     family = cox.ph,
+                     weight = case_)
+
+summary(ssf_gam2d_temporal5)
+
+gam_smooths <- smooth_estimates(ssf_gam2d_temporal5)
+
+gratia::draw(ssf_gam2d_temporal5, rug = FALSE)
+
+
+
+```
+
+
+

@@ -2,6 +2,8 @@
 title: "Predictive Movement Ecology"
 ---
 
-This is a Quarto website.
+This website accompanies the paper 'Patterns to predictions: movement ecology as a predictive science'. 
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+The tabs at the top contain different sections, which each have multiple pages that can be accessed via the sidebar on the left.
+
+The **Case Study** section contains the examples in the paper of African wild dogs (*Lycaon pictus*). 
