@@ -1,0 +1,191 @@
+---
+title: "SSF Formulations"
+author: "Scott Forrest"
+date: "`r Sys.Date()`"
+execute: 
+  cache: false
+bibliography: paperpile.bib
+toc: true
+number-sections: false
+format: 
+  html:
+    # self-contained: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    code-line-numbers: true
+    code-overflow: scroll
+    fig-format: png
+    fig-dpi: 300
+  pdf:
+    geometry: 
+      - top=30mm
+      - left=30mm
+editor:
+  source
+abstract: |
+  In this script we demonstrate different approaches to including covariates in an SSF model. 
+---
+
+# Load required packages
+
+```{r}
+#| warning=FALSE
+
+library(tidyverse)
+packages <- c("amt", "sf", "terra", "RColorBrewer")
+walk(packages, require, character.only = T)
+
+```
+
+# Import data and clean
+
+```{r}
+
+buffalo_data <- read_csv("data/buffalo.csv") 
+
+# remove individuals that have poor data quality or less than about 3 months of data. 
+# The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exclude it
+buffalo_data <- buffalo_data %>% filter(!node %in% c("2014.GPS_COMPACT copy.csv", 
+                                           2029, 2043, 2265, 2284, 2346))
+
+buffalo_data <- buffalo_data %>%  
+  group_by(node) %>% 
+  arrange(DateTime, .by_group = T) %>% 
+  distinct(DateTime, .keep_all = T) %>% 
+  arrange(node) %>% 
+  mutate(ID = node)
+
+buffalo_clean <- buffalo_data[, c(12, 2, 4, 3)]
+colnames(buffalo_clean) <- c("id", "time", "lon", "lat")
+attr(buffalo_clean$time, "tzone") <- "Australia/Queensland"
+head(buffalo_clean)
+tz(buffalo_clean$time)
+
+buffalo_ids <- unique(buffalo_clean$id)
+
+```
+
+# Create a step object 
+
+Use the `amt` package to create a trajectory object from the cleaned data. 
+
+```{r}
+#| label: make_track
+#| code-summary: "Create a trajectory object"
+
+buffalo_all <- buffalo_clean %>% mk_track(id = id,
+                                           lon,
+                                           lat, 
+                                           time, 
+                                           all_cols = T,
+                                           crs = 4326) %>% 
+  transform_coords(crs_to = 3112, crs_from = 4326) # Transformation to GDA94 / 
+# Geoscience Australia Lambert (https://epsg.io/3112)
+
+```
+
+## Plot the data spatially
+
+```{r}
+
+buffalo_all %>%
+  ggplot(aes(x = x_, y = y_, colour = id)) +
+  geom_point(alpha = 0.5, size = 0.1) + 
+  coord_fixed() +
+  scale_x_continuous("Easting (m)") +
+  scale_y_continuous("Northing (m)") +
+  scale_colour_viridis_d() +
+  theme_classic() +
+  theme(legend.position = "right") 
+
+# ggsave("outputs/data_prep/buffalo_djelk_map.png",
+#        width = 150, height = 150, units = "mm",  dpi = 600)
+
+```
+
+## Pick out a single individual
+
+```{r}
+
+which_buffalo <- "2022" # select a single buffalo ID
+
+buffalo_id <- buffalo_all %>% filter(id == which_buffalo)
+
+buffalo_id %>%
+  ggplot(aes(x = x_, y = y_, colour = t_)) +
+  geom_point(alpha = 0.5, size = 0.1) + 
+  coord_fixed() +
+  scale_x_continuous("Easting (m)") +
+  scale_y_continuous("Northing (m)") +
+  theme_classic()
+
+```
+
+## Create steps
+
+We will just use a steps object here for now
+
+```{r}
+
+buffalo_id_steps <- buffalo_id %>% 
+  steps()
+
+head(buffalo_id_steps)
+
+```
+
+
+# Import spatial covariates
+
+Although NDVI changes over time, and we have access to monthly layers, we will just select a single month here.
+
+```{r}
+
+ndvi <- rast("mapping/ndvi_aug_2018.tif")
+plot(ndvi, main = "NDVI August 2018")
+points(buffalo_id$x_, buffalo_id$y_, col = "red", pch = 16, cex = 0.5)
+ndvi
+
+```
+
+```{r}
+
+canopy <- rast("mapping/canopy_cover.tif")
+herby <- rast("mapping/veg_herby.tif")
+slope <- rast("mapping/slope_raster.tif")
+
+spatial_covs <- c(ndvi, canopy, herby, slope)
+names(spatial_covs) <- c("ndvi", "canopy", "herby", "slope")
+plot(spatial_covs)
+
+```
+
+## Extract covariate values at the end of each step
+
+```{r}
+
+buffalo_id_steps <- buffalo_id_steps %>% 
+  extract_covariates(spatial_covs, where = "end")
+
+head(buffalo_id_steps)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+### References
+
+::: {#refs}
+:::
+
