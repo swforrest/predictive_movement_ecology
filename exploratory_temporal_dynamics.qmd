@@ -33,7 +33,7 @@ abstract: |
 #| warning=FALSE
 
 library(tidyverse)
-packages <- c("amt", "sf", "terra", "RColorBrewer")
+packages <- c("amt", "sf", "terra", "RColorBrewer", "leaflet")
 walk(packages, require, character.only = T)
 
 ```
@@ -66,9 +66,9 @@ buffalo_ids <- unique(buffalo_clean$id)
 
 ```
 
-# Create a step object 
+# Create a step object
 
-Use the `amt` package to create a trajectory object from the cleaned data. 
+Use the `amt` package to create a trajectory object from the cleaned data.
 
 ```{r}
 #| label: make_track
@@ -104,6 +104,27 @@ buffalo_all %>%
 
 ```
 
+## Show data on a satellite basemap
+
+```{r}
+#| message: false
+#| warning: false
+
+# Use the original longitude/latitude data for mapping
+leaflet(data = buffalo_clean) %>%
+  addProviderTiles(providers$Esri.WorldImagery) %>%
+  addCircleMarkers(
+    lng = ~lon, lat = ~lat,
+    color = "red", radius = 2, opacity = 0.5,
+    popup = ~paste("ID:", id, "<br>", "Time:", time)
+  ) %>%
+  addLayersControl(
+    baseGroups = c("Satellite"),
+    options = layersControlOptions(collapsed = TRUE)
+  )
+
+```
+
 ## Pick out a single individual
 
 ```{r}
@@ -134,7 +155,6 @@ buffalo_id_steps <- buffalo_id %>%
 head(buffalo_id_steps)
 
 ```
-
 
 # Import spatial covariates
 
@@ -172,20 +192,41 @@ head(buffalo_id_steps)
 
 ```
 
+## Prepare data for extracting covariate information
 
+```{r}
 
+buffalo_id_steps <- buffalo_id_steps %>% 
+  mutate(t1_ = lubridate::with_tz(buffalo_id_steps$t1_, tzone = "Australia/Darwin"),
+         t2_ = lubridate::with_tz(buffalo_id_steps$t2_, tzone = "Australia/Darwin"))
 
+buffalo_id_steps <- buffalo_id_steps %>%
+  mutate(
+    # id_num = as.numeric(factor(id)), 
+        #  step_id = step_id_, 
+         x1 = x1_, x2 = x2_, 
+         y1 = y1_, y2 = y2_, 
+         t1 = t1_, 
+         t1_rounded = round_date(t1_, "hour"), 
+         hour_t1 = hour(t1_rounded),
+         t2 = t2_, 
+         t2_rounded = round_date(t2_, "hour"), 
+         hour_t2 = hour(t2_rounded),
+         hour = ifelse(hour_t2 == 0, 24, hour_t2),
+         yday = yday(t1_),
+         year = year(t1_), 
+         month = month(t1_),
+         sl = sl_, 
+         log_sl = log(sl_), 
+         ta = ta_, 
+         cos_ta = cos(ta_),
+         canopy_01 = canopy/100)
 
+head(buffalo_id_steps) 
 
-
-
-
-
-
-
+```
 
 ### References
 
 ::: {#refs}
 :::
-

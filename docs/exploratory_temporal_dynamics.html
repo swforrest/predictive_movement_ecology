@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.24">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Scott Forrest">
+<meta name="dcterms.date" content="2025-09-15">
+
+<title>SSF Formulations – Predictive Movement Ecology</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./figures/next-step.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dc55a5b9e770e841cd82e46aadbfb9b0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Predictive Movement Ecology</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./case_study.html"> 
+<span class="menu-text">Case Study</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./tutorials.html"> 
+<span class="menu-text">Helpful Scripts and Tutorials</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/swforrest/predictive_movement_ecology"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load-required-packages" id="toc-load-required-packages" class="nav-link active" data-scroll-target="#load-required-packages">Load required packages</a></li>
+  <li><a href="#import-data-and-clean" id="toc-import-data-and-clean" class="nav-link" data-scroll-target="#import-data-and-clean">Import data and clean</a></li>
+  <li><a href="#create-a-step-object" id="toc-create-a-step-object" class="nav-link" data-scroll-target="#create-a-step-object">Create a step object</a>
+  <ul class="collapse">
+  <li><a href="#plot-the-data-spatially" id="toc-plot-the-data-spatially" class="nav-link" data-scroll-target="#plot-the-data-spatially">Plot the data spatially</a></li>
+  <li><a href="#pick-out-a-single-individual" id="toc-pick-out-a-single-individual" class="nav-link" data-scroll-target="#pick-out-a-single-individual">Pick out a single individual</a></li>
+  <li><a href="#create-steps" id="toc-create-steps" class="nav-link" data-scroll-target="#create-steps">Create steps</a></li>
+  </ul></li>
+  <li><a href="#import-spatial-covariates" id="toc-import-spatial-covariates" class="nav-link" data-scroll-target="#import-spatial-covariates">Import spatial covariates</a>
+  <ul class="collapse">
+  <li><a href="#extract-covariate-values-at-the-end-of-each-step" id="toc-extract-covariate-values-at-the-end-of-each-step" class="nav-link" data-scroll-target="#extract-covariate-values-at-the-end-of-each-step">Extract covariate values at the end of each step</a></li>
+  <li><a href="#prepare-data-for-extracting-covariate-information" id="toc-prepare-data-for-extracting-covariate-information" class="nav-link" data-scroll-target="#prepare-data-for-extracting-covariate-information">Prepare data for extracting covariate information</a>
+  <ul class="collapse">
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="exploratory_temporal_dynamics.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">SSF Formulations</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Scott Forrest </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 15, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>In this script we demonstrate different approaches to including covariates in an SSF model.</p>
+  </div>
+</div>
+
+
+</header>
+
+
+<section id="load-required-packages" class="level1">
+<h1>Load required packages</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2"></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"amt"</span>, <span class="st">"sf"</span>, <span class="st">"terra"</span>, <span class="st">"RColorBrewer"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">walk</span>(packages, require, <span class="at">character.only =</span> T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="import-data-and-clean" class="level1">
+<h1>Import data and clean</h1>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>buffalo_data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/buffalo.csv"</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 133161 Columns: 11
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "," chr
+(2): node, dates dbl (7): ...1, lat, lon, height, accuracy, heading, speed dttm
+(2): timestamp, DateTime
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># remove individuals that have poor data quality or less than about 3 months of data. </span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="co"># The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exclude it</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>buffalo_data <span class="ot">&lt;-</span> buffalo_data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>node <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"2014.GPS_COMPACT copy.csv"</span>, </span>
+<span id="cb4-4"><a href="#cb4-4"></a>                                           <span class="dv">2029</span>, <span class="dv">2043</span>, <span class="dv">2265</span>, <span class="dv">2284</span>, <span class="dv">2346</span>))</span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a>buffalo_data <span class="ot">&lt;-</span> buffalo_data <span class="sc">%&gt;%</span>  </span>
+<span id="cb4-7"><a href="#cb4-7"></a>  <span class="fu">group_by</span>(node) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-8"><a href="#cb4-8"></a>  <span class="fu">arrange</span>(DateTime, <span class="at">.by_group =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">distinct</span>(DateTime, <span class="at">.keep_all =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-10"><a href="#cb4-10"></a>  <span class="fu">arrange</span>(node) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-11"><a href="#cb4-11"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> node)</span>
+<span id="cb4-12"><a href="#cb4-12"></a></span>
+<span id="cb4-13"><a href="#cb4-13"></a>buffalo_clean <span class="ot">&lt;-</span> buffalo_data[, <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">3</span>)]</span>
+<span id="cb4-14"><a href="#cb4-14"></a><span class="fu">colnames</span>(buffalo_clean) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"time"</span>, <span class="st">"lon"</span>, <span class="st">"lat"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="fu">attr</span>(buffalo_clean<span class="sc">$</span>time, <span class="st">"tzone"</span>) <span class="ot">&lt;-</span> <span class="st">"Australia/Queensland"</span></span>
+<span id="cb4-16"><a href="#cb4-16"></a><span class="fu">head</span>(buffalo_clean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["id"],"name":[1],"type":["chr"],"align":["left"]},{"label":["time"],"name":[2],"type":["dttm"],"align":["right"]},{"label":["lon"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["lat"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"2005","2":"2018-07-25 10:04:02.050139","3":"134.3780","4":"-12.30136"},{"1":"2005","2":"2018-07-25 11:04:23.050139","3":"134.3782","4":"-12.29955"},{"1":"2005","2":"2018-07-25 12:04:39.050139","3":"134.3778","4":"-12.29940"},{"1":"2005","2":"2018-07-25 13:04:17.050873","3":"134.3765","4":"-12.29893"},{"1":"2005","2":"2018-07-25 14:04:39.050873","3":"134.3770","4":"-12.29924"},{"1":"2005","2":"2018-07-25 15:04:27.050873","3":"134.3754","4":"-12.29897"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">tz</span>(buffalo_clean<span class="sc">$</span>time)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Australia/Queensland"</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>buffalo_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(buffalo_clean<span class="sc">$</span>id)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="create-a-step-object" class="level1">
+<h1>Create a step object</h1>
+<p>Use the <code>amt</code> package to create a trajectory object from the cleaned data.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Create a trajectory object</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>buffalo_all <span class="ot">&lt;-</span> buffalo_clean <span class="sc">%&gt;%</span> <span class="fu">mk_track</span>(<span class="at">id =</span> id,</span>
+<span id="cb8-2"><a href="#cb8-2"></a>                                           lon,</span>
+<span id="cb8-3"><a href="#cb8-3"></a>                                           lat, </span>
+<span id="cb8-4"><a href="#cb8-4"></a>                                           time, </span>
+<span id="cb8-5"><a href="#cb8-5"></a>                                           <span class="at">all_cols =</span> T,</span>
+<span id="cb8-6"><a href="#cb8-6"></a>                                           <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-7"><a href="#cb8-7"></a>  <span class="fu">transform_coords</span>(<span class="at">crs_to =</span> <span class="dv">3112</span>, <span class="at">crs_from =</span> <span class="dv">4326</span>) <span class="co"># Transformation to GDA94 / </span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co"># Geoscience Australia Lambert (https://epsg.io/3112)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="plot-the-data-spatially" class="level2">
+<h2 class="anchored" data-anchor-id="plot-the-data-spatially">Plot the data spatially</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>buffalo_all <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_, <span class="at">y =</span> y_, <span class="at">colour =</span> id)) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">"Easting (m)"</span>) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Northing (m)"</span>) <span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a>  <span class="fu">scale_colour_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="exploratory_temporal_dynamics_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># ggsave("outputs/data_prep/buffalo_djelk_map.png",</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="co">#        width = 150, height = 150, units = "mm",  dpi = 600)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="pick-out-a-single-individual" class="level2">
+<h2 class="anchored" data-anchor-id="pick-out-a-single-individual">Pick out a single individual</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>which_buffalo <span class="ot">&lt;-</span> <span class="st">"2022"</span> <span class="co"># select a single buffalo ID</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a>buffalo_id <span class="ot">&lt;-</span> buffalo_all <span class="sc">%&gt;%</span> <span class="fu">filter</span>(id <span class="sc">==</span> which_buffalo)</span>
+<span id="cb11-4"><a href="#cb11-4"></a></span>
+<span id="cb11-5"><a href="#cb11-5"></a>buffalo_id <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_, <span class="at">y =</span> y_, <span class="at">colour =</span> t_)) <span class="sc">+</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb11-8"><a href="#cb11-8"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">"Easting (m)"</span>) <span class="sc">+</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Northing (m)"</span>) <span class="sc">+</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a>  <span class="fu">theme_classic</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="exploratory_temporal_dynamics_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="create-steps" class="level2">
+<h2 class="anchored" data-anchor-id="create-steps">Create steps</h2>
+<p>We will just use a steps object here for now</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2"></a>  <span class="fu">steps</span>()</span>
+<span id="cb12-3"><a href="#cb12-3"></a></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="fu">head</span>(buffalo_id_steps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["x1_"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["x2_"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["y1_"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["y2_"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sl_"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["direction_p"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["ta_"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["t1_"],"name":[8],"type":["dttm"],"align":["right"]},{"label":["t2_"],"name":[9],"type":["dttm"],"align":["right"]},{"label":["dt_"],"name":[10],"type":["drtn"],"align":["right"]}],"data":[{"1":"27929.00","2":"27930.65","3":"-1421151","4":"-1421156","5":"5.948324","6":"-1.29081536","7":"NA","8":"2018-07-25 10:35:16.000000","9":"2018-07-25 11:36:05.000000","10":"60.81667 mins","_rn_":"1"},{"1":"27930.65","2":"27938.07","3":"-1421156","4":"-1421157","5":"7.421567","6":"-0.01873737","7":"1.2720780","8":"2018-07-25 11:36:05.000000","9":"2018-07-25 12:34:52.050384","10":"58.78417 mins","_rn_":"2"},{"1":"27938.07","2":"27934.40","3":"-1421157","4":"-1421155","5":"3.892796","6":"2.79643059","7":"2.8151680","8":"2018-07-25 12:34:52.050384","9":"2018-07-25 13:34:14.050384","10":"59.36667 mins","_rn_":"3"},{"1":"27934.40","2":"27938.00","3":"-1421155","4":"-1421160","5":"5.978187","6":"-0.92439998","7":"2.5623547","8":"2018-07-25 13:34:14.050384","9":"2018-07-25 14:34:08.050384","10":"59.90000 mins","_rn_":"4"},{"1":"27938.00","2":"27938.18","3":"-1421160","4":"-1421157","5":"3.368931","6":"1.51931451","7":"2.4437145","8":"2018-07-25 14:34:08.050384","9":"2018-07-25 16:34:33.050628","10":"120.41667 mins","_rn_":"5"},{"1":"27938.18","2":"27940.03","3":"-1421157","4":"-1421154","5":"2.915504","6":"0.88403294","7":"-0.6352816","8":"2018-07-25 16:34:33.050628","9":"2018-07-25 17:35:05.050628","10":"60.53333 mins","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="import-spatial-covariates" class="level1">
+<h1>Import spatial covariates</h1>
+<p>Although NDVI changes over time, and we have access to monthly layers, we will just select a single month here.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>ndvi <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/ndvi_aug_2018.tif"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="fu">plot</span>(ndvi, <span class="at">main =</span> <span class="st">"NDVI August 2018"</span>)</span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="fu">points</span>(buffalo_id<span class="sc">$</span>x_, buffalo_id<span class="sc">$</span>y_, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="exploratory_temporal_dynamics_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>ndvi</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>class       : SpatRaster 
+dimensions  : 2280, 2400, 1  (nrow, ncol, nlyr)
+resolution  : 25, 25  (x, y)
+extent      : 0, 60000, -1463000, -1406000  (xmin, xmax, ymin, ymax)
+coord. ref. : GDA94 / Geoscience Australia Lambert (EPSG:3112) 
+source      : ndvi_aug_2018.tif 
+name        :       ndvi 
+min value   : -0.5441047 
+max value   :  0.8086554 </code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>canopy <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/canopy_cover.tif"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2"></a>herby <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/veg_herby.tif"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3"></a>slope <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/slope_raster.tif"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4"></a></span>
+<span id="cb16-5"><a href="#cb16-5"></a>spatial_covs <span class="ot">&lt;-</span> <span class="fu">c</span>(ndvi, canopy, herby, slope)</span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="fu">names</span>(spatial_covs) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ndvi"</span>, <span class="st">"canopy"</span>, <span class="st">"herby"</span>, <span class="st">"slope"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7"></a><span class="fu">plot</span>(spatial_covs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="exploratory_temporal_dynamics_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="extract-covariate-values-at-the-end-of-each-step" class="level2">
+<h2 class="anchored" data-anchor-id="extract-covariate-values-at-the-end-of-each-step">Extract covariate values at the end of each step</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id_steps <span class="sc">%&gt;%</span> </span>
+<span id="cb17-2"><a href="#cb17-2"></a>  <span class="fu">extract_covariates</span>(spatial_covs, <span class="at">where =</span> <span class="st">"end"</span>)</span>
+<span id="cb17-3"><a href="#cb17-3"></a></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="fu">head</span>(buffalo_id_steps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["x1_"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["x2_"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["y1_"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["y2_"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sl_"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["direction_p"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["ta_"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["t1_"],"name":[8],"type":["dttm"],"align":["right"]},{"label":["t2_"],"name":[9],"type":["dttm"],"align":["right"]},{"label":["dt_"],"name":[10],"type":["drtn"],"align":["right"]},{"label":["ndvi"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["canopy"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["herby"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["slope"],"name":[14],"type":["dbl"],"align":["right"]}],"data":[{"1":"27929.00","2":"27930.65","3":"-1421151","4":"-1421156","5":"5.948324","6":"-1.29081536","7":"NA","8":"2018-07-25 10:35:16.000000","9":"2018-07-25 11:36:05.000000","10":"60.81667 mins","11":"0.4372955","12":"57.5","13":"1","14":"3.617125","_rn_":"1"},{"1":"27930.65","2":"27938.07","3":"-1421156","4":"-1421157","5":"7.421567","6":"-0.01873737","7":"1.2720780","8":"2018-07-25 11:36:05.000000","9":"2018-07-25 12:34:52.050384","10":"58.78417 mins","11":"0.4372955","12":"57.5","13":"1","14":"3.617125","_rn_":"2"},{"1":"27938.07","2":"27934.40","3":"-1421157","4":"-1421155","5":"3.892796","6":"2.79643059","7":"2.8151680","8":"2018-07-25 12:34:52.050384","9":"2018-07-25 13:34:14.050384","10":"59.36667 mins","11":"0.4372955","12":"57.5","13":"1","14":"3.617125","_rn_":"3"},{"1":"27934.40","2":"27938.00","3":"-1421155","4":"-1421160","5":"5.978187","6":"-0.92439998","7":"2.5623547","8":"2018-07-25 13:34:14.050384","9":"2018-07-25 14:34:08.050384","10":"59.90000 mins","11":"0.4372955","12":"57.5","13":"1","14":"3.617125","_rn_":"4"},{"1":"27938.00","2":"27938.18","3":"-1421160","4":"-1421157","5":"3.368931","6":"1.51931451","7":"2.4437145","8":"2018-07-25 14:34:08.050384","9":"2018-07-25 16:34:33.050628","10":"120.41667 mins","11":"0.4372955","12":"57.5","13":"1","14":"3.617125","_rn_":"5"},{"1":"27938.18","2":"27940.03","3":"-1421157","4":"-1421154","5":"2.915504","6":"0.88403294","7":"-0.6352816","8":"2018-07-25 16:34:33.050628","9":"2018-07-25 17:35:05.050628","10":"60.53333 mins","11":"0.4372955","12":"57.5","13":"1","14":"3.617125","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="prepare-data-for-extracting-covariate-information" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-data-for-extracting-covariate-information">Prepare data for extracting covariate information</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id_steps <span class="sc">%&gt;%</span> </span>
+<span id="cb18-2"><a href="#cb18-2"></a>  <span class="fu">mutate</span>(<span class="at">t1_ =</span> lubridate<span class="sc">::</span><span class="fu">with_tz</span>(buffalo_id_steps<span class="sc">$</span>t1_, <span class="at">tzone =</span> <span class="st">"Australia/Darwin"</span>),</span>
+<span id="cb18-3"><a href="#cb18-3"></a>         <span class="at">t2_ =</span> lubridate<span class="sc">::</span><span class="fu">with_tz</span>(buffalo_id_steps<span class="sc">$</span>t2_, <span class="at">tzone =</span> <span class="st">"Australia/Darwin"</span>))</span>
+<span id="cb18-4"><a href="#cb18-4"></a></span>
+<span id="cb18-5"><a href="#cb18-5"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id_steps <span class="sc">%&gt;%</span></span>
+<span id="cb18-6"><a href="#cb18-6"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb18-7"><a href="#cb18-7"></a>    <span class="co"># id_num = as.numeric(factor(id)), </span></span>
+<span id="cb18-8"><a href="#cb18-8"></a>        <span class="co">#  step_id = step_id_, </span></span>
+<span id="cb18-9"><a href="#cb18-9"></a>         <span class="at">x1 =</span> x1_, <span class="at">x2 =</span> x2_, </span>
+<span id="cb18-10"><a href="#cb18-10"></a>         <span class="at">y1 =</span> y1_, <span class="at">y2 =</span> y2_, </span>
+<span id="cb18-11"><a href="#cb18-11"></a>         <span class="at">t1 =</span> t1_, </span>
+<span id="cb18-12"><a href="#cb18-12"></a>         <span class="at">t1_rounded =</span> <span class="fu">round_date</span>(t1_, <span class="st">"hour"</span>), </span>
+<span id="cb18-13"><a href="#cb18-13"></a>         <span class="at">hour_t1 =</span> <span class="fu">hour</span>(t1_rounded),</span>
+<span id="cb18-14"><a href="#cb18-14"></a>         <span class="at">t2 =</span> t2_, </span>
+<span id="cb18-15"><a href="#cb18-15"></a>         <span class="at">t2_rounded =</span> <span class="fu">round_date</span>(t2_, <span class="st">"hour"</span>), </span>
+<span id="cb18-16"><a href="#cb18-16"></a>         <span class="at">hour_t2 =</span> <span class="fu">hour</span>(t2_rounded),</span>
+<span id="cb18-17"><a href="#cb18-17"></a>         <span class="at">hour =</span> <span class="fu">ifelse</span>(hour_t2 <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">24</span>, hour_t2),</span>
+<span id="cb18-18"><a href="#cb18-18"></a>         <span class="at">yday =</span> <span class="fu">yday</span>(t1_),</span>
+<span id="cb18-19"><a href="#cb18-19"></a>         <span class="at">year =</span> <span class="fu">year</span>(t1_), </span>
+<span id="cb18-20"><a href="#cb18-20"></a>         <span class="at">month =</span> <span class="fu">month</span>(t1_),</span>
+<span id="cb18-21"><a href="#cb18-21"></a>         <span class="at">sl =</span> sl_, </span>
+<span id="cb18-22"><a href="#cb18-22"></a>         <span class="at">log_sl =</span> <span class="fu">log</span>(sl_), </span>
+<span id="cb18-23"><a href="#cb18-23"></a>         <span class="at">ta =</span> ta_, </span>
+<span id="cb18-24"><a href="#cb18-24"></a>         <span class="at">cos_ta =</span> <span class="fu">cos</span>(ta_),</span>
+<span id="cb18-25"><a href="#cb18-25"></a>         <span class="at">canopy_01 =</span> canopy<span class="sc">/</span><span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="references" class="level3">
+<h3 class="anchored" data-anchor-id="references">References</h3>
+<div id="refs" role="list">
+
+</div>
+
+
+<!-- -->
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb19-1"><a href="#cb19-1"></a><span class="co">---</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a><span class="an">title:</span><span class="co"> "SSF Formulations"</span></span>
+<span id="cb19-3"><a href="#cb19-3"></a><span class="an">author:</span><span class="co"> "Scott Forrest"</span></span>
+<span id="cb19-4"><a href="#cb19-4"></a><span class="an">date:</span><span class="co"> "`r Sys.Date()`"</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a><span class="an">execute:</span><span class="co"> </span></span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="co">  cache: false</span></span>
+<span id="cb19-7"><a href="#cb19-7"></a><span class="an">bibliography:</span><span class="co"> paperpile.bib</span></span>
+<span id="cb19-8"><a href="#cb19-8"></a><span class="an">toc:</span><span class="co"> true</span></span>
+<span id="cb19-9"><a href="#cb19-9"></a><span class="an">number-sections:</span><span class="co"> false</span></span>
+<span id="cb19-10"><a href="#cb19-10"></a><span class="an">format:</span><span class="co"> </span></span>
+<span id="cb19-11"><a href="#cb19-11"></a><span class="co">  html:</span></span>
+<span id="cb19-12"><a href="#cb19-12"></a><span class="co">    # self-contained: true</span></span>
+<span id="cb19-13"><a href="#cb19-13"></a><span class="co">    code-fold: show</span></span>
+<span id="cb19-14"><a href="#cb19-14"></a><span class="co">    code-tools: true</span></span>
+<span id="cb19-15"><a href="#cb19-15"></a><span class="co">    df-print: paged</span></span>
+<span id="cb19-16"><a href="#cb19-16"></a><span class="co">    code-line-numbers: true</span></span>
+<span id="cb19-17"><a href="#cb19-17"></a><span class="co">    code-overflow: scroll</span></span>
+<span id="cb19-18"><a href="#cb19-18"></a><span class="co">    fig-format: png</span></span>
+<span id="cb19-19"><a href="#cb19-19"></a><span class="co">    fig-dpi: 300</span></span>
+<span id="cb19-20"><a href="#cb19-20"></a><span class="co">  pdf:</span></span>
+<span id="cb19-21"><a href="#cb19-21"></a><span class="co">    geometry: </span></span>
+<span id="cb19-22"><a href="#cb19-22"></a><span class="co">      - top=30mm</span></span>
+<span id="cb19-23"><a href="#cb19-23"></a><span class="co">      - left=30mm</span></span>
+<span id="cb19-24"><a href="#cb19-24"></a><span class="an">editor:</span></span>
+<span id="cb19-25"><a href="#cb19-25"></a><span class="co">  source</span></span>
+<span id="cb19-26"><a href="#cb19-26"></a><span class="an">abstract:</span><span class="co"> |</span></span>
+<span id="cb19-27"><a href="#cb19-27"></a><span class="co">  In this script we demonstrate different approaches to including covariates in an SSF model. </span></span>
+<span id="cb19-28"><a href="#cb19-28"></a><span class="co">---</span></span>
+<span id="cb19-29"><a href="#cb19-29"></a></span>
+<span id="cb19-30"><a href="#cb19-30"></a><span class="fu"># Load required packages</span></span>
+<span id="cb19-31"><a href="#cb19-31"></a></span>
+<span id="cb19-34"><a href="#cb19-34"></a><span class="in">```{r}</span></span>
+<span id="cb19-35"><a href="#cb19-35"></a><span class="co">#| warning=FALSE</span></span>
+<span id="cb19-36"><a href="#cb19-36"></a></span>
+<span id="cb19-37"><a href="#cb19-37"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb19-38"><a href="#cb19-38"></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"amt"</span>, <span class="st">"sf"</span>, <span class="st">"terra"</span>, <span class="st">"RColorBrewer"</span>)</span>
+<span id="cb19-39"><a href="#cb19-39"></a><span class="fu">walk</span>(packages, require, <span class="at">character.only =</span> T)</span>
+<span id="cb19-40"><a href="#cb19-40"></a></span>
+<span id="cb19-41"><a href="#cb19-41"></a><span class="in">```</span></span>
+<span id="cb19-42"><a href="#cb19-42"></a></span>
+<span id="cb19-43"><a href="#cb19-43"></a><span class="fu"># Import data and clean</span></span>
+<span id="cb19-44"><a href="#cb19-44"></a></span>
+<span id="cb19-47"><a href="#cb19-47"></a><span class="in">```{r}</span></span>
+<span id="cb19-48"><a href="#cb19-48"></a>buffalo_data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/buffalo.csv"</span>) </span>
+<span id="cb19-49"><a href="#cb19-49"></a></span>
+<span id="cb19-50"><a href="#cb19-50"></a><span class="co"># remove individuals that have poor data quality or less than about 3 months of data. </span></span>
+<span id="cb19-51"><a href="#cb19-51"></a><span class="co"># The "2014.GPS_COMPACT copy.csv" string is a duplicate of ID 2024, so we exclude it</span></span>
+<span id="cb19-52"><a href="#cb19-52"></a>buffalo_data <span class="ot">&lt;-</span> buffalo_data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span>node <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"2014.GPS_COMPACT copy.csv"</span>, </span>
+<span id="cb19-53"><a href="#cb19-53"></a>                                           <span class="dv">2029</span>, <span class="dv">2043</span>, <span class="dv">2265</span>, <span class="dv">2284</span>, <span class="dv">2346</span>))</span>
+<span id="cb19-54"><a href="#cb19-54"></a></span>
+<span id="cb19-55"><a href="#cb19-55"></a>buffalo_data <span class="ot">&lt;-</span> buffalo_data <span class="sc">%&gt;%</span>  </span>
+<span id="cb19-56"><a href="#cb19-56"></a>  <span class="fu">group_by</span>(node) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-57"><a href="#cb19-57"></a>  <span class="fu">arrange</span>(DateTime, <span class="at">.by_group =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-58"><a href="#cb19-58"></a>  <span class="fu">distinct</span>(DateTime, <span class="at">.keep_all =</span> T) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-59"><a href="#cb19-59"></a>  <span class="fu">arrange</span>(node) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-60"><a href="#cb19-60"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> node)</span>
+<span id="cb19-61"><a href="#cb19-61"></a></span>
+<span id="cb19-62"><a href="#cb19-62"></a>buffalo_clean <span class="ot">&lt;-</span> buffalo_data[, <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">3</span>)]</span>
+<span id="cb19-63"><a href="#cb19-63"></a><span class="fu">colnames</span>(buffalo_clean) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"time"</span>, <span class="st">"lon"</span>, <span class="st">"lat"</span>)</span>
+<span id="cb19-64"><a href="#cb19-64"></a><span class="fu">attr</span>(buffalo_clean<span class="sc">$</span>time, <span class="st">"tzone"</span>) <span class="ot">&lt;-</span> <span class="st">"Australia/Queensland"</span></span>
+<span id="cb19-65"><a href="#cb19-65"></a><span class="fu">head</span>(buffalo_clean)</span>
+<span id="cb19-66"><a href="#cb19-66"></a><span class="fu">tz</span>(buffalo_clean<span class="sc">$</span>time)</span>
+<span id="cb19-67"><a href="#cb19-67"></a></span>
+<span id="cb19-68"><a href="#cb19-68"></a>buffalo_ids <span class="ot">&lt;-</span> <span class="fu">unique</span>(buffalo_clean<span class="sc">$</span>id)</span>
+<span id="cb19-69"><a href="#cb19-69"></a></span>
+<span id="cb19-70"><a href="#cb19-70"></a><span class="in">```</span></span>
+<span id="cb19-71"><a href="#cb19-71"></a></span>
+<span id="cb19-72"><a href="#cb19-72"></a><span class="fu"># Create a step object </span></span>
+<span id="cb19-73"><a href="#cb19-73"></a></span>
+<span id="cb19-74"><a href="#cb19-74"></a>Use the <span class="in">`amt`</span> package to create a trajectory object from the cleaned data. </span>
+<span id="cb19-75"><a href="#cb19-75"></a></span>
+<span id="cb19-78"><a href="#cb19-78"></a><span class="in">```{r}</span></span>
+<span id="cb19-79"><a href="#cb19-79"></a><span class="co">#| label: make_track</span></span>
+<span id="cb19-80"><a href="#cb19-80"></a><span class="co">#| code-summary: "Create a trajectory object"</span></span>
+<span id="cb19-81"><a href="#cb19-81"></a></span>
+<span id="cb19-82"><a href="#cb19-82"></a>buffalo_all <span class="ot">&lt;-</span> buffalo_clean <span class="sc">%&gt;%</span> <span class="fu">mk_track</span>(<span class="at">id =</span> id,</span>
+<span id="cb19-83"><a href="#cb19-83"></a>                                           lon,</span>
+<span id="cb19-84"><a href="#cb19-84"></a>                                           lat, </span>
+<span id="cb19-85"><a href="#cb19-85"></a>                                           time, </span>
+<span id="cb19-86"><a href="#cb19-86"></a>                                           <span class="at">all_cols =</span> T,</span>
+<span id="cb19-87"><a href="#cb19-87"></a>                                           <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-88"><a href="#cb19-88"></a>  <span class="fu">transform_coords</span>(<span class="at">crs_to =</span> <span class="dv">3112</span>, <span class="at">crs_from =</span> <span class="dv">4326</span>) <span class="co"># Transformation to GDA94 / </span></span>
+<span id="cb19-89"><a href="#cb19-89"></a><span class="co"># Geoscience Australia Lambert (https://epsg.io/3112)</span></span>
+<span id="cb19-90"><a href="#cb19-90"></a></span>
+<span id="cb19-91"><a href="#cb19-91"></a><span class="in">```</span></span>
+<span id="cb19-92"><a href="#cb19-92"></a></span>
+<span id="cb19-93"><a href="#cb19-93"></a><span class="fu">## Plot the data spatially</span></span>
+<span id="cb19-94"><a href="#cb19-94"></a></span>
+<span id="cb19-97"><a href="#cb19-97"></a><span class="in">```{r}</span></span>
+<span id="cb19-98"><a href="#cb19-98"></a>buffalo_all <span class="sc">%&gt;%</span></span>
+<span id="cb19-99"><a href="#cb19-99"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_, <span class="at">y =</span> y_, <span class="at">colour =</span> id)) <span class="sc">+</span></span>
+<span id="cb19-100"><a href="#cb19-100"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb19-101"><a href="#cb19-101"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb19-102"><a href="#cb19-102"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">"Easting (m)"</span>) <span class="sc">+</span></span>
+<span id="cb19-103"><a href="#cb19-103"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Northing (m)"</span>) <span class="sc">+</span></span>
+<span id="cb19-104"><a href="#cb19-104"></a>  <span class="fu">scale_colour_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb19-105"><a href="#cb19-105"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb19-106"><a href="#cb19-106"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"right"</span>) </span>
+<span id="cb19-107"><a href="#cb19-107"></a></span>
+<span id="cb19-108"><a href="#cb19-108"></a><span class="co"># ggsave("outputs/data_prep/buffalo_djelk_map.png",</span></span>
+<span id="cb19-109"><a href="#cb19-109"></a><span class="co">#        width = 150, height = 150, units = "mm",  dpi = 600)</span></span>
+<span id="cb19-110"><a href="#cb19-110"></a></span>
+<span id="cb19-111"><a href="#cb19-111"></a><span class="in">```</span></span>
+<span id="cb19-112"><a href="#cb19-112"></a></span>
+<span id="cb19-113"><a href="#cb19-113"></a><span class="fu">## Pick out a single individual</span></span>
+<span id="cb19-114"><a href="#cb19-114"></a></span>
+<span id="cb19-117"><a href="#cb19-117"></a><span class="in">```{r}</span></span>
+<span id="cb19-118"><a href="#cb19-118"></a>which_buffalo <span class="ot">&lt;-</span> <span class="st">"2022"</span> <span class="co"># select a single buffalo ID</span></span>
+<span id="cb19-119"><a href="#cb19-119"></a></span>
+<span id="cb19-120"><a href="#cb19-120"></a>buffalo_id <span class="ot">&lt;-</span> buffalo_all <span class="sc">%&gt;%</span> <span class="fu">filter</span>(id <span class="sc">==</span> which_buffalo)</span>
+<span id="cb19-121"><a href="#cb19-121"></a></span>
+<span id="cb19-122"><a href="#cb19-122"></a>buffalo_id <span class="sc">%&gt;%</span></span>
+<span id="cb19-123"><a href="#cb19-123"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_, <span class="at">y =</span> y_, <span class="at">colour =</span> t_)) <span class="sc">+</span></span>
+<span id="cb19-124"><a href="#cb19-124"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span> </span>
+<span id="cb19-125"><a href="#cb19-125"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb19-126"><a href="#cb19-126"></a>  <span class="fu">scale_x_continuous</span>(<span class="st">"Easting (m)"</span>) <span class="sc">+</span></span>
+<span id="cb19-127"><a href="#cb19-127"></a>  <span class="fu">scale_y_continuous</span>(<span class="st">"Northing (m)"</span>) <span class="sc">+</span></span>
+<span id="cb19-128"><a href="#cb19-128"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb19-129"><a href="#cb19-129"></a></span>
+<span id="cb19-130"><a href="#cb19-130"></a><span class="in">```</span></span>
+<span id="cb19-131"><a href="#cb19-131"></a></span>
+<span id="cb19-132"><a href="#cb19-132"></a><span class="fu">## Create steps</span></span>
+<span id="cb19-133"><a href="#cb19-133"></a></span>
+<span id="cb19-134"><a href="#cb19-134"></a>We will just use a steps object here for now</span>
+<span id="cb19-135"><a href="#cb19-135"></a></span>
+<span id="cb19-138"><a href="#cb19-138"></a><span class="in">```{r}</span></span>
+<span id="cb19-139"><a href="#cb19-139"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id <span class="sc">%&gt;%</span> </span>
+<span id="cb19-140"><a href="#cb19-140"></a>  <span class="fu">steps</span>()</span>
+<span id="cb19-141"><a href="#cb19-141"></a></span>
+<span id="cb19-142"><a href="#cb19-142"></a><span class="fu">head</span>(buffalo_id_steps)</span>
+<span id="cb19-143"><a href="#cb19-143"></a></span>
+<span id="cb19-144"><a href="#cb19-144"></a><span class="in">```</span></span>
+<span id="cb19-145"><a href="#cb19-145"></a></span>
+<span id="cb19-146"><a href="#cb19-146"></a></span>
+<span id="cb19-147"><a href="#cb19-147"></a><span class="fu"># Import spatial covariates</span></span>
+<span id="cb19-148"><a href="#cb19-148"></a></span>
+<span id="cb19-149"><a href="#cb19-149"></a>Although NDVI changes over time, and we have access to monthly layers, we will just select a single month here.</span>
+<span id="cb19-150"><a href="#cb19-150"></a></span>
+<span id="cb19-153"><a href="#cb19-153"></a><span class="in">```{r}</span></span>
+<span id="cb19-154"><a href="#cb19-154"></a>ndvi <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/ndvi_aug_2018.tif"</span>)</span>
+<span id="cb19-155"><a href="#cb19-155"></a><span class="fu">plot</span>(ndvi, <span class="at">main =</span> <span class="st">"NDVI August 2018"</span>)</span>
+<span id="cb19-156"><a href="#cb19-156"></a><span class="fu">points</span>(buffalo_id<span class="sc">$</span>x_, buffalo_id<span class="sc">$</span>y_, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span>
+<span id="cb19-157"><a href="#cb19-157"></a>ndvi</span>
+<span id="cb19-158"><a href="#cb19-158"></a></span>
+<span id="cb19-159"><a href="#cb19-159"></a><span class="in">```</span></span>
+<span id="cb19-160"><a href="#cb19-160"></a></span>
+<span id="cb19-163"><a href="#cb19-163"></a><span class="in">```{r}</span></span>
+<span id="cb19-164"><a href="#cb19-164"></a>canopy <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/canopy_cover.tif"</span>)</span>
+<span id="cb19-165"><a href="#cb19-165"></a>herby <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/veg_herby.tif"</span>)</span>
+<span id="cb19-166"><a href="#cb19-166"></a>slope <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"mapping/slope_raster.tif"</span>)</span>
+<span id="cb19-167"><a href="#cb19-167"></a></span>
+<span id="cb19-168"><a href="#cb19-168"></a>spatial_covs <span class="ot">&lt;-</span> <span class="fu">c</span>(ndvi, canopy, herby, slope)</span>
+<span id="cb19-169"><a href="#cb19-169"></a><span class="fu">names</span>(spatial_covs) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ndvi"</span>, <span class="st">"canopy"</span>, <span class="st">"herby"</span>, <span class="st">"slope"</span>)</span>
+<span id="cb19-170"><a href="#cb19-170"></a><span class="fu">plot</span>(spatial_covs)</span>
+<span id="cb19-171"><a href="#cb19-171"></a></span>
+<span id="cb19-172"><a href="#cb19-172"></a><span class="in">```</span></span>
+<span id="cb19-173"><a href="#cb19-173"></a></span>
+<span id="cb19-174"><a href="#cb19-174"></a><span class="fu">## Extract covariate values at the end of each step</span></span>
+<span id="cb19-175"><a href="#cb19-175"></a></span>
+<span id="cb19-178"><a href="#cb19-178"></a><span class="in">```{r}</span></span>
+<span id="cb19-179"><a href="#cb19-179"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id_steps <span class="sc">%&gt;%</span> </span>
+<span id="cb19-180"><a href="#cb19-180"></a>  <span class="fu">extract_covariates</span>(spatial_covs, <span class="at">where =</span> <span class="st">"end"</span>)</span>
+<span id="cb19-181"><a href="#cb19-181"></a></span>
+<span id="cb19-182"><a href="#cb19-182"></a><span class="fu">head</span>(buffalo_id_steps)</span>
+<span id="cb19-183"><a href="#cb19-183"></a></span>
+<span id="cb19-184"><a href="#cb19-184"></a><span class="in">```</span></span>
+<span id="cb19-185"><a href="#cb19-185"></a></span>
+<span id="cb19-186"><a href="#cb19-186"></a><span class="fu">## Prepare data for extracting covariate information</span></span>
+<span id="cb19-187"><a href="#cb19-187"></a></span>
+<span id="cb19-190"><a href="#cb19-190"></a><span class="in">```{r}</span></span>
+<span id="cb19-191"><a href="#cb19-191"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id_steps <span class="sc">%&gt;%</span> </span>
+<span id="cb19-192"><a href="#cb19-192"></a>  <span class="fu">mutate</span>(<span class="at">t1_ =</span> lubridate<span class="sc">::</span><span class="fu">with_tz</span>(buffalo_id_steps<span class="sc">$</span>t1_, <span class="at">tzone =</span> <span class="st">"Australia/Darwin"</span>),</span>
+<span id="cb19-193"><a href="#cb19-193"></a>         <span class="at">t2_ =</span> lubridate<span class="sc">::</span><span class="fu">with_tz</span>(buffalo_id_steps<span class="sc">$</span>t2_, <span class="at">tzone =</span> <span class="st">"Australia/Darwin"</span>))</span>
+<span id="cb19-194"><a href="#cb19-194"></a></span>
+<span id="cb19-195"><a href="#cb19-195"></a>buffalo_id_steps <span class="ot">&lt;-</span> buffalo_id_steps <span class="sc">%&gt;%</span></span>
+<span id="cb19-196"><a href="#cb19-196"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-197"><a href="#cb19-197"></a>    <span class="co"># id_num = as.numeric(factor(id)), </span></span>
+<span id="cb19-198"><a href="#cb19-198"></a>        <span class="co">#  step_id = step_id_, </span></span>
+<span id="cb19-199"><a href="#cb19-199"></a>         <span class="at">x1 =</span> x1_, <span class="at">x2 =</span> x2_, </span>
+<span id="cb19-200"><a href="#cb19-200"></a>         <span class="at">y1 =</span> y1_, <span class="at">y2 =</span> y2_, </span>
+<span id="cb19-201"><a href="#cb19-201"></a>         <span class="at">t1 =</span> t1_, </span>
+<span id="cb19-202"><a href="#cb19-202"></a>         <span class="at">t1_rounded =</span> <span class="fu">round_date</span>(t1_, <span class="st">"hour"</span>), </span>
+<span id="cb19-203"><a href="#cb19-203"></a>         <span class="at">hour_t1 =</span> <span class="fu">hour</span>(t1_rounded),</span>
+<span id="cb19-204"><a href="#cb19-204"></a>         <span class="at">t2 =</span> t2_, </span>
+<span id="cb19-205"><a href="#cb19-205"></a>         <span class="at">t2_rounded =</span> <span class="fu">round_date</span>(t2_, <span class="st">"hour"</span>), </span>
+<span id="cb19-206"><a href="#cb19-206"></a>         <span class="at">hour_t2 =</span> <span class="fu">hour</span>(t2_rounded),</span>
+<span id="cb19-207"><a href="#cb19-207"></a>         <span class="at">hour =</span> <span class="fu">ifelse</span>(hour_t2 <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">24</span>, hour_t2),</span>
+<span id="cb19-208"><a href="#cb19-208"></a>         <span class="at">yday =</span> <span class="fu">yday</span>(t1_),</span>
+<span id="cb19-209"><a href="#cb19-209"></a>         <span class="at">year =</span> <span class="fu">year</span>(t1_), </span>
+<span id="cb19-210"><a href="#cb19-210"></a>         <span class="at">month =</span> <span class="fu">month</span>(t1_),</span>
+<span id="cb19-211"><a href="#cb19-211"></a>         <span class="at">sl =</span> sl_, </span>
+<span id="cb19-212"><a href="#cb19-212"></a>         <span class="at">log_sl =</span> <span class="fu">log</span>(sl_), </span>
+<span id="cb19-213"><a href="#cb19-213"></a>         <span class="at">ta =</span> ta_, </span>
+<span id="cb19-214"><a href="#cb19-214"></a>         <span class="at">cos_ta =</span> <span class="fu">cos</span>(ta_),</span>
+<span id="cb19-215"><a href="#cb19-215"></a>         <span class="at">canopy_01 =</span> canopy<span class="sc">/</span><span class="dv">100</span>)</span>
+<span id="cb19-216"><a href="#cb19-216"></a></span>
+<span id="cb19-217"><a href="#cb19-217"></a><span class="in">```</span></span>
+<span id="cb19-218"><a href="#cb19-218"></a></span>
+<span id="cb19-219"><a href="#cb19-219"></a></span>
+<span id="cb19-220"><a href="#cb19-220"></a></span>
+<span id="cb19-221"><a href="#cb19-221"></a></span>
+<span id="cb19-222"><a href="#cb19-222"></a></span>
+<span id="cb19-223"><a href="#cb19-223"></a></span>
+<span id="cb19-224"><a href="#cb19-224"></a></span>
+<span id="cb19-225"><a href="#cb19-225"></a></span>
+<span id="cb19-226"><a href="#cb19-226"></a></span>
+<span id="cb19-227"><a href="#cb19-227"></a></span>
+<span id="cb19-228"><a href="#cb19-228"></a></span>
+<span id="cb19-229"><a href="#cb19-229"></a><span class="fu">### References</span></span>
+<span id="cb19-230"><a href="#cb19-230"></a></span>
+<span id="cb19-231"><a href="#cb19-231"></a>::: {#refs}</span>
+<span id="cb19-232"><a href="#cb19-232"></a>:::</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

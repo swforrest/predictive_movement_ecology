@@ -4,7 +4,7 @@
     "href": "tutorials.html",
     "title": "Helpful Scripts and Tutorials",
     "section": "",
-    "text": "In the sidebar to the left there are a number of scripts and tutorials that you may find helpful.\nThese include: - Data preparation: Scripts to help you clean and preprocess your data for analysis. - Exploratory data analysis: Step-by-step guides on how to create various types of visualizations - … to complete"
+    "text": "In the sidebar to the left there are a number of scripts and tutorials that you may find helpful.\nThese include:\n\nData preparation: Scripts to help you clean and preprocess your data for analysis.\nExploratory data analysis: Step-by-step guides on how to create various types of visualizations\n… to complete"
   },
   {
     "objectID": "index.html",
@@ -103,5 +103,47 @@
     "title": "About",
     "section": "",
     "text": "About this site"
+  },
+  {
+    "objectID": "exploratory_temporal_dynamics.html",
+    "href": "exploratory_temporal_dynamics.html",
+    "title": "SSF Formulations",
+    "section": "",
+    "text": "Code\nlibrary(tidyverse)\npackages &lt;- c(\"amt\", \"sf\", \"terra\", \"RColorBrewer\")\nwalk(packages, require, character.only = T)"
+  },
+  {
+    "objectID": "exploratory_temporal_dynamics.html#plot-the-data-spatially",
+    "href": "exploratory_temporal_dynamics.html#plot-the-data-spatially",
+    "title": "SSF Formulations",
+    "section": "Plot the data spatially",
+    "text": "Plot the data spatially\n\n\nCode\nbuffalo_all %&gt;%\n  ggplot(aes(x = x_, y = y_, colour = id)) +\n  geom_point(alpha = 0.5, size = 0.1) + \n  coord_fixed() +\n  scale_x_continuous(\"Easting (m)\") +\n  scale_y_continuous(\"Northing (m)\") +\n  scale_colour_viridis_d() +\n  theme_classic() +\n  theme(legend.position = \"right\") \n\n\n\n\n\n\n\n\n\nCode\n# ggsave(\"outputs/data_prep/buffalo_djelk_map.png\",\n#        width = 150, height = 150, units = \"mm\",  dpi = 600)"
+  },
+  {
+    "objectID": "exploratory_temporal_dynamics.html#pick-out-a-single-individual",
+    "href": "exploratory_temporal_dynamics.html#pick-out-a-single-individual",
+    "title": "SSF Formulations",
+    "section": "Pick out a single individual",
+    "text": "Pick out a single individual\n\n\nCode\nwhich_buffalo &lt;- \"2022\" # select a single buffalo ID\n\nbuffalo_id &lt;- buffalo_all %&gt;% filter(id == which_buffalo)\n\nbuffalo_id %&gt;%\n  ggplot(aes(x = x_, y = y_, colour = t_)) +\n  geom_point(alpha = 0.5, size = 0.1) + \n  coord_fixed() +\n  scale_x_continuous(\"Easting (m)\") +\n  scale_y_continuous(\"Northing (m)\") +\n  theme_classic()"
+  },
+  {
+    "objectID": "exploratory_temporal_dynamics.html#create-steps",
+    "href": "exploratory_temporal_dynamics.html#create-steps",
+    "title": "SSF Formulations",
+    "section": "Create steps",
+    "text": "Create steps\nWe will just use a steps object here for now\n\n\nCode\nbuffalo_id_steps &lt;- buffalo_id %&gt;% \n  steps()\n\nhead(buffalo_id_steps)"
+  },
+  {
+    "objectID": "exploratory_temporal_dynamics.html#extract-covariate-values-at-the-end-of-each-step",
+    "href": "exploratory_temporal_dynamics.html#extract-covariate-values-at-the-end-of-each-step",
+    "title": "SSF Formulations",
+    "section": "Extract covariate values at the end of each step",
+    "text": "Extract covariate values at the end of each step\n\n\nCode\nbuffalo_id_steps &lt;- buffalo_id_steps %&gt;% \n  extract_covariates(spatial_covs, where = \"end\")\n\nhead(buffalo_id_steps)"
+  },
+  {
+    "objectID": "exploratory_temporal_dynamics.html#prepare-data-for-extracting-covariate-information",
+    "href": "exploratory_temporal_dynamics.html#prepare-data-for-extracting-covariate-information",
+    "title": "SSF Formulations",
+    "section": "Prepare data for extracting covariate information",
+    "text": "Prepare data for extracting covariate information\n\n\nCode\nbuffalo_id_steps &lt;- buffalo_id_steps %&gt;% \n  mutate(t1_ = lubridate::with_tz(buffalo_id_steps$t1_, tzone = \"Australia/Darwin\"),\n         t2_ = lubridate::with_tz(buffalo_id_steps$t2_, tzone = \"Australia/Darwin\"))\n\nbuffalo_id_steps &lt;- buffalo_id_steps %&gt;%\n  mutate(\n    # id_num = as.numeric(factor(id)), \n        #  step_id = step_id_, \n         x1 = x1_, x2 = x2_, \n         y1 = y1_, y2 = y2_, \n         t1 = t1_, \n         t1_rounded = round_date(t1_, \"hour\"), \n         hour_t1 = hour(t1_rounded),\n         t2 = t2_, \n         t2_rounded = round_date(t2_, \"hour\"), \n         hour_t2 = hour(t2_rounded),\n         hour = ifelse(hour_t2 == 0, 24, hour_t2),\n         yday = yday(t1_),\n         year = year(t1_), \n         month = month(t1_),\n         sl = sl_, \n         log_sl = log(sl_), \n         ta = ta_, \n         cos_ta = cos(ta_),\n         canopy_01 = canopy/100)\n\n\n\nReferences"
   }
 ]

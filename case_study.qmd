@@ -1,6 +1,5 @@
 ---
 title: "Case Study"
-author: "Scott Forrest"
 format: html
 ---
 
