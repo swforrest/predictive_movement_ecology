@@ -1,5 +1,5 @@
 ---
-title: "SSF Formulations"
+title: "Exploration of temporal dynamics"
 author: "Scott Forrest"
 date: "`r Sys.Date()`"
 execute: 
@@ -21,6 +21,7 @@ format:
     geometry: 
       - top=30mm
       - left=30mm
+prefer-html: true
 editor:
   source
 abstract: |
@@ -106,6 +107,8 @@ buffalo_all %>%
 
 ## Show data on a satellite basemap
 
+If viewing as a PDF this will be an automated screenshot. It viewing the HTML file this should be interactive.
+
 ```{r}
 #| message: false
 #| warning: false
@@ -115,7 +118,7 @@ leaflet(data = buffalo_clean) %>%
   addProviderTiles(providers$Esri.WorldImagery) %>%
   addCircleMarkers(
     lng = ~lon, lat = ~lat,
-    color = "red", radius = 2, opacity = 0.5,
+    color = "red", radius = 0.5, opacity = 0.5,
     popup = ~paste("ID:", id, "<br>", "Time:", time)
   ) %>%
   addLayersControl(
@@ -158,6 +161,8 @@ head(buffalo_id_steps)
 
 # Import spatial covariates
 
+## NDVI
+
 Although NDVI changes over time, and we have access to monthly layers, we will just select a single month here.
 
 ```{r}
@@ -168,6 +173,8 @@ points(buffalo_id$x_, buffalo_id$y_, col = "red", pch = 16, cex = 0.5)
 ndvi
 
 ```
+
+## Other covariates
 
 ```{r}
 
@@ -186,7 +193,7 @@ plot(spatial_covs)
 ```{r}
 
 buffalo_id_steps <- buffalo_id_steps %>% 
-  extract_covariates(spatial_covs, where = "end")
+  extract_covariates(covariates = spatial_covs, where = "end")
 
 head(buffalo_id_steps)
 
@@ -201,10 +208,7 @@ buffalo_id_steps <- buffalo_id_steps %>%
          t2_ = lubridate::with_tz(buffalo_id_steps$t2_, tzone = "Australia/Darwin"))
 
 buffalo_id_steps <- buffalo_id_steps %>%
-  mutate(
-    # id_num = as.numeric(factor(id)), 
-        #  step_id = step_id_, 
-         x1 = x1_, x2 = x2_, 
+  mutate(x1 = x1_, x2 = x2_, 
          y1 = y1_, y2 = y2_, 
          t1 = t1_, 
          t1_rounded = round_date(t1_, "hour"), 
@@ -212,7 +216,7 @@ buffalo_id_steps <- buffalo_id_steps %>%
          t2 = t2_, 
          t2_rounded = round_date(t2_, "hour"), 
          hour_t2 = hour(t2_rounded),
-         hour = ifelse(hour_t2 == 0, 24, hour_t2),
+         hour_t2 = ifelse(hour_t2 == 0, 24, hour_t2),
          yday = yday(t1_),
          year = year(t1_), 
          month = month(t1_),
@@ -223,6 +227,155 @@ buffalo_id_steps <- buffalo_id_steps %>%
          canopy_01 = canopy/100)
 
 head(buffalo_id_steps) 
+
+```
+
+# Hourly movement behaviour and selection of covariates
+
+Here we bin the trajectories into the hours of the day, and calculate the mean, and quantiles for the step lengths and four habitat covariates. This is a similar approach to in @Forrest2024-gc and @Forrest2025-bn, where we used this approach to assess temporal dynamics as an exploratory step, but also as a validation step by assessing whether the simualted trajectories had also learned the temporally dynamic behaviour.
+
+## Observed buffalo data
+
+```{r}
+
+buffalo_hourly_habitat <- 
+  buffalo_id_steps %>% dplyr::group_by(hour_t2) %>% 
+  summarise(n = n(),
+
+            # step lengths
+            step_length_mean = mean(sl_),
+            step_length_q025 = quantile(sl_, 0.025),
+            step_length_q25 = quantile(sl_, 0.25),
+            step_length_median = quantile(sl_, 0.5),
+            step_length_q75 = quantile(sl_, 0.75),
+            step_length_q975 = quantile(sl_, 0.975),
+
+            # ndvi
+            ndvi_mean = mean(ndvi),
+            ndvi_q025 = quantile(ndvi, 0.025),
+            ndvi_q25 = quantile(ndvi, 0.25),
+            ndvi_median = median(ndvi),
+            ndvi_q75 = quantile(ndvi, 0.75),
+            ndvi_q975 = quantile(ndvi, 0.975),
+
+            # herby
+            herby_mean = mean(herby),
+            herby_q025 = quantile(herby, 0.025),
+            herby_q25 = quantile(herby, 0.25),
+            herby_median = median(herby),
+            herby_q75 = quantile(herby, 0.75),
+            herby_q975 = quantile(herby, 0.975),
+
+            # canopy cover
+            canopy_mean = mean(canopy_01),
+            canopy_q025 = quantile(canopy_01, 0.025),
+            canopy_q25 = quantile(canopy_01, 0.25),
+            canopy_median = median(canopy_01),
+            canopy_q75 = quantile(canopy_01, 0.75),
+            canopy_q975 = quantile(canopy_01, 0.975),
+            
+            # slope
+            slope_mean = mean(slope),
+            slope_q025 = quantile(slope, 0.025),
+            slope_q25 = quantile(slope, 0.25),
+            slope_median = median(slope),
+            slope_q75 = quantile(slope, 0.75),
+            slope_q975 = quantile(slope, 0.975)
+            
+            ) %>% ungroup()
+
+head(buffalo_hourly_habitat)
+
+```
+
+### Lengthen the dataframe
+
+```{r}
+
+buffalo_hourly_habitat_long <- buffalo_hourly_habitat %>%
+  pivot_longer(cols = !c(hour_t2), names_to = "variable", values_to = "value") %>% 
+  filter(!variable == "n")
+
+head(buffalo_hourly_habitat_long)
+
+```
+
+### Set plotting parameters
+
+```{r}
+
+# set plotting parameters here that will change in each plot
+
+# path
+path_linewidth <- 0.5
+path_alpha <- 0.1
+path_95_alpha <- 1
+
+# ribbon
+ribbon_95_alpha <- 0.5
+ribbon_50_alpha <- 0.25
+
+```
+
+### Loop over each variable to create a plot
+
+As we have some categorical and binary variables, we use the **mean** for the line, rather than the median, and it explains why some of the ribbons look weird.
+
+```{r}
+
+# variables <- unique(buffalo_hourly_habitat_long$variable)
+
+# variables to loop over
+variables <- c("step_length", "ndvi", "herby", "canopy", "slope")
+
+for(i in 1:length(variables)){
+  
+  # Filter data for the current variable
+  var_data <- buffalo_hourly_habitat_long %>% 
+    filter(str_detect(variable, variables[i]))
+  
+  # Extract specific quantiles for ribbons
+  var_summary <- buffalo_hourly_habitat %>% 
+    select(hour_t2, 
+           mean = !!paste0(variables[i], "_mean"),
+           q025 = !!paste0(variables[i], "_q025"), 
+           q25 = !!paste0(variables[i], "_q25"),
+           median = !!paste0(variables[i], "_median"),
+           q75 = !!paste0(variables[i], "_q75"),
+           q975 = !!paste0(variables[i], "_q975"))
+  
+  plot <- ggplot(data = var_summary) +
+    
+    # ribbons
+    # 95% ribbon
+    # geom_ribbon(aes(x = hour_t2, 
+    #                 ymin = q025,
+    #                 ymax = q975),
+    #             alpha = ribbon_95_alpha, fill = "grey70") +
+    
+    # 50% ribbon
+    geom_ribbon(aes(x = hour_t2, 
+                    ymin = q25,
+                    ymax = q75),
+                alpha = ribbon_50_alpha, fill = "grey50") +
+    
+    # lines
+    geom_line(aes(x = hour_t2, y = mean), size = 1) +
+    geom_point(aes(x = hour_t2, y = mean), size = 2) +
+    
+    scale_x_continuous(breaks = seq(0, 24, by = 2)) +
+    labs(x = "Hour of the day",
+         y = variables[i],
+         title = paste0("Hourly ", variables[i])) +
+    theme_bw()
+  
+  print(plot)
+
+  # ggsave(paste0("outputs/exploratory_temporal_dynamics/buffalo_hourly_", variables[i], ".png"),
+  #        plot = plot,
+  #        width = 150, height = 100, units = "mm", dpi = 600)
+  
+}
 
 ```
 

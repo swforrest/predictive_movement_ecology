@@ -8,11 +8,12 @@ execute:
 website:
   favicon: figures/next-step.png
   title: "Predictive Movement Ecology"
+  page-navigation: true
+  
   navbar:
     left:
-      - href: index.qmd
-        text: Home
-      # - about.qmd
+      - text: Home
+        href: index.qmd
       - case_study.qmd
       - tutorials.qmd
       
@@ -20,18 +21,18 @@ website:
       - icon: github
         href: https://github.com/swforrest/predictive_movement_ecology
         
-    sidebar:
-    
-      - title: "Case Study"
-        style: floating
-        contents:
-          - case_study.qmd
-          
-      - title: "Helpful Scripts and Tutorials"
-        style: floating
-        contents:
-          - tutorials.qmd
-          - ssf_responses.qmd
+  sidebar:
+    - title: "Case Study"
+      style: floating
+      contents:
+        - case_study.qmd
+        
+    - title: "Helpful Scripts and Tutorials"
+      style: floating
+      contents:
+        - tutorials.qmd
+        - ssf_responses.qmd
+        - exploratory_temporal_dynamics.qmd
         
 
 format:
