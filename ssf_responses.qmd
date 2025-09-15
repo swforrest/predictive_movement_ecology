@@ -172,25 +172,12 @@ points(x = 0, y = 0, col = "red")
 # Save the plot
 png(filename = paste0("outputs/ndvi_local_", which_buffalo, ".png"), 
     width = 100, height = 100, units = "mm", res = 600)
-print(plot(ndvi_window, 
+plot(ndvi_window, 
      # main = paste0("NDVI"),
      col = brewer.pal(9, "Greens"), 
-     plg=list(x="top", title="NDVI", tics="out", cex=.8)))
-print(points(x = 0, y = 0, col = "red"))
+     plg=list(x="top", title="NDVI", tics="out", cex=.8))
+points(x = 0, y = 0, col = "red")
 dev.off()
-
-
-# # create a NDVI df to plot with ggplot
-# ndvi_df <- as.data.frame(ndvi_window, xy = TRUE) 
-# 
-# ggplot() +
-#   geom_raster(data = ndvi_df, aes(x = x, y = y, fill = as.factor(cut(ndvi, breaks = 9)))) +
-#   scale_fill_brewer(palette = "Greens", direction = 1) +
-#   coord_fixed() +
-#   geom_point(aes(x = 0, y = 0), 
-#              colour = "red", size = 0.5) +
-#   labs(x = "Easting (m)", y = "Northing (m)", fill = "NDVI") +
-#   theme_classic()
 
 ```
 
@@ -372,7 +359,7 @@ plot(ndvi_linear, main = "RSS - linear")
 # Save the plot
 png(filename = paste0("outputs/rss_linear_", which_buffalo, ".png"), 
     width = 100, height = 80, units = "mm", res = 600)
-print(plot(ndvi_linear, main = "RSS - linear"))
+plot(ndvi_linear, main = "RSS - linear")
 dev.off()
 
 ```
@@ -513,7 +500,7 @@ plot(ndvi_quadratic, main = "RSS - quadratic")
 # Save the plot
 png(filename = paste0("outputs/rss_quadratic_", which_buffalo, ".png"), 
     width = 100, height = 80, units = "mm", res = 600)
-print(plot(ndvi_quadratic, main = "RSS - quadratic"))
+plot(ndvi_quadratic, main = "RSS - quadratic")
 dev.off()
 
 ```
@@ -642,7 +629,7 @@ plot(ndvi_gam, main = "RSS - smooth term")
 # Save the plot
 png(filename = paste0("outputs/rss_smooth_", which_buffalo, ".png"), 
     width = 100, height = 80, units = "mm", res = 600)
-print(plot(ndvi_gam, main = "RSS - smooth"))
+plot(ndvi_gam, main = "RSS - smooth")
 dev.off()
 
 ```
