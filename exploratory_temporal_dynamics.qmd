@@ -379,7 +379,7 @@ for(i in 1:length(variables)){
 
 ```
 
-### References
+# References
 
 ::: {#refs}
 :::

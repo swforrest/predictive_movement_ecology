@@ -59,10 +59,14 @@ buffalo_data <- buffalo_data %>%
 buffalo_clean <- buffalo_data[, c(12, 2, 4, 3)]
 colnames(buffalo_clean) <- c("id", "time", "lon", "lat")
 attr(buffalo_clean$time, "tzone") <- "Australia/Queensland"
+buffalo_clean$sex <- "f"
+buffalo_clean$life_stage <- "adult"
 head(buffalo_clean)
 tz(buffalo_clean$time)
 
 buffalo_ids <- unique(buffalo_clean$id)
+
+write_csv(buffalo_clean, "data/buffalo_clean.csv")
 
 ```
 
@@ -108,17 +112,25 @@ buffalo_all %>%
 
 ```{r}
 
-which_buffalo <- "2022" # select a single buffalo ID
+which_buffalo <- "2158" # select a single buffalo ID
+
+# create directory to save plots for each buffalo
+plot_save_path <- paste0("outputs/buffalo_", which_buffalo)
+dir.create(plot_save_path, showWarnings = FALSE)
 
 buffalo_id <- buffalo_all %>% filter(id == which_buffalo)
 
 buffalo_id %>%
   ggplot(aes(x = x_, y = y_, colour = t_)) +
+  geom_path(alpha = 0.5) + 
   geom_point(alpha = 0.5, size = 0.1) + 
   coord_fixed() +
   scale_x_continuous("Easting (m)") +
   scale_y_continuous("Northing (m)") +
   theme_classic()
+
+ggsave(paste0(plot_save_path, "/buffalo_id_", which_buffalo, "_map.png"),
+       width = 150, height = 150, units = "mm",  dpi = 600)
 
 ```
 
@@ -145,8 +157,7 @@ We'll centre the extent on an interesting looking part of the landscape, and the
 
 cell_resolution <- 25 # in metres
 
-buffalo_single_point <- buffalo_id %>% 
-  filter(t_ == min(t_)) # select the first time point
+buffalo_single_point <- buffalo_id[7500,] # select one of the locations
 
 buffer <- 1500 + (cell_resolution/2) # buffer in metres
 
@@ -170,7 +181,7 @@ plot(ndvi_window,
 points(x = 0, y = 0, col = "red")
 
 # Save the plot
-png(filename = paste0("outputs/ndvi_local_", which_buffalo, ".png"), 
+png(filename = paste0(plot_save_path, "/ndvi_local_", which_buffalo, ".png"), 
     width = 100, height = 100, units = "mm", res = 600)
 plot(ndvi_window, 
      # main = paste0("NDVI"),
@@ -218,14 +229,14 @@ Firstly, we want to pull out the range of NDVI values to plot the curves with.
 ```{r}
 
 # histogram of NDVI values
-# hist(values(ndvi))
+hist(values(ndvi))
 
 # 1% and 99% quantiles of NDVI values
-ndvi_quantiles <- quantile(values(ndvi), probs = c(0.025, 0.975), na.rm = TRUE)
+ndvi_quantiles <- quantile(values(ndvi), probs = c(0.005, 0.995), na.rm = TRUE)
 ndvi_quantiles
 
 # plot across the range in the local window
-ndvi_values <- seq(ndvi_quantiles[1], 
+ndvi_values <- seq(min(0, ndvi_quantiles[1]), 
                    ndvi_quantiles[2], 
                    length.out = 100)
 
@@ -234,6 +245,17 @@ pred_data <- data.frame(ndvi = ndvi_values,
                         sl_ = 0,
                         log_sl = 0,
                         cos_ta = 0)
+
+```
+
+## Set RSS min and max values
+
+This is hard-coded as the maximum rss value across the different formulations, to ensure the plotting extent is consistent across approaches.
+
+```{r}
+
+rss_min <- 0
+rss_max <- 2.1
 
 ```
 
@@ -309,6 +331,7 @@ ggplot(data = ndvi_coef_df) +
               fill = "grey70", alpha = 0.5) +
   geom_line(aes(x = ndvi_values, y = rss), 
             colour = "black", linewidth = 1) +
+  scale_x_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   labs(x = "NDVI", y = "RSS") +
   theme_classic() 
 
@@ -338,10 +361,14 @@ ggplot(data = ndvi_coef_df) +
               fill = "grey70", alpha = 0.5) +
   geom_line(aes(x = ndvi_values, y = rss), 
             colour = "black", linewidth = 1) +
+  geom_rug(data = buffalo_ssf_data %>% filter(case_ == T), 
+           aes(x = ndvi), alpha = 0.25, sides="b") +
+  scale_x_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
+  scale_y_continuous(limits = c(rss_min, rss_max)) +
   labs(x = "NDVI", y = "RSS") +
   theme_classic() 
 
-ggsave(paste0("outputs/ndvi_linear_response_id", which_buffalo, ".png"),
+ggsave(paste0(plot_save_path, "/ndvi_linear_response_id", which_buffalo, ".png"),
        width = 120, height = 100, units = "mm", dpi = 600)
 
 ```
@@ -357,7 +384,7 @@ ndvi_linear <- exp(ndvi_window * ndvi_coef)
 plot(ndvi_linear, main = "RSS - linear")
 
 # Save the plot
-png(filename = paste0("outputs/rss_linear_", which_buffalo, ".png"), 
+png(filename = paste0(plot_save_path, "/rss_linear_", which_buffalo, ".png"), 
     width = 100, height = 80, units = "mm", res = 600)
 plot(ndvi_linear, main = "RSS - linear")
 dev.off()
@@ -405,6 +432,8 @@ predictions <- predict(ssf_quadratic_gam,
 
 ```
 
+### Generate the response curve
+
 ```{r}
 
 # Get predictions on log-scale with standard errors
@@ -444,10 +473,14 @@ ggplot(data = ndvi_coef_df) +
               fill = "grey70", alpha = 0.5) +
   geom_line(aes(x = ndvi_values, y = rss), 
             colour = "black", linewidth = 1) +
+  geom_rug(data = buffalo_ssf_data %>% filter(case_ == T), 
+           aes(x = ndvi), alpha = 0.25, sides="b") +
+  scale_x_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
+  scale_y_continuous(limits = c(rss_min, rss_max)) +
   labs(x = "NDVI", y = "RSS") +
   theme_classic() 
 
-ggsave(paste0("outputs/ndvi_quadratic_response_id", which_buffalo, ".png"),
+ggsave(paste0(plot_save_path, "/ndvi_quadratic_response_id", which_buffalo, ".png"),
        width = 120, height = 100, units = "mm", dpi = 600)
 
 ```
@@ -474,10 +507,11 @@ ggplot() +
   geom_hline(yintercept = 1, linetype = "dashed", colour = "grey") +
   geom_line(data = ndvi_coef_df, aes(x = ndvi_values, y = rss), 
             colour = "black", linewidth = 1) +
+  scale_x_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   labs(x = "NDVI", y = "RSS") +
   theme_classic() 
 
-# ggsave(paste0("outputs/ndvi_quadratic_response_id", which_buffalo, ".png"),
+# ggsave(paste0(plot_save_path, /ndvi_quadratic_response_id", which_buffalo, ".png"),
 #        width = 100, height = 100, units = "mm", dpi = 600)
 
 ```
@@ -498,7 +532,7 @@ ndvi_quadratic <- exp((ndvi_window * ndvi_coef) +
 plot(ndvi_quadratic, main = "RSS - quadratic")
 
 # Save the plot
-png(filename = paste0("outputs/rss_quadratic_", which_buffalo, ".png"), 
+png(filename = paste0(plot_save_path, "/rss_quadratic_", which_buffalo, ".png"), 
     width = 100, height = 80, units = "mm", res = 600)
 plot(ndvi_quadratic, main = "RSS - quadratic")
 dev.off()
@@ -519,7 +553,7 @@ $y \sim s(ndvi)$
 
 # fit an ssf gam model
 ssf_gam <- mgcv::gam(cbind(times, step_id_) ~ 
-                       s(ndvi, bs = "tp", k = 10) +
+                       s(ndvi, bs = "cr") + 
                        # s(ndvi) +
                        sl_ + log_sl + cos_ta,
                             data = buffalo_ssf_data,
@@ -531,20 +565,28 @@ AIC(ssf_gam)
 
 # coef(ssf_gam)[4]
 
-gam_smooths <- smooth_estimates(ssf_gam)
+gam_smooths <- gratia::smooth_estimates(ssf_gam)
 
 ```
 
 ### Response curve
 
+Using `gratia'
+
 ```{r}
 
-# gratia::draw(ssf_gam, rug = FALSE) + 
-#   geom_hline(yintercept = 0, linetype = "dashed", colour = "grey") +
-#   labs(x = "NDVI", y = "log-RSS") +
-#   scale_x_continuous(limits = c(ndvi_quantiles[1], 0.5)) +
-#   scale_y_continuous(limits = c(-0.4, 0.4)) +
-#   theme_classic() 
+gratia::draw(ssf_gam, rug = FALSE) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "grey") +
+  labs(x = "NDVI", y = "log-RSS") +
+  scale_x_continuous(limits = c(ndvi_quantiles[1], 0.5)) +
+  scale_y_continuous(limits = c(-0.4, 0.4)) +
+  theme_classic()
+
+```
+
+Using ggplot with the `smooth_estimates` dataframe from `gratia`
+
+```{r}
 
 ggplot(data = gam_smooths) + 
   geom_hline(yintercept = 1, linetype = "dashed", colour = "grey") +
@@ -557,10 +599,12 @@ ggplot(data = gam_smooths) +
   # scale_y_continuous(limits = c(0.65, 1.3)) +
   theme_classic() 
 
-# ggsave(paste0("outputs/ndvi_smooth_response_id", which_buffalo, ".png"),
-#        width = 120, height = 100, units = "mm", dpi = 600)
+ggsave(paste0(plot_save_path, "/ndvi_smooth_response_id", which_buffalo, ".png"),
+       width = 120, height = 100, units = "mm", dpi = 600)
 
 ```
+
+### Generate the response curve
 
 ```{r}
 
@@ -601,10 +645,14 @@ ggplot(data = ndvi_coef_df) +
               fill = "grey70", alpha = 0.5) +
   geom_line(aes(x = ndvi_values, y = rss), 
             colour = "black", linewidth = 1) +
+  geom_rug(data = buffalo_ssf_data %>% filter(case_ == T), 
+           aes(x = ndvi), alpha = 0.25, sides="b") +
+  scale_x_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
+  scale_y_continuous(limits = c(rss_min, rss_max)) +
   labs(x = "NDVI", y = "RSS") +
   theme_classic() 
 
-ggsave(paste0("outputs/ndvi_smooth_response_id", which_buffalo, ".png"),
+ggsave(paste0(plot_save_path, "/ndvi_smooth_response_id", which_buffalo, ".png"),
        width = 120, height = 100, units = "mm", dpi = 600)
 
 ```
@@ -627,7 +675,7 @@ values(ndvi_gam) <- exp(as.vector(predicted_log_rss))
 plot(ndvi_gam, main = "RSS - smooth term")
 
 # Save the plot
-png(filename = paste0("outputs/rss_smooth_", which_buffalo, ".png"), 
+png(filename = paste0(plot_save_path, "/rss_smooth_", which_buffalo, ".png"), 
     width = 100, height = 80, units = "mm", res = 600)
 plot(ndvi_gam, main = "RSS - smooth")
 dev.off()
@@ -717,6 +765,8 @@ ggplot(data = ndvi_temporal_coef_df) +
 
 ```
 
+
+
 ```{r}
 
 # Coefficient names we need
@@ -752,8 +802,13 @@ ggplot(ndvi_temporal_ci, aes(x = hour)) +
   geom_hline(yintercept = 0, linetype = "dashed", colour = "grey60") +
   geom_ribbon(aes(ymin = lo, ymax = hi), alpha = 0.2) +
   geom_line(aes(y = est)) +
-  labs(x = "Hour", y = "NDVI coefficient", fill = NULL) +
+  labs(title = "harmonics(ndvi)", x = "Hour", y = expression(beta[NDVI]), fill = NULL) +
+  scale_x_continuous(breaks = seq(0, 24, by = 4)) +
+  scale_y_continuous(breaks = seq(-4, 4, by = 1)) +
   theme_classic()
+
+ggsave(paste0(plot_save_path, "/ndvi_harmonic_coef_response_id", which_buffalo, ".png"),
+       width = 150, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -799,9 +854,9 @@ ndvi_hour_values <- expand.grid(ndvi = ndvi_values,
                                 hour = seq(0, 23, length.out = length(ndvi_values)))
 
 ndvi_hour_values$ssf_linear_log_rss <- mapply(ndvi_harmonic_reconstruction, 
-                                    ssf_harmonic_model = list(ssf_harmonics), 
-                                    ndvi_value = ndvi_hour_values$ndvi, 
-                                    hour = ndvi_hour_values$hour)
+                                        ssf_harmonic_model = list(ssf_harmonics), 
+                                        ndvi_value = ndvi_hour_values$ndvi, 
+                                        hour = ndvi_hour_values$hour)
 
 # plot the response curve
 ggplot(data = ndvi_hour_values) +
@@ -813,18 +868,21 @@ ggplot(data = ndvi_hour_values) +
 max_abs_colour <- max(abs(range(ndvi_hour_values$ssf_linear_log_rss)))
 
 # plot the selection surface
-ggplot(data = ndvi_hour_values,
+ggplot() +
+  geom_raster(data = ndvi_hour_values,
        aes(x = hour, y = ndvi, fill = ssf_linear_log_rss)) +
-  geom_raster() +
   labs(title = "harmonics(ndvi)", x = "Hour", y = "NDVI", fill = "log-RSS") +
-  geom_contour(aes(z = ssf_linear_log_rss), colour = "black") +
-  scale_fill_distiller(palette = "RdBu", type = "div",
+  geom_contour(data = ndvi_hour_values, aes(x = hour, y = ndvi, z = ssf_linear_log_rss), colour = "black") +
+  scale_fill_distiller(palette = "RdBu", type = "div", direction = 1,
     limits = c(-max_abs_colour, max_abs_colour)) +   # symmetric around 0) 
   coord_cartesian(expand = FALSE) +
-  theme_bw() 
+  geom_rug(data = buffalo_ssf_data %>% filter(case_ == T),
+           aes(y = ndvi), alpha = 0.1, length = unit(0.015, "npc"), sides="l") +
+  scale_y_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
+  theme_bw()
 
-ggsave(paste0("outputs/ndvi_harmonic_response_id", which_buffalo, ".png"),
-       width = 120, height = 60, units = "mm", dpi = 600)
+ggsave(paste0(plot_save_path, "/ndvi_harmonic_response_id", which_buffalo, ".png"),
+       width = 150, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -850,66 +908,6 @@ ssf_harmonics_quadratic <- amt::fit_issf(case_ ~
 
 summary(ssf_harmonics_quadratic)
 AIC(ssf_harmonics_quadratic)
-
-```
-
-### Pull out the coefficents across time
-
-```{r}
-
-# ndvi_harmonic_coef_reconstruction <- function(ssf_harmonic_model, hour) {
-# 
-#   # linear terms
-#   ndvi_coef <- ssf_harmonic_model$model$coefficients["ndvi"]
-#   ndvi_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_1_hour"]
-#   ndvi_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_1_hour"]
-#   ndvi_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:sin_2_hour"]
-#   ndvi_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi:cos_2_hour"]
-# 
-#   # quadratic terms
-#   ndvi_sq_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq"]
-#   ndvi_sq_sin_1_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:sin_1_hour"]
-#   ndvi_sq_cos_1_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:cos_1_hour"]
-#   ndvi_sq_sin_2_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:sin_2_hour"]
-#   ndvi_sq_cos_2_coef <- ssf_harmonic_model$model$coefficients["ndvi_sq:cos_2_hour"]
-# 
-#   sin_1_hour <- sin(2 * pi * hour / 24)
-#   cos_1_hour <- cos(2 * pi * hour / 24)
-#   sin_2_hour <- sin(4 * pi * hour / 24)
-#   cos_2_hour <- cos(4 * pi * hour / 24)
-# 
-#   linear_part <- ndvi_coef +
-#     sin_1_hour * ndvi_sin_1_coef +
-#     cos_1_hour * ndvi_cos_1_coef +
-#     sin_2_hour * ndvi_sin_2_coef +
-#     cos_2_hour * ndvi_cos_2_coef
-# 
-#   quadratic_part <- ndvi_sq_coef +
-#     sin_1_hour * ndvi_sq_sin_1_coef +
-#     cos_1_hour * ndvi_sq_cos_1_coef +
-#     sin_2_hour * ndvi_sq_sin_2_coef +
-#     cos_2_hour * ndvi_sq_cos_2_coef
-#   
-#   return(c(
-#     linear_coef = as.numeric(linear_part),
-#     quadratic_coef = as.numeric(quadratic_part)
-#   ))
-# 
-# }
-# 
-# ndvi_temporal_coef_df <- data.frame(hour = seq(0, 23, length.out = 100))
-# 
-# ndvi_temporal_coef_df$ndvi_coef <- sapply(ndvi_temporal_coef_df$hour,
-#                                             ndvi_harmonic_coef_reconstruction,
-#                                             ssf_harmonic_model = ssf_harmonics_quadratic)
-# 
-# # plot the response curve
-# ggplot(data = ndvi_temporal_coef_df) +
-#   geom_hline(yintercept = 0, linetype = "dashed", colour = "grey") +
-#   geom_line(aes(x = hour, y = ndvi_coef),
-#             colour = "black") +
-#   labs(x = "Hour", y = "NDVI coefficient") +
-#   theme_classic()
 
 ```
 
@@ -978,23 +976,28 @@ ggplot(data = ndvi_hour_values) +
   geom_point(aes(x = hour, y = ndvi, colour = ssf_quadratic_log_rss)) +
   labs(x = "Hour", y = "NDVI", colour = "log RSS") +
   scale_colour_viridis_c() +
+  scale_y_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   theme_classic() 
 
 max_abs_colour <- max(abs(range(ndvi_hour_values$ssf_quadratic_log_rss)))
 
 # plot the selection surface
-ggplot(data = ndvi_hour_values,
+ggplot() +
+  geom_raster(data = ndvi_hour_values,
        aes(x = hour, y = ndvi, fill = ssf_quadratic_log_rss)) +
-  geom_raster() +
-  labs(title = "harmonics(hour + hour^2)", x = "Hour", y = "NDVI", fill = "log-RSS") +
-  geom_contour(aes(z = ssf_quadratic_log_rss), colour = "black") +
-  scale_fill_distiller(palette = "RdBu", type = "div",
+  labs(title = "harmonics(ndvi + ndvi^2)", x = "Hour", y = "NDVI", fill = "log-RSS") +
+  geom_contour(data = ndvi_hour_values,
+       aes(x = hour, y = ndvi, z = ssf_quadratic_log_rss), colour = "black") +
+  scale_fill_distiller(palette = "RdBu", type = "div", direction = 1,
                        limits = c(-max_abs_colour, max_abs_colour)) +
   coord_cartesian(expand = FALSE) +
+  geom_rug(data = buffalo_ssf_data %>% filter(case_ == T),
+           aes(y = ndvi), alpha = 0.25, length = unit(0.015, "npc"), sides="l") +
+  scale_y_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   theme_bw() 
 
-ggsave(paste0("outputs/ndvi_harmonic_quadratic_response_id", which_buffalo, ".png"),
-       width = 120, height = 60, units = "mm", dpi = 600)
+ggsave(paste0(plot_save_path, "/ndvi_harmonic_quadratic_response_id", which_buffalo, ".png"),
+       width = 150, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -1004,7 +1007,7 @@ ggsave(paste0("outputs/ndvi_harmonic_quadratic_response_id", which_buffalo, ".pn
 
 # fit an ssf gam model
 ssf_gam_temporal <- mgcv::gam(cbind(times, step_id_) ~ 
-                       s(hour, by = ndvi, bs = "cc", k = 10) +
+                       s(hour, by = ndvi, bs = "cc") + #, k = 5
                        sl_ + log_sl + cos_ta,
                      data = buffalo_ssf_data,
                      family = cox.ph,
@@ -1015,19 +1018,28 @@ AIC(ssf_gam_temporal)
 
 gam_smooths <- smooth_estimates(ssf_gam_temporal)
 
-gratia::draw(ssf_gam_temporal, rug = FALSE)
-
 ```
 
-### Prepare prediction data
 
 ```{r}
 
+gratia::draw(ssf_gam_temporal, rug = FALSE) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "grey60") +
+  labs() +
+  scale_x_continuous(breaks = seq(0, 24, by = 4)) +
+  scale_y_continuous(breaks = seq(-4, 4, by = 1)) +
+  labs(title = "s(hour, by = ndvi)",
+       subtitle = NULL,
+       x = "Hour", 
+       y = expression(beta[NDVI]), fill = NULL) +
+  theme_classic()
 
+ggsave(paste0(plot_save_path, "/ndvi_gam_coef_response_id", which_buffalo, ".png"),
+       width = 150, height = 80, units = "mm", dpi = 600)
 
 ```
 
-### Response curve
+### GAM selection surface
 
 ```{r}
 
@@ -1071,18 +1083,22 @@ ndvi_hour_values <- ndvi_hour_values %>% mutate(
 max_abs_colour <- max(abs(range(ndvi_hour_values$gam_log_rss)))
 
 # plot the selection surface
-ggplot(data = ndvi_hour_values,
+ggplot() +
+  geom_raster(data = ndvi_hour_values,
        aes(x = hour, y = ndvi, fill = gam_log_rss)) +
-  geom_raster() +
   labs(title = "s(hour, by = ndvi)", x = "Hour", y = "NDVI", fill = "log-RSS") +
-  geom_contour(aes(z = gam_log_rss), colour = "black") +
-  scale_fill_distiller(palette = "RdBu", type = "div",
+  geom_contour(data = ndvi_hour_values,
+       aes(x = hour, y = ndvi, z = gam_log_rss), colour = "black") +
+  scale_fill_distiller(palette = "RdBu", type = "div", direction = 1,
                        limits = c(-max_abs_colour, max_abs_colour)) +
   coord_cartesian(expand = FALSE) +
+  geom_rug(data = buffalo_ssf_data %>% filter(case_ == T),
+           aes(y = ndvi), alpha = 0.25, length = unit(0.015, "npc"), sides="l") +
+  scale_y_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   theme_bw() 
 
-ggsave(paste0("outputs/ndvi_linear_gam_response_id", which_buffalo, ".png"),
-       width = 120, height = 60, units = "mm", dpi = 600)
+ggsave(paste0(plot_save_path, "/ndvi_linear_gam_response_id", which_buffalo, ".png"),
+       width = 150, height = 80, units = "mm", dpi = 600)
 
 ```
 
@@ -1092,7 +1108,7 @@ ggsave(paste0("outputs/ndvi_linear_gam_response_id", which_buffalo, ".png"),
 
 # fit an ssf gam model
 ssf_gam2d_temporal2 <- mgcv::gam(cbind(times, step_id_) ~ 
-                                  te(hour, ndvi, bs = c("cc", "cr"), k = c(8, 10)) +
+                                  te(hour, ndvi, bs = c("cc", "cr")) + #, k = c(5, 5)
                        sl_ + log_sl + cos_ta,
                      data = buffalo_ssf_data,
                      family = cox.ph,
@@ -1109,10 +1125,11 @@ AIC(ssf_gam2d_temporal2)
 gratia::draw(ssf_gam2d_temporal2, rug = FALSE)
 
 gam_smooths <- smooth_estimates(ssf_gam2d_temporal2)
-filtered_gam_smooths <- gam_smooths %>% filter(ndvi > 0.14 & ndvi < 0.6)
+filtered_gam_smooths <- gam_smooths %>% filter(ndvi > ndvi_quantiles[1] & ndvi < ndvi_quantiles[2])
 
 gratia::draw(filtered_gam_smooths) +
   coord_cartesian(expand = FALSE) +
+  scale_y_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   labs(x = "Hour", y = "NDVI") +
   theme_bw()
 
@@ -1151,11 +1168,13 @@ ggplot(data = ndvi_hour_values) +
   geom_point(aes(x = hour, y = ndvi, colour = gam_log_rss)) +
   labs(x = "Hour", y = "NDVI", colour = "log RSS") +
   scale_colour_viridis_c() +
+  scale_y_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   theme_classic() 
 
 
 gratia::draw(filtered_gam_smooths) +
   coord_cartesian(expand = FALSE) +
+  scale_y_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   labs(x = "Hour", y = "NDVI") +
   theme_bw()
 
@@ -1163,22 +1182,26 @@ gratia::draw(filtered_gam_smooths) +
 max_abs_colour <- max(abs(range(ndvi_hour_values$gam_log_rss)))
 
 # plot the selection surface
-ggplot(data = ndvi_hour_values,
+ggplot() +
+  geom_raster(data = ndvi_hour_values,
        aes(x = hour, y = ndvi, fill = gam_log_rss)) +
-  geom_raster() +
   labs(title = "te(hour, ndvi)", x = "Hour", y = "NDVI", fill = "log-RSS") +
-  geom_contour(aes(z = gam_log_rss), colour = "black") +
-  scale_fill_distiller(palette = "RdBu", type = "div",
+  geom_contour(data = ndvi_hour_values,
+       aes(x = hour, y = ndvi, z = gam_log_rss), colour = "black") +
+  scale_fill_distiller(palette = "RdBu", type = "div", direction = 1,
                        limits = c(-max_abs_colour, max_abs_colour)) +
   coord_cartesian(expand = FALSE) +
+  geom_rug(data = buffalo_ssf_data %>% filter(case_ == T),
+           aes(y = ndvi), alpha = 0.25, length = unit(0.015, "npc"), sides="l") +
+  scale_y_continuous(breaks = seq(-0.2, 0.8, by = 0.1)) +
   theme_bw() 
 
-ggsave(paste0("outputs/ndvi_tensor_gam_response_id", which_buffalo, ".png"),
-       width = 120, height = 60, units = "mm", dpi = 600)
+ggsave(paste0(plot_save_path, "/ndvi_tensor_gam_response_id", which_buffalo, ".png"),
+       width = 150, height = 80, units = "mm", dpi = 600)
 
 ```
 
-### References
+# References
 
 ::: {#refs}
 :::
