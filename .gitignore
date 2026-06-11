@@ -1,3 +1,7 @@
+# Manually added
+outputs/
+mapping/large_files/
+
 # History files
 .Rhistory
 .Rapp.history
@@ -51,3 +55,4 @@ rsconnect/
 /.quarto/
 
 **/*.quarto_ipynb
+.positai
