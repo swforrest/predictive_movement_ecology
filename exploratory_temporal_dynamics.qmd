@@ -18,6 +18,8 @@ format:
     fig-format: png
     fig-dpi: 300
   pdf:
+    fig-format: png
+    fig-dpi: 300
     geometry: 
       - top=30mm
       - left=30mm
@@ -132,12 +134,13 @@ leaflet(data = buffalo_clean) %>%
 
 ```{r}
 
-which_buffalo <- "2022" # select a single buffalo ID
+which_buffalo <- "2158" # select a single buffalo ID
 
 buffalo_id <- buffalo_all %>% filter(id == which_buffalo)
 
 buffalo_id %>%
   ggplot(aes(x = x_, y = y_, colour = t_)) +
+  geom_path(alpha = 0.5) + 
   geom_point(alpha = 0.5, size = 0.1) + 
   coord_fixed() +
   scale_x_continuous("Easting (m)") +
@@ -178,7 +181,7 @@ ndvi
 
 ```{r}
 
-canopy <- rast("mapping/canopy_cover.tif")
+canopy <- rast("mapping/canopy_cover.tif")/100
 herby <- rast("mapping/veg_herby.tif")
 slope <- rast("mapping/slope_raster.tif")
 
@@ -188,12 +191,56 @@ plot(spatial_covs)
 
 ```
 
+## Crop covariates to the range of data to determine the background values
+
+```{r}
+
+study_area <- st_as_sf(buffalo_id, coords = c("x_", "y_"), crs = 3112) %>% 
+  st_buffer(5000) # buffer to ensure we capture the background values]
+
+spatial_covs_cropped <- spatial_covs %>% 
+  terra::crop(terra::ext(study_area))
+
+plot(spatial_covs_cropped$ndvi, main = "Cropped NDVI")
+points(buffalo_id$x_, buffalo_id$y_, col = "red", pch = 16, cex = 0.5)
+
+```
+
+## Create dataframes of the covariate values
+
+```{r}
+
+spatial_covs_cropped_df <- as.data.frame(spatial_covs_cropped, xy = T)
+
+spatial_covs_cropped_df_long <- spatial_covs_cropped_df %>% 
+  pivot_longer(cols = -c(x, y), names_to = "covariate", values_to = "value") 
+
+spatial_covs_cropped_df_long %>% 
+  ggplot(aes(x = value)) +
+  geom_histogram() +
+  facet_wrap(~covariate, scales = "free") +
+  theme_bw()
+
+spatial_covs_summary <- spatial_covs_cropped_df_long %>% drop_na() %>%
+  group_by(covariate) %>%
+  summarise(n = n(),
+            mean = mean(value),
+            q025 = quantile(value, 0.025),
+            q25 = quantile(value, 0.25),
+            median = quantile(value, 0.5),
+            q75 = quantile(value, 0.75),
+            q975 = quantile(value, 0.975)
+  )
+
+```
+
+
 ## Extract covariate values at the end of each step
 
 ```{r}
 
 buffalo_id_steps <- buffalo_id_steps %>% 
-  extract_covariates(covariates = spatial_covs, where = "end")
+  extract_covariates(covariates = spatial_covs_cropped, where = "end")
 
 head(buffalo_id_steps)
 
@@ -223,8 +270,7 @@ buffalo_id_steps <- buffalo_id_steps %>%
          sl = sl_, 
          log_sl = log(sl_), 
          ta = ta_, 
-         cos_ta = cos(ta_),
-         canopy_01 = canopy/100)
+         cos_ta = cos(ta_))
 
 head(buffalo_id_steps) 
 
@@ -267,12 +313,12 @@ buffalo_hourly_habitat <-
             herby_q975 = quantile(herby, 0.975),
 
             # canopy cover
-            canopy_mean = mean(canopy_01),
-            canopy_q025 = quantile(canopy_01, 0.025),
-            canopy_q25 = quantile(canopy_01, 0.25),
-            canopy_median = median(canopy_01),
-            canopy_q75 = quantile(canopy_01, 0.75),
-            canopy_q975 = quantile(canopy_01, 0.975),
+            canopy_mean = mean(canopy),
+            canopy_q025 = quantile(canopy, 0.025),
+            canopy_q25 = quantile(canopy, 0.25),
+            canopy_median = median(canopy),
+            canopy_q75 = quantile(canopy, 0.75),
+            canopy_q975 = quantile(canopy, 0.975),
             
             # slope
             slope_mean = mean(slope),
@@ -312,14 +358,14 @@ path_alpha <- 0.1
 path_95_alpha <- 1
 
 # ribbon
-ribbon_95_alpha <- 0.5
-ribbon_50_alpha <- 0.25
+ribbon_95_alpha <- 0.25
+ribbon_50_alpha <- 0.5
 
 ```
 
 ### Loop over each variable to create a plot
 
-As we have some categorical and binary variables, we use the **mean** for the line, rather than the median, and it explains why some of the ribbons look weird.
+As we have some categorical and binary variables, we use the **mean** for the line, rather than the median, and it explains why some of the ribbons look weird, as the quantile doesn't change throughout the day. 
 
 ```{r}
 
@@ -344,36 +390,45 @@ for(i in 1:length(variables)){
            q75 = !!paste0(variables[i], "_q75"),
            q975 = !!paste0(variables[i], "_q975"))
   
+  spatial_covs_summary_cov <- spatial_covs_summary %>% filter(covariate == variables[i])
+  
   plot <- ggplot(data = var_summary) +
+    
+    # background
+    geom_rect(xmin = -Inf, xmax = Inf, 
+              ymin = spatial_covs_summary_cov$q25, ymax = spatial_covs_summary_cov$q75, 
+              fill = "grey", alpha = 0.05) +
+    geom_hline(yintercept = spatial_covs_summary_cov$mean, linetype = "dashed", colour = "black", size = 0.5) +
     
     # ribbons
     # 95% ribbon
-    # geom_ribbon(aes(x = hour_t2, 
+    # geom_ribbon(aes(x = hour_t2,
     #                 ymin = q025,
     #                 ymax = q975),
-    #             alpha = ribbon_95_alpha, fill = "grey70") +
+    #             alpha = ribbon_95_alpha, fill = "orange") +
     
     # 50% ribbon
     geom_ribbon(aes(x = hour_t2, 
                     ymin = q25,
                     ymax = q75),
-                alpha = ribbon_50_alpha, fill = "grey50") +
+                alpha = ribbon_50_alpha, fill = "orange") +
     
     # lines
-    geom_line(aes(x = hour_t2, y = mean), size = 1) +
-    geom_point(aes(x = hour_t2, y = mean), size = 2) +
+    geom_line(aes(x = hour_t2, y = mean), colour = "black", size = 1) +
+    geom_point(aes(x = hour_t2, y = mean), colour = "black", size = 1) +
     
     scale_x_continuous(breaks = seq(0, 24, by = 2)) +
+    coord_cartesian(expand = TRUE) +
     labs(x = "Hour of the day",
          y = variables[i],
-         title = paste0("Hourly ", variables[i])) +
+         title = paste0("Hourly ", variables[i], " - 50% quantiles")) +
     theme_bw()
   
   print(plot)
 
-  # ggsave(paste0("outputs/exploratory_temporal_dynamics/buffalo_hourly_", variables[i], ".png"),
-  #        plot = plot,
-  #        width = 150, height = 100, units = "mm", dpi = 600)
+  ggsave(paste0("outputs/exploratory_temporal_dynamics/buffalo_hourly_", variables[i], ".png"),
+         plot = plot,
+         width = 150, height = 100, units = "mm", dpi = 600)
   
 }
 

@@ -18,6 +18,8 @@ format:
     fig-format: png
     fig-dpi: 300
   pdf:
+    fig-format: png
+    fig-dpi: 300
     geometry: 
       - top=30mm
       - left=30mm

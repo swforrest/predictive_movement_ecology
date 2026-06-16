@@ -18,6 +18,8 @@ format:
     fig-format: png
     fig-dpi: 300
   pdf:
+    fig-format: png
+    fig-dpi: 300
     geometry: 
       - top=30mm
       - left=30mm
@@ -30,7 +32,7 @@ abstract: |
 # Load required packages
 
 ```{r}
-#| warning=TRUE
+#| warning=FALSE
 
 # remotes::install_github("sjevelazco/flexsdm")
 
@@ -186,9 +188,9 @@ Spatially plot the used and random steps, with the used steps in red.
 
 buffalo_parametric_popn_GvM %>% ggplot() +
   geom_point(data = . %>% filter(y == 0), aes(x = x2_, y = y2_), 
-             colour = "black", size = 0.1, alpha = 0.1) +
+             colour = "black", size = 0.1, alpha = 0.5) +
   geom_point(data = . %>% filter(y == 1), aes(x = x2_, y = y2_), 
-             colour = "red", size = 0.1, alpha = 0.1) +
+             colour = "red", size = 0.1, alpha = 0.5) +
   coord_equal() +
   theme_bw()
 
@@ -250,20 +252,21 @@ buffalo_parametric_popn_covs <- buffalo_parametric_popn_GvM %>%
 
 ```{r}
 
-tic()
-
-extrapolation_raster <- extra_eval(
-  training_data = buffalo_parametric_popn_covs,
-  pr_ab = "y",
-  projection_data = c(ndvi, elev, slope), 
-  metric = "mahalanobis",
-  univar_comb = FALSE,
-  aggreg_factor = 10
-)
-
-beep(sound = 2)
-
-toc()
+# uncomment to run the code - takes a while
+# tic()
+# 
+# extrapolation_raster <- extra_eval(
+#   training_data = buffalo_parametric_popn_covs,
+#   pr_ab = "y",
+#   projection_data = c(ndvi, elev, slope), 
+#   metric = "mahalanobis",
+#   univar_comb = FALSE,
+#   aggreg_factor = 10
+# )
+# 
+# beep(sound = 2)
+# 
+# toc()
 
 ```
 
@@ -271,8 +274,8 @@ toc()
 
 ```{r}
 
-terra::writeRaster(extrapolation_raster, "outputs/extrapolation_raster.tif", overwrite = TRUE)
-# extrapolation_raster <- terra::rast("outputs/extrapolation_raster.tif")
+# terra::writeRaster(extrapolation_raster, "outputs/extrapolation_raster.tif", overwrite = TRUE)
+extrapolation_raster <- terra::rast("outputs/extrapolation_raster.tif")
 
 ```
 
@@ -495,6 +498,98 @@ extrapolation_aus_plot /
 
 ggsave("outputs/extrapolation_aus_covs.png",
        width = 180, height = 110, units = "mm", scale = 1.5, dpi = 600)
+
+```
+
+# Create zoomed plot for earlier figure
+
+## Crop spatial covariates
+
+```{r}
+
+# set the extent
+zoom_extent_min_x <- min(buffalo_parametric_popn_covs_thin$x1_) - 20000
+zoom_extent_max_x <- max(buffalo_parametric_popn_covs_thin$x1_) + 120000
+zoom_extent_min_y <- min(buffalo_parametric_popn_covs_thin$y1_) - 50000
+zoom_extent_max_y <- max(buffalo_parametric_popn_covs_thin$y1_) + 20000
+
+# create extent
+crop_extent <- terra::ext(
+  zoom_extent_min_x,
+  zoom_extent_max_x,
+  zoom_extent_min_y,
+  zoom_extent_max_y
+)
+
+ndvi_crop <- terra::crop(ndvi, crop_extent)
+elev_crop <- terra::crop(elev, crop_extent)
+slope_crop <- terra::crop(slope, crop_extent)
+
+```
+
+# Assess extrapolation
+
+```{r}
+
+# commented out here as it takes about 45 minutes to run
+# tic()
+# 
+# extrapolation_raster_crop <- extra_eval(
+#   training_data = buffalo_parametric_popn_covs,
+#   pr_ab = "y",
+#   projection_data = c(ndvi_crop, elev_crop, slope_crop),
+#   metric = "mahalanobis",
+#   univar_comb = FALSE,
+#   aggreg_factor = 1
+# )
+# 
+# beep(sound = 2)
+# 
+# toc()
+
+# terra::writeRaster(extrapolation_raster_crop, "outputs/extrapolation_raster_crop.tif", overwrite = TRUE)
+extrapolation_raster_crop <- terra::rast("outputs/extrapolation_raster_crop.tif")
+
+```
+
+```{r}
+
+# mask and create dataframe for plotting
+extrapolation_raster_crop <- terra::mask(extrapolation_raster_crop, ndvi_crop)
+extrapolation_raster_cropped_df <- as.data.frame(extrapolation_raster_crop, xy = TRUE)
+
+# plot with ggplot
+ggplot(data = extrapolation_raster_cropped_df, aes(x = x, y = y, fill = extrapolation)) +
+  
+  geom_raster() +
+  
+  scale_fill_viridis_c(
+    na.value = "transparent",
+    transform = "log1p",
+    breaks = c(1, 10, 100, 500)
+  ) +
+  
+  geom_contour(aes(z = extrapolation),
+               breaks = c(threshold_max), color = "orange", linewidth = 0.3) +
+  
+  geom_point(data = buffalo_parametric_popn_covs %>% filter(y == 0),
+             aes(x = x2_, y = y2_),
+             colour = "black", alpha = 0.25, size = 0.01) +
+  
+  geom_point(data = buffalo_parametric_popn_covs %>% filter(y == 1),
+             aes(x = x1_, y = y1_),
+             colour = "red", alpha = 0.25, size = 0.01) +
+  
+  annotation_scale(location = "bl", width_hint = 0.2) +
+  coord_sf(crs = 3112, default_crs = 3112, expand = FALSE) +
+  labs(x = NULL, y = NULL, fill = "Extrapolation\n(Shape)") +
+  theme_classic() +
+  theme(
+    legend.position = "right"
+    )
+
+ggsave("outputs/extrapolation_raster_cropped_ggplot.png",
+       width = 180, height = 90, units = "mm", scale = 1.5, dpi = 600)
 
 ```
 
