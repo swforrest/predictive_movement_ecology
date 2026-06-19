@@ -15,25 +15,31 @@ website:
       - text: Home
         href: index.qmd
       # - case_study.qmd
-      - tutorials.qmd
-      
+      # - tutorials.qmd
+      - text: Temporal dynamics
+        href: exploratory_temporal_dynamics.qmd
+      - text: SSF Formulations
+        href: ssf_responses.qmd
+      - text: Environmental Extrapolation
+        href: extrapolation_shape.qmd
+
     right:
       - icon: github
         href: https://github.com/swforrest/predictive_movement_ecology
         
-  sidebar:
+  # sidebar:
     # - title: "Case Study"
     #   style: floating
     #   contents:
     #     - case_study.qmd
         
-    - title: "Helpful Scripts and Tutorials"
-      style: floating
-      contents:
-        - tutorials.qmd
-        - exploratory_temporal_dynamics.qmd
-        - ssf_responses.qmd
-        - extrapolation_shape.qmd
+    # - title: "Helpful Scripts and Tutorials"
+    #   style: floating
+    #   contents:
+    #     - tutorials.qmd
+    #     - exploratory_temporal_dynamics.qmd
+    #     - ssf_responses.qmd
+    #     - extrapolation_shape.qmd
         
 
 format:
