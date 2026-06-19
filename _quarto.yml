@@ -14,7 +14,7 @@ website:
     left:
       - text: Home
         href: index.qmd
-      - case_study.qmd
+      # - case_study.qmd
       - tutorials.qmd
       
     right:
@@ -22,10 +22,10 @@ website:
         href: https://github.com/swforrest/predictive_movement_ecology
         
   sidebar:
-    - title: "Case Study"
-      style: floating
-      contents:
-        - case_study.qmd
+    # - title: "Case Study"
+    #   style: floating
+    #   contents:
+    #     - case_study.qmd
         
     - title: "Helpful Scripts and Tutorials"
       style: floating

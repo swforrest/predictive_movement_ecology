@@ -278,7 +278,7 @@ head(buffalo_id_steps)
 
 # Hourly movement behaviour and selection of covariates
 
-Here we bin the trajectories into the hours of the day, and calculate the mean, and quantiles for the step lengths and four habitat covariates. This is a similar approach to in @Forrest2024-gc and @Forrest2025-bn, where we used this approach to assess temporal dynamics as an exploratory step, but also as a validation step by assessing whether the simualted trajectories had also learned the temporally dynamic behaviour.
+Here we bin the trajectories into the hours of the day, and calculate the mean, and quantiles for the step lengths and four habitat covariates. This is a similar approach to in @Forrest2025-le and @Forrest2026-eg, where we used this approach to assess temporal dynamics as an exploratory step, but also as a validation step by assessing whether the simulated trajectories had also learned the temporally dynamic behaviour.
 
 ## Observed buffalo data
 
@@ -365,7 +365,9 @@ ribbon_50_alpha <- 0.5
 
 ### Loop over each variable to create a plot
 
-As we have some categorical and binary variables, we use the **mean** for the line, rather than the median, and it explains why some of the ribbons look weird, as the quantile doesn't change throughout the day. 
+As we have some categorical (canopy cover) and binary variables (herbaceous vegetation), we use the **mean** for the line, rather than the median. Having categorical and binary variables also explains why some of the ribbons look weird, as the quantile doesn't change across the day, or jump to a different level (as in the observed ribbon for canopy cover).
+
+In these plots, the grey ribbon represents the 50% quantiles of the covariate values across the landscape (i.e., the background availability), and the dashed line represents the mean value across the landscape. The black line represents the mean value of the covariate at the end of each step, binned by hour of the day, with the orange ribbon representing the 50% quantiles of the covariate values at the end of each step at each hour.
 
 ```{r}
 
