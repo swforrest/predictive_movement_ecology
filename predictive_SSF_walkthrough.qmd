@@ -111,7 +111,7 @@ season_end    <- as.POSIXct("2018-11-01", tz = "Australia/Darwin")
 n_control <- 25    # number of available (random) steps per used step
 
 # --- Simulation ----------------------------------------------------------
-n_traj  <- 1000    # number of simulated trajectories (paper used 100,000)
+n_traj  <- 10000   # number of simulated trajectories (paper used 100,000)
 n_steps <- 1440    # steps per trajectory; hourly in this case
 n_ch    <- 25      # candidate steps evaluated at each step of the simulation
 burn_in <- 24      # leading steps discarded from each trajectory (1 day)

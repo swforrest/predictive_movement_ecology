@@ -421,7 +421,7 @@ window.Quarto = {
 <span id="cb3-14"><a href="#cb3-14"></a>n_control <span class="ot">&lt;-</span> <span class="dv">25</span>    <span class="co"># number of available (random) steps per used step</span></span>
 <span id="cb3-15"><a href="#cb3-15"></a></span>
 <span id="cb3-16"><a href="#cb3-16"></a><span class="co"># --- Simulation ----------------------------------------------------------</span></span>
-<span id="cb3-17"><a href="#cb3-17"></a>n_traj  <span class="ot">&lt;-</span> <span class="dv">1000</span>    <span class="co"># number of simulated trajectories (paper used 100,000)</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a>n_traj  <span class="ot">&lt;-</span> <span class="dv">10000</span>    <span class="co"># number of simulated trajectories (paper used 100,000)</span></span>
 <span id="cb3-18"><a href="#cb3-18"></a>n_steps <span class="ot">&lt;-</span> <span class="dv">1440</span>    <span class="co"># steps per trajectory; hourly in this case</span></span>
 <span id="cb3-19"><a href="#cb3-19"></a>n_ch    <span class="ot">&lt;-</span> <span class="dv">25</span>      <span class="co"># candidate steps evaluated at each step of the simulation</span></span>
 <span id="cb3-20"><a href="#cb3-20"></a>burn_in <span class="ot">&lt;-</span> <span class="dv">24</span>      <span class="co"># leading steps discarded from each trajectory (1 day)</span></span>
@@ -1117,7 +1117,7 @@ Deviance explained = 0.117%
 <span id="cb42-20"><a href="#cb42-20"></a><span class="fu">toc</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Fitting the temporally dynamic model: 122.701 sec elapsed</code></pre>
+<pre><code>Fitting the temporally dynamic model: 217.449 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -1500,7 +1500,7 @@ Deviance explained = -94.7%
 <span id="cb63-18"><a href="#cb63-18"></a><span class="fu">toc</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Building hourly selection surfaces: 0.475 sec elapsed</code></pre>
+<pre><code>Building hourly selection surfaces: 1.029 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -1793,7 +1793,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <p>The code in <code>dynamic_SSF_sims</code> draws turning angles with <code>Rfast::rvonmises()</code>, and the obvious port of it to this script is what we started with. Two problems showed up once the simulation was run at scale, both worth knowing about if you are adapting that code:</p>
 <ul>
 <li><strong>It does not respect <code>set.seed()</code>.</strong> <code>Rfast</code> uses its own random number generator, so the simulations are not reproducible no matter what seed you set. For a teaching script — or any analysis you intend someone to be able to re-run — that is disqualifying on its own.</li>
-<li><strong>It very occasionally returns <code>NaN</code></strong>: about 1 draw in 8 million, at small positive concentrations. That sounds negligible until you count the draws. At 1000 × 1440 × 25 we make around 9 million per model, so roughly one <code>NaN</code> per run — enough that it appeared, killed a render, and then refused to reproduce.</li>
+<li><strong>It very occasionally returns <code>NaN</code></strong>: about 1 draw in 8 million, at small positive concentrations. That sounds negligible until you count the draws. At 10000 × 1440 × 25 we make around 9 million per model, so roughly one <code>NaN</code> per run — enough that it appeared, killed a render, and then refused to reproduce.</li>
 </ul>
 <p><code>circular::rvonmises()</code> is reproducible, produced no non-finite values in 4.8 × 10⁷ draws with these parameters, and is slightly faster, so that is what we use. The <code>lookup()</code> function above also guards against non-finite coordinates regardless, since a candidate step that cannot be evaluated should simply never be selected rather than halting the simulation.</p>
 </div>
@@ -1939,7 +1939,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <span id="cb79-6"><a href="#cb79-6"></a>  <span class="at">label =</span> <span class="st">"A: static"</span>, <span class="at">seed =</span> <span class="dv">101</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Simulating: A: static: 23.748 sec elapsed</code></pre>
+<pre><code>Simulating: A: static: 353.017 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -1949,7 +1949,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <span id="cb81-4"><a href="#cb81-4"></a>  <span class="at">label =</span> <span class="st">"B: temporally dynamic"</span>, <span class="at">seed =</span> <span class="dv">102</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Simulating: B: temporally dynamic: 19.4 sec elapsed</code></pre>
+<pre><code>Simulating: B: temporally dynamic: 352.634 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -1957,7 +1957,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <span id="cb83-2"><a href="#cb83-2"></a>    <span class="st">" dynamic:"</span>, <span class="fu">nrow</span>(sims_dynamic), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Simulated locations - static: 1416000  dynamic: 1416000 </code></pre>
+<pre><code>Simulated locations - static: 14160000  dynamic: 14160000 </code></pre>
 </div>
 </div>
 <div class="cell">
@@ -1971,7 +1971,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <span id="cb85-6"><a href="#cb85-6"></a>  <span class="at">label =</span> <span class="st">"B: dynamic, observed start"</span>, <span class="at">seed =</span> <span class="dv">103</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Simulating: B: dynamic, observed start: 18.854 sec elapsed</code></pre>
+<pre><code>Simulating: B: dynamic, observed start: 243.297 sec elapsed</code></pre>
 </div>
 </div>
 </section>
@@ -2090,7 +2090,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <span id="cb92-5"><a href="#cb92-5"></a><span class="fu">toc</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Aggregating simulations: 0.895 sec elapsed</code></pre>
+<pre><code>Aggregating simulations: 12.655 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -2204,7 +2204,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <div class="cell-output-display">
 <div data-pagedtable="false">
 <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["n_trajectories"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["100 m"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["250 m"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"10","2":"0.2708223","3":"0.4485280"},{"1":"25","2":"0.4046839","3":"0.6171379"},{"1":"50","2":"0.5492029","3":"0.7628646"},{"1":"100","2":"0.6797539","3":"0.8580710"},{"1":"250","2":"0.8533942","3":"0.9435353"},{"1":"1000","2":"1.0000000","3":"1.0000000"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["n_trajectories"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["100 m"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["250 m"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"10","2":"0.3157170","3":"0.5209733"},{"1":"25","2":"0.4238874","3":"0.6590460"},{"1":"50","2":"0.5377787","3":"0.7720583"},{"1":"100","2":"0.6422675","3":"0.8523125"},{"1":"250","2":"0.8032524","3":"0.9258008"},{"1":"1000","2":"0.9376597","3":"0.9776403"},{"1":"5000","2":"0.9912364","3":"0.9969947"},{"1":"10000","2":"1.0000000","3":"1.0000000"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <p>Correlation between a UD built from n trajectories and the UD built from all of them.</p>
@@ -2228,7 +2228,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["resolution"],"name":[1],"type":["chr"],"align":["left"]},{"label":["n_trajectories"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["correlation"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"100 m","2":"250","3":"0.8533942"},{"1":"250 m","2":"250","3":"0.9435353"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["resolution"],"name":[1],"type":["chr"],"align":["left"]},{"label":["n_trajectories"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["correlation"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"100 m","2":"5000","3":"0.9912364"},{"1":"250 m","2":"5000","3":"0.9969947"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -2243,8 +2243,8 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>At the 100 m aggregation, a distribution built from half the trajectories correlates 0.85 with the full one; at 250 m it is 0.94. That is well short of 1, which means <strong>1,000 trajectories is not yet enough</strong> to characterise the utilisation distribution at that resolution.</p>
-<p>With 1,416,000 simulated locations spread over a 100 m grid, each cell holds only a limited number of points, so a fine-resolution map carries more sampling noise than a coarse one — which is exactly what the gap between the two curves shows.</p>
+<p>At the 100 m aggregation, a distribution built from half the trajectories correlates 0.99 with the full one; at 250 m it is 1.00. That is close enough to 1 that adding more trajectories is no longer changing the answer much at this resolution.</p>
+<p>With 14,160,000 simulated locations spread over a 100 m grid, each cell holds only a limited number of points, so a fine-resolution map carries more sampling noise than a coarse one — which is exactly what the gap between the two curves shows.</p>
 <p>Two levers are available if the answer is still moving, and the second curve shows the second of them:</p>
 <ul>
 <li><strong>More trajectories.</strong> <span class="citation" data-cites="Forrest2025-le">Forrest et al. (<a href="#ref-Forrest2025-le" role="doc-biblioref">2025</a>)</span> used 100,000 trajectories of 3,000 steps, run on a computing cluster. Increase <code>n_traj</code> in the parameter block.</li>
@@ -2267,7 +2267,7 @@ max values  :  0.073107,  0.056587,  0.044605,   0.15044,  0.504934,  0.994433, 
 <span id="cb101-4"><a href="#cb101-4"></a><span class="fu">toc</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Building hourly UDs: 1.337 sec elapsed</code></pre>
+<pre><code>Building hourly UDs: 9.179 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -2284,8 +2284,8 @@ extent      : 17000, 31000, -1440000, -1426000  (xmin, xmax, ymin, ymax)
 coord. ref. : GDA94 / Geoscience Australia Lambert (EPSG:3112)
 source(s)   : memory
 names       :   hour_0,   hour_1,   hour_2,   hour_3,   hour_4,   hour_5, ...
-min values  : 0.000017, 0.000017,        0, 0.000017, 0.000017, 0.000017, ...
-max values  : 0.001136, 0.001085, 0.001169, 0.001169, 0.001051, 0.001102, ...</code></pre>
+min values  : 0.000042, 0.000042, 0.000044, 0.000058, 0.000083, 0.000061, ...
+max values  :  0.00092, 0.000944, 0.000893, 0.000902, 0.000914, 0.001017, ...</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -2339,7 +2339,7 @@ max values  : 0.001136, 0.001085, 0.001169, 0.001169, 0.001051, 0.001102, ...</c
 <span id="cb106-8"><a href="#cb106-8"></a><span class="fu">toc</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Extracting covariates at simulated locations: 1.01 sec elapsed</code></pre>
+<pre><code>Extracting covariates at simulated locations: 8.792 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -2348,7 +2348,7 @@ max values  : 0.001136, 0.001085, 0.001169, 0.001169, 0.001051, 0.001102, ...</c
 <div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["step"],"name":[1],"type":["int"],"align":["right"]},{"label":["hour"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["x"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["y"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sl"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["ta"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["bearing"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["hab_p"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["traj_id"],"name":[9],"type":["int"],"align":["right"]},{"label":["model"],"name":[10],"type":["chr"],"align":["left"]},{"label":["ndvi"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["canopy"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["slope"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"25","2":"0","3":"21132.03","4":"-1434153","5":"362.08219783","6":"-1.0951106","7":"12.26377","8":"-0.5255618","9":"1","10":"A: static","11":"0.4250066","12":"0.575","13":"1.3519722"},{"1":"26","2":"1","3":"21210.68","4":"-1434164","5":"79.35875764","6":"0.1683750","7":"12.43215","8":"-0.4223365","9":"1","10":"A: static","11":"0.4282572","12":"0.575","13":"1.0072907"},{"1":"27","2":"2","3":"20667.02","4":"-1433621","5":"768.65365916","6":"2.4906756","7":"14.92282","8":"-0.2684548","9":"1","10":"A: static","11":"0.5311319","12":"0.825","13":"0.3402640"},{"1":"28","2":"3","3":"20672.49","4":"-1433640","5":"19.93521686","6":"2.6338160","7":"17.55664","8":"-0.3082734","9":"1","10":"A: static","11":"0.5150622","12":"0.825","13":"0.4766916"},{"1":"29","2":"4","3":"20672.50","4":"-1433640","5":"0.02526076","6":"0.2529242","7":"17.80956","8":"-0.3082734","9":"1","10":"A: static","11":"0.5150622","12":"0.825","13":"0.4766916"},{"1":"30","2":"5","3":"20573.68","4":"-1433497","5":"173.23468722","6":"-3.0653207","7":"14.74424","8":"-0.2413481","9":"1","10":"A: static","11":"0.5098046","12":"0.575","13":"0.3851920"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["step"],"name":[1],"type":["int"],"align":["right"]},{"label":["hour"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["x"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["y"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["sl"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["ta"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["bearing"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["hab_p"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["traj_id"],"name":[9],"type":["int"],"align":["right"]},{"label":["model"],"name":[10],"type":["chr"],"align":["left"]},{"label":["ndvi"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["canopy"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["slope"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"25","2":"0","3":"22137.52","4":"-1427532","5":"209.3392011","6":"-2.03815226","7":"-3.773789","8":"-0.5638219","9":"1","10":"A: static","11":"0.3665822","12":"0.575","13":"1.4931228"},{"1":"26","2":"1","3":"21349.14","4":"-1439434","5":"2240.9819799","6":"-0.57910618","7":"-4.352895","8":"-0.2709331","9":"1","10":"A: static","11":"0.5080108","12":"0.575","13":"0.4841816"},{"1":"27","2":"2","3":"21349.00","4":"-1439434","5":"0.2548938","6":"0.19187941","7":"-4.161016","8":"-0.2709331","9":"1","10":"A: static","11":"0.5080108","12":"0.575","13":"0.4841816"},{"1":"28","2":"3","3":"21356.73","4":"-1439435","5":"7.8219229","6":"-2.27966387","7":"-6.440680","8":"-0.2900906","9":"1","10":"A: static","11":"0.4951795","12":"0.575","13":"0.5510136"},{"1":"29","2":"4","3":"21345.28","4":"-1439412","5":"25.9651834","6":"2.18493200","7":"-4.255748","8":"-0.3084089","9":"1","10":"A: static","11":"0.4935078","12":"0.575","13":"0.6124367"},{"1":"30","2":"5","3":"21279.53","4":"-1439249","5":"175.5773885","6":"-0.07280923","7":"-4.328557","8":"-0.5500093","9":"1","10":"A: static","11":"0.4443054","12":"0.575","13":"1.4289070"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -2520,7 +2520,7 @@ max values  : 0.001136, 0.001085, 0.001169, 0.001169, 0.001051, 0.001102, ...</c
 <div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["model"],"name":[1],"type":["chr"],"align":["left"]},{"label":["spearman"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["pearson"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"A: static","2":"0.599","3":"0.590"},{"1":"B: temporally dynamic","2":"0.779","3":"0.759"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["model"],"name":[1],"type":["chr"],"align":["left"]},{"label":["spearman"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["pearson"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"A: static","2":"0.724","3":"0.79"},{"1":"B: temporally dynamic","2":"0.750","3":"0.58"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -2550,12 +2550,12 @@ max values  : 0.001136, 0.001085, 0.001169, 0.001169, 0.001051, 0.001102, ...</c
 <div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["model"],"name":[1],"type":["chr"],"align":["left"]},{"label":["half_1"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["half_2"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["difference"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"A: static","2":"0.484","3":"0.836","4":"0.352"},{"1":"B: temporally dynamic","2":"0.748","3":"0.872","4":"0.124"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["model"],"name":[1],"type":["chr"],"align":["left"]},{"label":["half_1"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["half_2"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["difference"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"A: static","2":"0.763","3":"0.796","4":"0.033"},{"1":"B: temporally dynamic","2":"0.839","3":"0.712","4":"0.127"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
 </div>
-<p>The halves agree to within 0.124 for one of the models, which looks reassuring.</p>
+<p>The halves agree to within 0.033 for one of the models, which looks reassuring.</p>
 <p><strong>It is weaker evidence than it appears.</strong> The two halves are not as independent as they look: both are drawn under the same starting locations and the same simulation setup, so they share whatever that particular run happens to be doing. A split-half check measures <em>within-run</em> sampling noise only.</p>
 <p>The check that actually matters is to re-run the whole simulation from scratch, several times, and see how far the answer moves. That is more expensive, which is why it is tempting to skip — so we do it at reduced scale rather than not at all.</p>
 <div class="cell">
@@ -2589,12 +2589,12 @@ max values  : 0.001136, 0.001085, 0.001169, 0.001169, 0.001051, 0.001102, ...</c
 <span id="cb114-26"><a href="#cb114-26"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Simulating: repeat: 4.017 sec elapsed
-Simulating: repeat: 4.027 sec elapsed
-Simulating: repeat: 4.047 sec elapsed
-Simulating: repeat: 3.631 sec elapsed
-Simulating: repeat: 3.741 sec elapsed
-Simulating: repeat: 3.821 sec elapsed</code></pre>
+<pre><code>Simulating: repeat: 3.977 sec elapsed
+Simulating: repeat: 4.033 sec elapsed
+Simulating: repeat: 4.123 sec elapsed
+Simulating: repeat: 3.952 sec elapsed
+Simulating: repeat: 3.912 sec elapsed
+Simulating: repeat: 4.627 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -2623,7 +2623,7 @@ Simulating: repeat: 3.821 sec elapsed</code></pre>
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Compare the two tables. The split-half spread was at most 0.352; across fully independent re-runs it is 0.412. Same models, same data, same code — only the random draws differ.</p>
+<p>Compare the two tables. The split-half spread was at most 0.127; across fully independent re-runs it is 0.412. Same models, same data, same code — only the random draws differ.</p>
 <p>The robust finding, which has held across every version of this analysis, is that <strong>the whole-day Boyce index is not stable enough at this simulation scale to rank the two models from a single run</strong>. A separate experiment run outside this document — 5 independent seeds per model, at 500 trajectories of 720 steps — gives a sense of the spread involved:</p>
 <table class="caption-top table">
 <thead>
@@ -2730,7 +2730,7 @@ Simulating: repeat: 3.821 sec elapsed</code></pre>
 <div class="cell-output-display">
 <div data-pagedtable="false">
 <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["model"],"name":[1],"type":["chr"],"align":["left"]},{"label":["spearman_vs_kde"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"A: static","2":"0.04098715"},{"1":"B: temporally dynamic","2":"0.25436615"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["model"],"name":[1],"type":["chr"],"align":["left"]},{"label":["spearman_vs_kde"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"A: static","2":"0.07651513"},{"1":"B: temporally dynamic","2":"0.25123027"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <p>Observed kernel density estimate alongside the dynamic model’s prediction.</p>
@@ -2790,7 +2790,7 @@ Simulating: repeat: 3.821 sec elapsed</code></pre>
 <div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["hour"],"name":[1],"type":["int"],"align":["right"]},{"label":["n_observed"],"name":[2],"type":["int"],"align":["right"]},{"label":["A: static"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["B: temporally dynamic"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"0","2":"97","3":"0.561","4":"0.837"},{"1":"1","2":"98","3":"0.336","4":"0.876"},{"1":"2","2":"98","3":"0.479","4":"0.833"},{"1":"3","2":"98","3":"0.606","4":"0.831"},{"1":"4","2":"98","3":"0.415","4":"0.810"},{"1":"5","2":"98","3":"0.837","4":"0.905"},{"1":"6","2":"98","3":"0.421","4":"0.895"},{"1":"7","2":"97","3":"0.671","4":"0.923"},{"1":"8","2":"88","3":"-0.025","4":"0.650"},{"1":"9","2":"90","3":"0.105","4":"0.425"},{"1":"10","2":"95","3":"-0.107","4":"0.548"},{"1":"11","2":"97","3":"0.160","4":"0.602"},{"1":"12","2":"93","3":"-0.033","4":"0.463"},{"1":"13","2":"95","3":"-0.003","4":"0.491"},{"1":"14","2":"69","3":"0.048","4":"0.487"},{"1":"15","2":"63","3":"0.029","4":"0.754"},{"1":"16","2":"87","3":"0.259","4":"0.658"},{"1":"17","2":"96","3":"0.132","4":"0.888"},{"1":"18","2":"93","3":"0.081","4":"0.627"},{"1":"19","2":"96","3":"0.592","4":"0.741"},{"1":"20","2":"96","3":"0.477","4":"0.828"},{"1":"21","2":"97","3":"0.751","4":"0.743"},{"1":"22","2":"99","3":"0.516","4":"0.892"},{"1":"23","2":"99","3":"0.574","4":"0.813"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["hour"],"name":[1],"type":["int"],"align":["right"]},{"label":["n_observed"],"name":[2],"type":["int"],"align":["right"]},{"label":["A: static"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["B: temporally dynamic"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"0","2":"97","3":"0.584","4":"0.890"},{"1":"1","2":"98","3":"0.670","4":"0.922"},{"1":"2","2":"98","3":"0.645","4":"0.888"},{"1":"3","2":"98","3":"0.535","4":"0.844"},{"1":"4","2":"98","3":"0.672","4":"0.939"},{"1":"5","2":"98","3":"0.765","4":"0.839"},{"1":"6","2":"98","3":"0.747","4":"0.839"},{"1":"7","2":"97","3":"0.333","4":"0.973"},{"1":"8","2":"88","3":"0.279","4":"0.553"},{"1":"9","2":"90","3":"0.263","4":"0.535"},{"1":"10","2":"95","3":"0.193","4":"0.721"},{"1":"11","2":"97","3":"-0.119","4":"0.567"},{"1":"12","2":"93","3":"-0.041","4":"0.609"},{"1":"13","2":"95","3":"-0.166","4":"0.716"},{"1":"14","2":"69","3":"-0.027","4":"0.709"},{"1":"15","2":"63","3":"-0.089","4":"0.679"},{"1":"16","2":"87","3":"0.012","4":"0.685"},{"1":"17","2":"96","3":"0.391","4":"0.745"},{"1":"18","2":"93","3":"0.650","4":"0.549"},{"1":"19","2":"96","3":"0.635","4":"0.769"},{"1":"20","2":"96","3":"0.467","4":"0.815"},{"1":"21","2":"97","3":"0.587","4":"0.886"},{"1":"22","2":"99","3":"0.680","4":"0.867"},{"1":"23","2":"99","3":"0.458","4":"0.882"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -2834,7 +2834,7 @@ Simulating: repeat: 3.821 sec elapsed</code></pre>
 <div class="cell-output-display">
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["mean_static"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["mean_dynamic"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["hours_dynamic_better"],"name":[3],"type":["int"],"align":["right"]},{"label":["hours_compared"],"name":[4],"type":["int"],"align":["right"]}],"data":[{"1":"0.3284167","2":"0.73","3":"23","4":"24"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["mean_static"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["mean_dynamic"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["hours_dynamic_better"],"name":[3],"type":["int"],"align":["right"]},{"label":["hours_compared"],"name":[4],"type":["int"],"align":["right"]}],"data":[{"1":"0.3801667","2":"0.7675417","3":"23","4":"24"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
@@ -2903,7 +2903,7 @@ Simulating: repeat: 3.821 sec elapsed</code></pre>
 <span id="cb127-21"><a href="#cb127-21"></a><span class="fu">toc</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>amt simulation: 41.388 sec elapsed</code></pre>
+<pre><code>amt simulation: 37.913 sec elapsed</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -3052,7 +3052,7 @@ BLAS:   /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRbla
 LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
 
 locale:
-[1] C.UTF-8/C.UTF-8/C.UTF-8/C/C.UTF-8/C.UTF-8
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 time zone: Australia/Brisbane
 tzcode source: internal
@@ -3077,16 +3077,16 @@ loaded via a namespace (and not attached):
 [21] KernSmooth_2.23-26 withr_3.0.3        grid_4.5.0         e1071_1.7-17      
 [25] iterators_1.0.14   scales_1.4.0       MASS_7.3-65        dichromat_2.0-0.1 
 [29] mvtnorm_1.3-3      cli_3.6.6          rmarkdown_2.29     crayon_1.5.3      
-[33] generics_0.1.4     tzdb_0.5.0         DBI_1.3.0          proxy_0.4-29      
-[37] splines_4.5.0      parallel_4.5.0     vctrs_0.7.3        boot_1.3-31       
-[41] Matrix_1.7-3       jsonlite_2.0.0     hms_1.1.4          ecospat_4.1.2     
-[45] bit64_4.8.4        foreach_1.5.2      units_1.0-1        glue_1.8.1        
-[49] ggokabeito_0.1.0   codetools_0.2-20   mvnfast_0.2.8      stringi_1.8.7     
-[53] gtable_0.3.6       circular_0.5-1     pillar_1.11.1      htmltools_0.5.8.1 
-[57] R6_2.6.1           Rdpack_2.6.4       vroom_1.7.1        evaluate_1.0.5    
-[61] lattice_0.22-6     rbibutils_2.3      backports_1.5.0    class_7.3-23      
-[65] Rcpp_1.1.2         gridExtra_2.3      checkmate_2.3.2    xfun_0.57         
-[69] pkgconfig_2.0.3   </code></pre>
+[33] generics_0.1.4     rstudioapi_0.17.1  tzdb_0.5.0         DBI_1.3.0         
+[37] proxy_0.4-29       splines_4.5.0      parallel_4.5.0     vctrs_0.7.3       
+[41] boot_1.3-31        Matrix_1.7-3       jsonlite_2.0.0     hms_1.1.4         
+[45] ecospat_4.1.2      bit64_4.8.4        foreach_1.5.2      units_1.0-1       
+[49] glue_1.8.1         ggokabeito_0.1.0   codetools_0.2-20   mvnfast_0.2.8     
+[53] stringi_1.8.7      gtable_0.3.6       circular_0.5-1     pillar_1.11.1     
+[57] htmltools_0.5.8.1  R6_2.6.1           Rdpack_2.6.4       vroom_1.7.1       
+[61] evaluate_1.0.5     lattice_0.22-6     rbibutils_2.3      backports_1.5.0   
+[65] class_7.3-23       Rcpp_1.1.2         gridExtra_2.3      checkmate_2.3.2   
+[69] xfun_0.57          pkgconfig_2.0.3   </code></pre>
 </div>
 </div>
 
@@ -3661,7 +3661,7 @@ loaded via a namespace (and not attached):
 <span id="cb136-115"><a href="#cb136-115"></a>n_control <span class="ot">&lt;-</span> <span class="dv">25</span>    <span class="co"># number of available (random) steps per used step</span></span>
 <span id="cb136-116"><a href="#cb136-116"></a></span>
 <span id="cb136-117"><a href="#cb136-117"></a><span class="co"># --- Simulation ----------------------------------------------------------</span></span>
-<span id="cb136-118"><a href="#cb136-118"></a>n_traj  <span class="ot">&lt;-</span> <span class="dv">1000</span>    <span class="co"># number of simulated trajectories (paper used 100,000)</span></span>
+<span id="cb136-118"><a href="#cb136-118"></a>n_traj  <span class="ot">&lt;-</span> <span class="dv">10000</span>   <span class="co"># number of simulated trajectories (paper used 100,000)</span></span>
 <span id="cb136-119"><a href="#cb136-119"></a>n_steps <span class="ot">&lt;-</span> <span class="dv">1440</span>    <span class="co"># steps per trajectory; hourly in this case</span></span>
 <span id="cb136-120"><a href="#cb136-120"></a>n_ch    <span class="ot">&lt;-</span> <span class="dv">25</span>      <span class="co"># candidate steps evaluated at each step of the simulation</span></span>
 <span id="cb136-121"><a href="#cb136-121"></a>burn_in <span class="ot">&lt;-</span> <span class="dv">24</span>      <span class="co"># leading steps discarded from each trajectory (1 day)</span></span>
