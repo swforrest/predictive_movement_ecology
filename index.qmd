@@ -14,4 +14,6 @@ These include:
 
 -   **Assessing environmental extrapolation**: Use the Shape metric to assess the degree of extrapolation (via environmental distance) is present in the covariates that are being predicted over. This can be used to identify areas where predictions are likely to be unreliable.
 
+-   **Predictive SSF Walkthrough**: An end-to-end worked example of the approach in the paper — fit a step selection function (both a static model and a temporally dynamic GAM), simulate stochastic trajectories from the fitted models, aggregate those simulations into utilisation distributions, summarise hourly movement and habitat use, and validate the predictions against the observed data.
+
 ![](figures/ConceptFigure.png)

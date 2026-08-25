@@ -572,9 +572,9 @@ ggplot(data = extrapolation_raster_cropped_df, aes(x = x, y = y, fill = extrapol
   geom_contour(aes(z = extrapolation),
                breaks = c(threshold_max), color = "orange", linewidth = 0.3) +
   
-  geom_point(data = buffalo_parametric_popn_covs %>% filter(y == 0),
-             aes(x = x2_, y = y2_),
-             colour = "black", alpha = 0.25, size = 0.01) +
+  # geom_point(data = buffalo_parametric_popn_covs %>% filter(y == 0),
+  #            aes(x = x2_, y = y2_),
+  #            colour = "black", alpha = 0.25, size = 0.01) +
   
   geom_point(data = buffalo_parametric_popn_covs %>% filter(y == 1),
              aes(x = x1_, y = y1_),

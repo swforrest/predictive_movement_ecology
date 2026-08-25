@@ -22,6 +22,8 @@ website:
         href: ssf_responses.qmd
       - text: Environmental Extrapolation
         href: extrapolation_shape.qmd
+      - text: Predictive SSF Walkthrough
+        href: predictive_SSF_walkthrough.qmd
 
     right:
       - icon: github
