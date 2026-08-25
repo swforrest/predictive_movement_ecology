@@ -93,8 +93,8 @@ thing bigger or smaller without hunting through it:
 | `which_buffalo` | `2158` | Individual to fit |
 | `season_start` / `season_end` | 2018-07-25 / 2018-11-01 | Fitting window |
 | `n_control` | `25` | Available steps per used step |
-| `n_traj` | `500` | Simulated trajectories per model |
-| `n_steps` | `720` | Steps per trajectory (720 h = 30 days) |
+| `n_traj` | `1000` | Simulated trajectories per model |
+| `n_steps` | `1440` | Steps per trajectory (1440 h = 60 days) |
 | `n_ch` | `25` | Candidate steps evaluated at each simulated step |
 | `burn_in` | `24` | Leading steps discarded from each trajectory |
 | `start_mode` | `"random"` | Seeding strategy — see §6 |
@@ -376,34 +376,78 @@ rebuilt per hour.
 
 ---
 
+## 8a. Site integration and file layout
+
+Three things had to be right for `quarto render` (the whole site, not just this page) to work:
+
+- **HTML only for this page.** The `pdf:` format was removed from its YAML. LaTeX cannot render
+  `.gif`, so a bare `quarto render` fails with *Unknown graphics extension: .gif* while building
+  the PDF. Other pages keep their PDF output.
+- **The notes file is `_`-prefixed.** Quarto ignores paths beginning with `_`, so
+  `_predictive_SSF_walkthrough_notes.md` is not built as a site page. Without the prefix it
+  appeared as `[1/10]` in the render and would have been published.
+- **Embedded gifs live in `figures/walkthrough/`, not `outputs/`.** `.gitignore` line 2 is
+  `outputs/`, which also matches `docs/outputs/` — so gifs written there are untracked both at
+  source and in the built site, and the published page would show two broken images while looking
+  fine locally. The script therefore keeps two paths: `plot_save_path` (scratch, gitignored) and
+  `figure_save_path` (embedded figures, tracked).
+
 ## 9a. Results, and how they should be read
 
 The first complete render produced a more interesting outcome than expected, and the walkthrough
 text was rewritten to report it honestly rather than to tell the tidy story.
 
+Latest run (1000 trajectories x 1440 steps):
+
 | Comparison | Static | Dynamic |
 |---|---|---|
 | AIC | 14523.35 (edf 6) | **13311.24** (edf 43.1), ΔAIC 1212 |
-| Boyce index, whole-day UD | **0.729** | 0.692 |
-| Spearman vs observed KDE | 0.025 | **0.223** |
-| Boyce index, mean across 24 hours | 0.275 | **0.529** (better in 21 of 24 hours) |
+| Boyce index, whole-day UD | 0.599 | **0.779** |
+| Boyce index, mean across 24 hours | 0.328 | **0.730** (better in 23 of 24 hours) |
 
-So the dynamic model wins decisively on fit, on the KDE comparison and on the hourly validation —
-but is *marginally worse* on the single whole-day Boyce index. That is not a contradiction: the
-whole-day UD pools every hour, which averages away exactly the advantage the dynamic model has.
-The two models put the animal in much the same places over 30 days and disagree about the
-schedule; a pooled metric cannot see a schedule.
+**The whole-day figure is not stable and must not be reported from a single run.** Across drafts of
+this document it has returned 0.729, −0.034, 0.755 and 0.599 for the *static* model, as incidental
+things changed upstream (a different RNG, an added diagnostic, a parameter change). A 5-seed
+offline experiment at 500 x 720 quantifies it:
 
-This is now the walkthrough's closing point — the validation has to match the claim being made,
-and a better-fitting model has not automatically earned the claim that it predicts better.
+| Model | mean | sd | min | max |
+|---|---|---|---|---|
+| A: static | 0.524 | 0.350 | −0.040 | 0.840 |
+| B: temporally dynamic | 0.773 | 0.118 | 0.632 | 0.909 |
 
-**The convergence check fails, and that is left visible on purpose.** Spearman correlation against
-the full 500-trajectory UD runs 0.26 / 0.36 / 0.46 / 0.62 / 0.86 / 1.00 at 10 / 25 / 50 / 100 /
-250 / 500 trajectories — still climbing steeply, nowhere near flat. An earlier draft of the prose
-claimed the curve "flattens well before the full set"; that was wrong and was corrected. The
-diagnostic now runs at two aggregation resolutions to show the second lever (coarser cells
-converge much faster on the same simulations), and a callout states plainly that the results are
-an illustration of the method rather than a settled statement about this animal.
+The **hourly** comparison, by contrast, has been stable and decisive in every run: the dynamic
+model roughly doubles the static model's mean Boyce index and wins in 19–23 of 24 hours. That is
+the result the walkthrough leads with.
+
+Two claims I made along the way that the data then contradicted, both corrected in the text:
+
+- That the split-half check *demonstrated* the static model's instability. It did not — in one
+  render the halves agreed to 0.007, in another to 0.352, and in one the dynamic model looked more
+  variable. Split-half shares a starting-location draw and simulation setup between halves, so it
+  is blind to run-to-run variability. The in-document check (3 runs x 200 trajectories) is far too
+  small to rank the models on stability, and now carries an explicit warning saying so.
+- That the whole-day comparison "cannot distinguish the models". Averaged over repeated runs it
+  does (0.773 vs 0.524). What it cannot do is distinguish them *from one run*, which is the point
+  actually worth making.
+
+**The convergence check fails, and that is left visible on purpose.** Even at 1,000 trajectories of
+1,440 steps (1,416,000 simulated locations), a UD built from half the trajectories correlates only
+**0.85** with the full one at 100 m — and 0.94 at 250 m. Still short of converged at the fine
+resolution. An earlier draft of the prose claimed the curve "flattens well before the full set";
+that was wrong and was corrected.
+
+**All result-dependent prose is now computed inline** rather than hard-coded. This matters because
+the parameters get changed: the document was written at 500 x 720, then re-run at 1000 x 1440, and
+every hard-coded number silently became wrong. The convergence callout now derives its own verdict
+(`converged <- conv_fine > 0.95`) and picks its wording accordingly; the stability callout computes
+its spreads from `split_half_boyce` and `repeat_runs`. The only hard-coded table left is the
+5-seed offline experiment, explicitly labelled with the configuration it was run at.
+
+**A related bug this exposed:** `subset_sizes` in the convergence chunk was a fixed vector. When
+`n_traj` was raised to 1000 it contained 1000 twice (once literally, once as `n_traj`) plus a 5000
+that exceeded the number of trajectories simulated, so `pivot_wider()` produced list-columns and the
+table rendered as `<dbl [2]>`. Now filtered and de-duplicated against `n_traj`, so it is correct at
+any scale.
 
 ## 10. Status
 

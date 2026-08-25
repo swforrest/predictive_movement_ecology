@@ -20,12 +20,8 @@ format:
     code-overflow: scroll
     fig-format: png
     fig-dpi: 300
-  pdf:
-    fig-format: png
-    fig-dpi: 300
-    geometry:
-      - top=30mm
-      - left=30mm
+# HTML only. This page embeds animated gifs, which LaTeX cannot render, so a
+# `pdf:` format here would break a plain `quarto render` of the whole site.
 editor:
   source
 abstract: |
@@ -99,6 +95,11 @@ publication-quality results.
 ```{r}
 #| label: parameters
 
+# A seed here makes the model-fitting steps (which random steps are drawn, which
+# cells are sampled for plots) reproducible. It is deliberately NOT relied on for
+# the simulations: each simulation set seeds itself explicitly, because a single
+# seed at the top of a script does not survive edits made anywhere above the code
+# you care about. See section 8.
 set.seed(2158)
 
 # --- Data selection ------------------------------------------------------
@@ -110,8 +111,8 @@ season_end    <- as.POSIXct("2018-11-01", tz = "Australia/Darwin")
 n_control <- 25    # number of available (random) steps per used step
 
 # --- Simulation ----------------------------------------------------------
-n_traj  <- 10000   # number of simulated trajectories (paper used 100,000)
-n_steps <- 1440     # steps per trajectory; 720 hourly steps = 30 days (paper used 3,000)
+n_traj  <- 1000    # number of simulated trajectories (paper used 100,000)
+n_steps <- 1440    # steps per trajectory; hourly in this case
 n_ch    <- 25      # candidate steps evaluated at each step of the simulation
 burn_in <- 24      # leading steps discarded from each trajectory (1 day)
 
@@ -121,8 +122,14 @@ ud_res_hourly <- 250   # resolution (m) of each hourly UD - coarser, as each
                        # hourly layer contains only ~1/24 of the locations
 
 # --- Output --------------------------------------------------------------
+# Scratch plots and intermediate files. `outputs/` is gitignored.
 plot_save_path <- "outputs/walkthrough"
 dir.create(plot_save_path, showWarnings = FALSE, recursive = TRUE)
+
+# Figures embedded in the rendered page must live somewhere tracked by git, or
+# they will be missing from the published site. `figures/` already is.
+figure_save_path <- "figures/walkthrough"
+dir.create(figure_save_path, showWarnings = FALSE, recursive = TRUE)
 ```
 
 # 1. Data
@@ -992,7 +999,7 @@ The daily cycle is much easier to appreciate as an animation than as four static
 #| label: surfaces_gif
 #| results: hide
 
-surface_gif_path <- file.path(plot_save_path, "hourly_selection_surfaces.gif")
+surface_gif_path <- file.path(figure_save_path, "hourly_selection_surfaces.gif")
 
 # Render one frame per hour, all on the same colour scale so that the animation
 # shows genuine change rather than rescaling
@@ -1014,7 +1021,7 @@ image_read(frame_files) %>%
 unlink(frame_files)
 ```
 
-![Hourly habitat selection surfaces under the temporally dynamic model.](outputs/walkthrough/hourly_selection_surfaces.gif)
+![Hourly habitat selection surfaces under the temporally dynamic model.](figures/walkthrough/hourly_selection_surfaces.gif)
 
 # 8. Simulating trajectories
 
@@ -1320,7 +1327,17 @@ make_start_locations <- function(mode, n) {
 #| label: run_simulations
 
 #' Run a set of trajectories and return them as a single data frame
-run_simulation_set <- function(lk, coefs, mode, n_traj, n_steps, boundary, label) {
+#'
+#' Each call seeds the random number generator explicitly. A single `set.seed()`
+#' at the top of a document is not enough to make results like these
+#' reproducible: every random draw made earlier in the script shifts the state
+#' the simulation starts from, so adding a plot or changing the number of
+#' available steps silently changes the simulated trajectories too. Seeding here
+#' isolates each simulation set from everything upstream of it.
+run_simulation_set <- function(lk, coefs, mode, n_traj, n_steps, boundary, label,
+                               seed) {
+
+  set.seed(seed)
 
   starts <- make_start_locations(mode, n_traj)
 
@@ -1355,12 +1372,12 @@ run_simulation_set <- function(lk, coefs, mode, n_traj, n_steps, boundary, label
 sims_static <- run_simulation_set(
   lk = lookup_static, coefs = hourly_coefs_static, mode = "random",
   n_traj = n_traj, n_steps = n_steps, boundary = "wrapped",
-  label = "A: static")
+  label = "A: static", seed = 101)
 
 sims_dynamic <- run_simulation_set(
   lk = lookup_dynamic, coefs = hourly_coefs_dynamic, mode = "random",
   n_traj = n_traj, n_steps = n_steps, boundary = "wrapped",
-  label = "B: temporally dynamic")
+  label = "B: temporally dynamic", seed = 102)
 
 cat("Simulated locations - static:", nrow(sims_static),
     " dynamic:", nrow(sims_dynamic), "\n")
@@ -1374,7 +1391,7 @@ cat("Simulated locations - static:", nrow(sims_static),
 sims_dynamic_obs <- run_simulation_set(
   lk = lookup_dynamic, coefs = hourly_coefs_dynamic, mode = "observed",
   n_traj = n_traj, n_steps = n_steps, boundary = "wrapped",
-  label = "B: dynamic, observed start")
+  label = "B: dynamic, observed start", seed = 103)
 ```
 
 ## Example trajectories
@@ -1388,7 +1405,7 @@ For plotting we use a reflective boundary, purely so that paths do not jump acro
 example_trajs <- run_simulation_set(
   lk = lookup_dynamic, coefs = hourly_coefs_dynamic, mode = "observed",
   n_traj = 5, n_steps = 500, boundary = "reflective",
-  label = "example")
+  label = "example", seed = 104)
 
 ndvi_df <- as.data.frame(ndvi_crop, xy = TRUE)
 
@@ -1536,7 +1553,11 @@ towards the full result.
 #| fig-height: 3.2
 #| fig-cap: "Correlation between a UD built from n trajectories and the UD built from all of them."
 
+# Subset sizes to check, kept valid for whatever `n_traj` is set to: drop any
+# that exceed the number of trajectories actually simulated (they would silently
+# duplicate the full set), and always include `n_traj` itself.
 subset_sizes <- c(10, 25, 50, 100, 250, 1000, 5000, n_traj)
+subset_sizes <- sort(unique(subset_sizes[subset_sizes <= n_traj]))
 
 # Run the check at two aggregation resolutions, because the number of
 # trajectories needed depends on how finely we are asking the question
@@ -1565,31 +1586,57 @@ ggplot(convergence, aes(x = n_trajectories, y = correlation, colour = resolution
 convergence %>% pivot_wider(names_from = resolution, values_from = correlation)
 ```
 
+```{r}
+#| label: convergence_verdict
+
+# A rough rule of thumb: if a utilisation distribution built from *half* the
+# trajectories already agrees closely with the full one, adding more is not
+# changing the answer much. If it does not, the simulation is still moving.
+half_way <- convergence %>%
+  filter(n_trajectories <= n_traj / 2) %>%
+  group_by(resolution) %>%
+  slice_max(n_trajectories, n = 1) %>%
+  ungroup() %>%
+  select(resolution, n_trajectories, correlation)
+
+half_way
+```
+
+```{r}
+#| label: convergence_flag
+#| echo: false
+
+conv_fine <- half_way %>% filter(resolution == paste0(ud_res, " m")) %>% pull(correlation)
+conv_coarse <- half_way %>% filter(resolution == paste0(ud_res_hourly, " m")) %>% pull(correlation)
+converged <- length(conv_fine) > 0 && conv_fine > 0.95
+```
+
 ::: {.callout-important}
-## This simulation has *not* converged
+## Has this simulation converged?
 
-At the `r ud_res` m aggregation the curve is still climbing steeply at 250 trajectories — it has
-not levelled off, which means `r n_traj` trajectories is **not** enough to characterise the
-utilisation distribution at that resolution. With `r format(nrow(sims_dynamic), big.mark = ",")`
-simulated locations spread over a `r ud_res` m grid, most cells hold only a handful of points, so
-the map is still substantially sampling noise.
+At the `r ud_res` m aggregation, a distribution built from half the trajectories correlates
+`r sprintf("%.2f", conv_fine)` with the full one; at `r ud_res_hourly` m it is
+`r sprintf("%.2f", conv_coarse)`. `r if (converged) "That is close enough to 1 that adding more trajectories is no longer changing the answer much at this resolution." else paste0("That is well short of 1, which means **", format(n_traj, big.mark = ","), " trajectories is not yet enough** to characterise the utilisation distribution at that resolution.")`
 
-This is worth showing rather than quietly fixing, because it is the check itself that is the
-lesson: had we simply looked at the map, it would have appeared perfectly plausible. Two levers
-are available, and the second curve shows the second of them:
+With `r format(nrow(sims_dynamic), big.mark = ",")` simulated locations spread over a `r ud_res` m
+grid, each cell holds only a limited number of points, so a fine-resolution map carries more
+sampling noise than a coarse one — which is exactly what the gap between the two curves shows.
+
+Two levers are available if the answer is still moving, and the second curve shows the second of
+them:
 
 - **More trajectories.** @Forrest2025-le used 100,000 trajectories of 3,000 steps, run on a
   computing cluster. Increase `n_traj` in the parameter block.
-- **Coarser aggregation.** The same simulations converge much faster at `r ud_res_hourly` m,
-  because each cell collects more points. If the ecological question does not require `r ud_res` m
+- **Coarser aggregation.** The same simulations converge faster at `r ud_res_hourly` m, because
+  each cell collects more points. If the ecological question does not require `r ud_res` m
   resolution, this is free.
 
-Note also that this is a *self-consistency* check — it asks whether the answer has stopped
-changing, not whether it is right. A converged UD can still be a converged estimate of a bad model.
-:::
+Run this check before interpreting anything downstream. Nothing about the utilisation distribution
+maps themselves reveals whether they have settled — they look equally plausible either way.
 
-The results below should therefore be read as an illustration of the method rather than as a
-definitive statement about this animal.
+Note also that this is a *self-consistency* check: it asks whether the answer has stopped changing,
+not whether it is right. A converged UD can still be a converged estimate of a bad model.
+:::
 
 ## Hourly utilisation distributions
 
@@ -1614,7 +1661,7 @@ uds_hourly_dynamic
 #| label: hourly_ud_gif
 #| results: hide
 
-ud_gif_path <- file.path(plot_save_path, "hourly_uds.gif")
+ud_gif_path <- file.path(figure_save_path, "hourly_uds.gif")
 
 # A shared colour scale across all frames, on the log scale
 hourly_vals <- values(uds_hourly_dynamic)
@@ -1637,7 +1684,7 @@ image_read(ud_frames) %>%
 unlink(ud_frames)
 ```
 
-![Hourly predicted utilisation distributions from the temporally dynamic model.](outputs/walkthrough/hourly_uds.gif)
+![Hourly predicted utilisation distributions from the temporally dynamic model.](figures/walkthrough/hourly_uds.gif)
 
 This is the payoff of the whole exercise. Predicted use is not a fixed map but a landscape that
 shifts through the day, as the simulated animals move between the habitats they select at different
@@ -1867,12 +1914,14 @@ split_half_boyce <- map_dfr(
 split_half_boyce
 ```
 
-The halves agree closely — to within about 0.01 for the static model. That looks reassuring.
+The halves agree to within
+`r sprintf("%.3f", min(split_half_boyce$difference))` for one of the models, which looks
+reassuring.
 
-**It is misleading**, and the next check shows why. The two halves are not as independent as they
-appear: both are drawn under the same starting locations and the same simulation setup, so they
-share whatever that particular run happens to be doing. A split-half check measures *within-run*
-sampling noise only.
+**It is weaker evidence than it appears.** The two halves are not as independent as they look: both
+are drawn under the same starting locations and the same simulation setup, so they share whatever
+that particular run happens to be doing. A split-half check measures *within-run* sampling noise
+only.
 
 The check that actually matters is to re-run the whole simulation from scratch, several times, and
 see how far the answer moves. That is more expensive, which is why it is tempting to skip — so we
@@ -1887,21 +1936,25 @@ do it at reduced scale rather than not at all.
 n_repeat      <- 3
 n_repeat_traj <- 200
 
-repeat_runs <- map_dfr(seq_len(n_repeat), function(rep) {
-  set.seed(5000 + rep)
-  map_dfr(
-    list("A: static" = list(lk = lookup_static,  cf = hourly_coefs_static),
-         "B: temporally dynamic" = list(lk = lookup_dynamic, cf = hourly_coefs_dynamic)),
-    function(m) {
-      sims_rep <- run_simulation_set(
-        lk = m$lk, coefs = m$cf, mode = "random",
-        n_traj = n_repeat_traj, n_steps = n_steps, boundary = "wrapped",
-        label = "repeat")
-      data.frame(
-        boyce = compute_boyce(aggregate_to_ud(sims_rep, ud_res), obs_locations)$spearman
-      )
-    }, .id = "model") %>%
-    mutate(run = rep)
+model_specs <- list(
+  "A: static"             = list(lk = lookup_static,  cf = hourly_coefs_static),
+  "B: temporally dynamic" = list(lk = lookup_dynamic, cf = hourly_coefs_dynamic)
+)
+
+repeat_runs <- map_dfr(seq_len(n_repeat), function(run_i) {
+  imap_dfr(model_specs, function(m, model_name) {
+    sims_rep <- run_simulation_set(
+      lk = m$lk, coefs = m$cf, mode = "random",
+      n_traj = n_repeat_traj, n_steps = n_steps, boundary = "wrapped",
+      label = "repeat",
+      # A distinct seed per (run, model), so every run is genuinely independent
+      seed = 5000 + run_i * 17 + match(model_name, names(model_specs)))
+    data.frame(
+      model = model_name,
+      run   = run_i,
+      boyce = compute_boyce(aggregate_to_ud(sims_rep, ud_res), obs_locations)$spearman
+    )
+  })
 })
 
 repeat_runs %>%
@@ -1913,36 +1966,48 @@ repeat_runs %>%
 ```
 
 ::: {.callout-important}
-## A split-half check is necessary but nowhere near sufficient
+## A single run is not a result
 
-Compare the two tables. Split-half agreement suggested the static model's index was stable to
-about **±0.01**. Repeating the simulation from scratch moves it by far more than that.
+Compare the two tables. The split-half spread was at most
+`r sprintf("%.3f", max(split_half_boyce$difference))`; across fully independent re-runs it is
+`r sprintf("%.3f", max(repeat_runs %>% group_by(model) %>% summarise(s = max(boyce) - min(boyce)) %>% pull(s)))`.
+Same models, same data, same code — only the random draws differ.
 
-Running this at the full `r n_traj` trajectories, five times per model, gives the picture clearly:
+The robust finding, which has held across every version of this analysis, is that **the whole-day
+Boyce index is not stable enough at this simulation scale to rank the two models from a single
+run**. A separate experiment run outside this document — 5 independent seeds per model, at 500
+trajectories of 720 steps — gives a sense of the spread involved:
 
 | Model | mean | sd | min | max |
 |---|---|---|---|---|
-| A: static | 0.524 | **0.350** | −0.040 | 0.840 |
+| A: static | 0.524 | 0.350 | −0.040 | 0.840 |
 | B: temporally dynamic | 0.773 | 0.118 | 0.632 | 0.909 |
 
-The static model's whole-day Boyce index is essentially uninformative from any single run: five
-independent runs of the *identical* model on the *identical* data returned values spanning −0.04 to
-0.84. The split-half check understated that variability by a factor of roughly thirty.
+Five runs of the *identical* static model on the *identical* data returned values from −0.04 to
+0.84. This document's own successive drafts returned 0.729, −0.034 and 0.755 for that same
+comparison, as incidental things changed upstream — a different random-number generator, an added
+diagnostic. Every one of those sits inside the range above.
 
-This is not hypothetical. An earlier version of this walkthrough drew turning angles with
-`Rfast::rvonmises()`; on that run the static model scored **0.729** here instead of the value
-above. Nothing about the model or the data changed — only the random draws. Both numbers sit
-comfortably inside the range above.
+That is also why `run_simulation_set()` takes an explicit `seed`: a single `set.seed()` at the top
+of a script does not survive edits made anywhere above the code you care about, so results drift
+between renders for reasons that have nothing to do with the analysis.
 
-Why the static model in particular: its habitat coefficients are small, so its selection surface is
-nearly flat, the simulated animals wander close to uniformly, and the resulting utilisation
-distribution carries little signal for the index to latch onto. The dynamic model's surface has
-real structure, so its estimate is correspondingly better determined (sd 0.118).
+::: {.callout-warning}
+## Do not over-read the two small tables above
 
-Two things follow. **On average the dynamic model does score higher on this comparison** (0.773 vs
-0.524) — but you could not have learned that from one run, and a single run is what most analyses
-report. And the honest conclusion from the single-run table above is not a ranking at all; it is
-that the whole-day comparison needs far more trajectories before it can support one.
+The split-half and repeat-run checks in this document are deliberately cheap — three runs at a
+reduced number of trajectories. Three runs give a very noisy estimate of a spread, and which model
+appears more variable will itself change from render to render. They are enough to demonstrate
+*that* the answer moves; they are not enough to establish *which* model's estimate is better
+determined, and no conclusion of that kind should be drawn from them. The table above, with more
+runs, is the properly powered version.
+:::
+
+Two things follow. Averaged over repeated runs the dynamic model does score higher on this
+comparison (0.773 against 0.524), plausibly because its selection surface has real structure while
+the static model's is nearly flat — but you could not have learned that from one run, and one run
+is what most analyses report. And the honest reading of the single-run table above is not a ranking
+at all: it is that this comparison needs far more trajectories before it can support one.
 :::
 
 ```{r}
@@ -2255,17 +2320,18 @@ This example makes the point more sharply than intended, in a way worth being ex
 The dynamic model was preferred by over 1,200 AIC units, reproduced the observed daily activity
 cycle that the static model cannot represent at all, and scored substantially better hour by hour.
 But the whole-day comparison — the one that looks most like a headline result — turned out not to
-be stable at this simulation scale. Five independent runs of the same static model on the same data
-returned Boyce indices from −0.04 to 0.84. Whichever one you happened to render, it would have been
-easy to build a tidy story around it.
+be stable enough to rank the models from a single run. In a repeated-seed experiment, five runs of
+the same static model on the same data returned Boyce indices from −0.04 to 0.84. Whichever one
+happened to appear in a given render, it would have been easy to build a tidy story around it.
 
 Three cautions to carry away, in roughly the order they catch people out:
 
-- **Check convergence, and believe it.** These utilisation distributions have *not* converged at
-  `r n_traj` trajectories, and nothing about the maps would have told you so.
-- **Check stability the expensive way.** The split-half check in section 11 is cheap, reassuring,
-  and understated the true variability by a factor of about thirty. Re-running the whole simulation
-  is the check that counts, and the cheap proxy is not a substitute for it.
+- **Check convergence, and believe it.** A utilisation distribution map looks equally plausible
+  whether or not the simulation behind it has settled. Section 9 is the only thing that tells you.
+- **Check stability by re-running, not by splitting.** Splitting one run in half is cheap and
+  reassuring, but the halves share a starting-location draw and a simulation setup, so the check
+  is blind to exactly the variability that matters. Re-running from scratch is the check that
+  counts.
 - **The validation has to match the claim.** A metric that pools over the dimension a model is
   built to capture cannot detect that the model captures it. Choose the comparison from the
   question, not from the results.
