@@ -24,8 +24,6 @@ format:
 # `pdf:` format here would break a plain `quarto render` of the whole site.
 editor:
   source
-  markdown: 
-    wrap: 72
 abstract: |
   An end-to-end walkthrough of generating predictions from step-selection functions. We fit
   two step-selection functions to a single water buffalo — a *static* model with constant
