@@ -24,45 +24,53 @@ format:
 # `pdf:` format here would break a plain `quarto render` of the whole site.
 editor:
   source
+  markdown: 
+    wrap: 72
 abstract: |
-  An end-to-end walkthrough of predictive movement ecology using step selection functions. We fit
-  two step selection functions to a single water buffalo — a *static* model with constant
+  An end-to-end walkthrough of generating predictions from step-selection functions. We fit
+  two step-selection functions to a single water buffalo — a *static* model with constant
   selection coefficients, and a *temporally dynamic* GAM in which selection for each covariate
   varies smoothly across the day — and then use each fitted model to generate stochastic movement
   trajectories. Those simulations are aggregated into utilisation distributions, summarised into
   hourly movement and habitat-use statistics, and validated against the observed data. The aim is
-  to show the full path from fitted coefficients to spatial predictions, and to check whether the
-  extra flexibility of the dynamic model actually buys better predictions.
+  to show an example and provide code from fitted coefficients to spatial predictions, and to check
+  how the predictions compare between the static and dynamic models.
 ---
+
+### Generative AI statement
+
+The first version of this tutorial was generated using Claude Code (with Opus 5), based on the GitHub repo at [github.com/swforrest/dynamic_SSF_sims](https://github.com/swforrest/dynamic_SSF_sims), which is associated with [@Forrest2025-le], and the other notebooks on this website (i.e. for fitting models and assessing temporal dynamics). 
+
+I have been over the notebook to remove unnecessary bits and simplify the code in places, and have verified that it runs as expected. There were some suggested improvements by the AI, such as indexing a matrix rather than using `terra::extract()`, which greatly help the computational efficiency. Please get in touch for any questions!
+
+
+### Other code for simulating from SSFs
+
+Other sources of code for generating simulations and predictions from SSFs are in:
+
+- The `amt` package ([@Signer2023-wm]), which provides functions to simulate from fitted SSFs. We show an example of using the `amt` package towards the end of the notebook.
+- <https://github.com/DavidDHofmann/DispersalSimulation> (from [@Hofmann2023-ii])
+  - also shows how to calculate landscape connectivity metrics from simulated trajectories
+
 
 # Introduction
 
-A step selection function (SSF) is usually the *end* of an analysis: we fit the model, report the
-coefficients, and interpret which habitats an animal selected for. But a fitted SSF is also a
-complete, generative description of a movement process. If we can fit it, we can *simulate* from
-it — and simulated trajectories can be turned into spatial predictions that we can validate.
+A fitted SSF is a complete, generative description of a movement process. If we can fit it, we can *simulate* from it — and simulated trajectories can be turned into spatial predictions that we can validate.
 
-This walkthrough takes that full path:
+In this walkthrough we show:
 
+```         
+fit  ->  simulate  ->  aggregate into UDs  ->  hourly summaries (for the dynamic model)  ->  assess predictions
 ```
-fit  ->  simulate  ->  aggregate  ->  hourly summaries  ->  assess predictions
-```
-
-It is a simplified version of the analysis in @Forrest2025-le, whose full code lives at
-[github.com/swforrest/dynamic_SSF_sims](https://github.com/swforrest/dynamic_SSF_sims). Where that
-repository spreads the work across six scripts and a high-performance computing cluster, here we
-compress it into one script that runs on a laptop.
 
 Throughout, we fit **two** models and carry both all the way to the end:
 
-| | |
-|---|---|
+|  |  |
+|------------------------------------|------------------------------------|
 | **Model A — static** | An ordinary integrated SSF (iSSF). One selection coefficient per covariate, constant across the day. |
 | **Model B — temporally dynamic** | A GAM in which each coefficient is a smooth, cyclic function of the hour of day. |
 
-Carrying both through is the point. It is easy to show that a more flexible model produces more
-interesting-looking coefficients. It is much more informative to ask whether those coefficients
-translate into *better predictions* — and that requires simulating, aggregating and validating.
+We are using the Asian water buffalo (*Bubalus bubalis*) data analysed in [@Forrest2025-le], and here we just select a single individual's data, and a subset of the full tracking period. You can select other individuals or a different season by changing the parameters in the parameter code chunk below.
 
 # Setup
 
@@ -81,16 +89,15 @@ walk(packages, require, character.only = TRUE)
 #  - `circular`, for the von Mises distribution. Attaching it would mask
 #    `stats::sd` and `stats::var`, which is an easy trap to fall into later.
 #  - `ecospat`, used once for the Boyce index; it pulls in a large dependency tree.
+#
+# You will still need these installed to call those functions though
 
-options(scipen = 999)
+options(scipen = 999) # avoid scientific notation in printed numbers
 ```
 
 ## Parameters
 
-Every quantity that controls the size or behaviour of the analysis lives here, so the whole
-walkthrough can be re-run at a different scale without hunting through the script. The defaults
-are chosen to run in a reasonable time on a laptop; the comments indicate what to increase for
-publication-quality results.
+Every quantity that controls the size or behaviour of the analysis lives here, so the whole walkthrough can be re-run at a different scale without searching through the script. The defaults are chosen to run in a reasonable time on a laptop; the comments indicate what to increase for better predictions.
 
 ```{r}
 #| label: parameters
@@ -103,20 +110,23 @@ publication-quality results.
 set.seed(2158)
 
 # --- Data selection ------------------------------------------------------
-which_buffalo <- 2158                                          # individual to analyse
-season_start  <- as.POSIXct("2018-07-25", tz = "Australia/Darwin")
-season_end    <- as.POSIXct("2018-11-01", tz = "Australia/Darwin")
+which_buffalo <- 2158      # individual buffalo ID to analyse
+# to select a subset of the data
+time_start  <- as.POSIXct("2018-07-25", tz = "Australia/Darwin") # start of tracking period
+time_end    <- as.POSIXct("2018-11-01", tz = "Australia/Darwin") 
 
 # --- Model fitting -------------------------------------------------------
 n_control <- 25    # number of available (random) steps per used step
 
 # --- Simulation ----------------------------------------------------------
-n_traj  <- 10000   # number of simulated trajectories (paper used 100,000)
-n_steps <- 1440    # steps per trajectory; hourly in this case
+n_traj  <- 10000   # number of simulated trajectories (Ecography paper used 100,000)
+n_steps <- 2400    # steps per trajectory; hourly in this case (100 days)
 n_ch    <- 25      # candidate steps evaluated at each step of the simulation
-burn_in <- 24      # leading steps discarded from each trajectory (1 day)
+# to reduce the bias towards the starting locations we can discard some of the initial locations
+burn_in <- 240     # leading steps discarded from each trajectory (10 days)
 
 # --- Aggregation ---------------------------------------------------------
+# This should ideally be in multiples of the raster cell resolution (here 25m)
 ud_res        <- 100   # resolution (m) of the all-hours utilisation distribution
 ud_res_hourly <- 250   # resolution (m) of each hourly UD - coarser, as each
                        # hourly layer contains only ~1/24 of the locations
@@ -136,9 +146,7 @@ dir.create(figure_save_path, showWarnings = FALSE, recursive = TRUE)
 
 ## Import the GPS data
 
-We use GPS tracking data from water buffalo (*Bubalus bubalis*) in Arnhem Land, northern
-Australia. The cleaned dataset contains 14 individuals tracked at approximately hourly intervals
-between July 2018 and October 2019.
+We use GPS tracking data from water buffalo (*Bubalus bubalis*) in Djelk Indigenous Protected Area, northern Australia. The cleaned dataset contains 14 individuals tracked at approximately hourly intervals between July 2018 and October 2019.
 
 ```{r}
 #| label: import_data
@@ -159,10 +167,7 @@ buffalo_ids
 
 ## Create a track object
 
-The `amt` package [@Signer2019-fi] provides the infrastructure for step selection analysis. We
-first convert the data into a *track*, and project it from geographic coordinates (longitude and
-latitude) into a projected coordinate system with metres as units — essential, because step
-lengths need to be in metres, not degrees.
+The `amt` package [@Signer2019-fi] provides the infrastructure for step selection analysis. We first convert the data into a *track*, and project it from geographic coordinates (longitude and latitude) into a projected coordinate system with metres as units — essential, because step lengths need to be in metres, not degrees.
 
 ```{r}
 #| label: make_track
@@ -193,24 +198,17 @@ buffalo_all %>%
 
 We restrict the analysis to **one individual over one season**, for two reasons.
 
-*One individual* keeps the walkthrough focused on the simulation pipeline rather than on the
-modelling questions that arise with multiple animals (pooling, random effects, two-step
-estimation). It also makes validation unambiguous: we compare predicted space use against *this
-animal's* observed locations.
+*One individual* keeps the walkthrough focused on the simulation pipeline rather than on the modelling questions that arise with multiple animals (pooling, random effects, two-step estimation). It also makes validation unambiguous: we compare predicted space use against *this animal's* observed locations. 
 
-*One season* matters more than it might appear. Buffalo `r which_buffalo` is not range-stationary
-across the full 15 months of data — it shifts roughly 20 km east during 2019. A long-term
-utilisation distribution validated against the whole track would score badly for reasons that have
-nothing to do with the quality of the model. Restricting to the 2018 dry season keeps the animal
-within one contiguous area, and also matches our NDVI layer, which represents August 2018.
+*One season*: Restricting to roughly the 2018 dry season keeps buffalo `r which_buffalo` within one contiguous area, and also matches our NDVI layer, which represents August 2018.
 
 ```{r}
 #| label: select_individual
 
 buffalo_id <- buffalo_all %>%
   filter(id == which_buffalo,
-         t_ >= season_start,
-         t_ <  season_end)
+         t_ >= time_start,
+         t_ <  time_end)
 
 cat("Number of locations:", nrow(buffalo_id), "\n")
 cat("Date range:", format(min(buffalo_id$t_)), "to", format(max(buffalo_id$t_)), "\n")
@@ -218,7 +216,7 @@ cat("Date range:", format(min(buffalo_id$t_)), "to", format(max(buffalo_id$t_)),
 
 ```{r}
 #| label: plot_individual
-#| fig-cap: "The trajectory of the focal individual over the 2018 dry season."
+#| fig-cap: "The trajectory of the focal individual over subset period."
 
 buffalo_id %>%
   ggplot(aes(x = x_, y = y_, colour = t_)) +
@@ -233,9 +231,7 @@ buffalo_id %>%
 
 ## Check the sampling rate
 
-Step selection analysis assumes a *regular* sampling interval. Before going further we check that
-assumption, because irregular fixes would make step lengths incomparable and would corrupt the
-mapping between step number and hour of day that the whole temporal analysis depends on.
+Step selection analysis assumes a *regular* sampling interval. Before going further we check that assumption, because irregular fixes would make step lengths incomparable and would corrupt the mapping between step number and hour of day that the whole temporal analysis depends on.
 
 ```{r}
 #| label: sampling_rate
@@ -252,20 +248,18 @@ sampling_intervals <- as.numeric(diff(buffalo_id$t_), units = "hours")
 ggplot(data.frame(dt = sampling_intervals[sampling_intervals < 6]), aes(x = dt)) +
   geom_histogram(bins = 60, fill = "steelblue", colour = "white") +
   geom_vline(xintercept = 1, linetype = "dashed", colour = "red") +
-  labs(x = "Interval between fixes (hours)", y = "Count") +
-  theme_classic()
+  labs(x = "Time between fixes (hours)", y = "Count") +
+  theme_bw()
 ```
 
-The overwhelming majority of fixes are one hour apart, so we treat this as an hourly trajectory.
+The majority of fixes are one hour apart, so we treat this as an hourly trajectory.
 
 # 2. Environmental covariates
 
-We use three covariates, all at 25 m resolution and on the same grid:
+We use three covariates, all at 25 m resolution and on the same grid, which has been projected into the same GDA94 / Geoscience Australia Lambert (https://epsg.io/3112) CRS as the buffalo data.
 
-- **NDVI** — the Normalised Difference Vegetation Index, a measure of vegetation greenness and
-  productivity. Here it also distinguishes water bodies (strongly negative values).
-- **Canopy cover** — percentage tree canopy cover, rescaled to 0–1. Relevant for shade and
-  thermoregulation.
+- **NDVI** — the Normalised Difference Vegetation Index, a measure of vegetation greenness and productivity. Here it also distinguishes water bodies (strongly negative values).
+- **Canopy cover** — percentage tree canopy cover, rescaled to 0–1. Relevant for shade and thermoregulation.
 - **Slope** — terrain slope in degrees.
 
 ```{r}
@@ -289,15 +283,20 @@ covariates
 
 ## Define the simulation extent
 
-Simulating over the full raster would be wasteful — most of it is far from anywhere this animal
-ever went, and we would need vastly more trajectories to fill it. Instead we crop to a box around
-the observed locations, with a generous buffer so that the simulated animal has somewhere to go.
+Simulating over the full raster would be wasteful — most of it is far from anywhere this animal ever went, and we would need vastly more trajectories to fill it. Instead we crop to a box around the observed locations, with a generous buffer so that the simulated animal has somewhere to go.
 
 ```{r}
 #| label: sim_extent
 
 # A buffered box around the observed dry-season locations
-sim_extent <- ext(17000, 31000, -1440000, -1426000)
+buffer_distance <- 5000 # metres
+
+xmin <- min(buffalo_id$x_) - buffer_distance
+xmax <- max(buffalo_id$x_) + buffer_distance
+ymin <- min(buffalo_id$y_) - buffer_distance
+ymax <- max(buffalo_id$y_) + buffer_distance
+
+sim_extent <- ext(xmin, xmax, ymin, ymax)
 
 covariates_crop <- crop(covariates, sim_extent)
 covariates_crop
@@ -321,12 +320,11 @@ for (lyr in c("ndvi", "canopy", "slope")) {
 par(mfrow = c(1, 1))
 ```
 
-## Used versus available: a first look
+## Used versus available: across the full landscape
 
-Before fitting anything, it is worth looking at what the animal *used* against what was
-*available*. This is the intuition that a habitat selection model formalises: if an animal is
-selecting, the distribution of covariate values at its locations will differ from the distribution
-across the landscape.
+Before fitting anything, it is worth looking at what the animal *used* against what was *available*, for a visual assessment of (static) habitat selection. If an animal is selecting for certain habitat features, the distribution of covariate values at its locations will differ from the distribution across the landscape.
+
+This is only a visual assessment, as it does not account for what was *available* to the animal at each step. For that, we will sample random steps to compare against the observed steps.
 
 ```{r}
 #| label: used_vs_available
@@ -359,8 +357,7 @@ bind_rows(avail_vals, used_vals) %>%
 
 ## From locations to steps
 
-A step selection function models *steps* — the movement from one location to the next — rather
-than locations. Each step has a length and a turning angle relative to the previous step.
+A step selection function models *steps* — the movement from one location to the next — rather than locations. Each step has a length and a turning angle relative to the previous step.
 
 ```{r}
 #| label: make_steps
@@ -372,13 +369,9 @@ head(buffalo_steps)
 
 ## Tentative movement distributions
 
-Integrated step selection analysis (iSSA) works by first fitting *tentative* distributions to the
-observed step lengths and turning angles, using those to generate available steps, and then
-**correcting** them using the coefficients that the model estimates for the movement terms
-[@Avgar2016-pb; @Fieberg2021-wx].
+Integrated step selection analysis (iSSA) works by first fitting *tentative* distributions to the observed step lengths and turning angles, using those to generate available steps, and then **correcting** them using the coefficients that the model estimates for the movement terms [@Avgar2016-pb; @Fieberg2021-wx].
 
-The word *tentative* is important. These are not the final estimates of the movement kernel — they
-are a proposal distribution. We recover the corrected parameters in section 6.
+The word *tentative* is important. These are not the final estimates of the movement kernel — they are a proposal distribution. We recover the corrected parameters in section 6.
 
 ```{r}
 #| label: tentative_distributions
@@ -429,13 +422,9 @@ p_sl + p_ta
 
 ## Sample available steps
 
-For each observed (*used*) step we generate `r n_control` *available* steps from the tentative
-distributions, and extract the covariate values at the end of every step.
+For each observed (*used*) step we generate `r n_control` *available* steps from the tentative distributions, and extract the covariate values at the end of every step.
 
-Note the naming of the movement terms: `sl_`, `log_sl_` and `cos_ta_`, each with a **trailing
-underscore**. This is `amt`'s convention, and following it means that `amt::update_sl_distr()` and
-`amt::update_ta_distr()` will work on our fitted model without any manual specification — which we
-make use of as a cross-check in section 6.
+Note the naming of the movement terms: `sl_`, `log_sl_` and `cos_ta_`, each with a **trailing underscore**. This is `amt`'s convention, and following it means that `amt::update_sl_distr()` and `amt::update_ta_distr()` will work on our fitted model without any manual specification — which we make use of as a cross-check in section 6.
 
 ```{r}
 #| label: random_steps
@@ -461,6 +450,8 @@ cat("Rows:", nrow(ssf_data),
 
 head(ssf_data)
 ```
+
+The covariate values of these *used* vs *available* steps will look more similar to one another, as the random steps are drawn from a similar region in the covariate space (to define availability), but there should still be some differences if the animal is selecting for certain habitat features. 
 
 ```{r}
 #| label: plot_used_available_steps
@@ -489,31 +480,37 @@ The standard iSSF is fitted as a conditional logistic regression, stratified by 
 ```{r}
 #| label: fit_static
 
+tic("Fitting the static model with amt::fit_issf()")
+
 ssf_static <- amt::fit_issf(
   case_ ~ ndvi + canopy + slope +      # habitat selection
     sl_ + log_sl_ + cos_ta_ +          # movement (used to correct the tentative distributions)
     strata(step_id_),                  # each used step and its available steps form a stratum
   data = ssf_data, model = TRUE)
 
+toc()
+
 summary(ssf_static)
 ```
 
 ## The same model, fitted as a GAM
 
-We also fit the identical model using `mgcv`, via a Cox proportional hazards likelihood. A
-stratified Cox model with one "event" per stratum is mathematically equivalent to conditional
-logistic regression, so this gives the same answer — the trick is described in @Klappstein2024-ax.
+We also fit the identical model using `mgcv`, via a Cox proportional hazards likelihood. A stratified Cox model with one "event" per stratum is mathematically equivalent to conditional logistic regression, so this gives the same answer — the trick is described in @Klappstein2024-ax.
 
-Why bother? Because Model B in the next section *must* be fitted this way (we need smooth terms),
-and having Model A in the same framework means a single interface for prediction, and a
-like-for-like AIC comparison.
+Why do we fit the static model using a GAM, even though it doesn't have smooth (additive terms)? Because Model B in the next section *must* be fitted this way (we need smooth terms), and having Model A in the same framework means we can generate the prediction weights using the `predict()` function, which makes it easier to get standard errors for the predictions.
+
+A downside is that the GAM fitting is slower than `amt::fit_issf()`, so for more complicated models and/or more data, we would probably stick to the `amt` approach unless we are fitting smooth terms.
 
 ```{r}
 #| label: fit_static_gam
 
+tic("Fitting the static model with mgcv::gam()")
+
 ssf_static_gam <- mgcv::gam(
   cbind(times, step_id_) ~ ndvi + canopy + slope + sl_ + log_sl_ + cos_ta_,
   data = ssf_data, family = cox.ph, weight = case_)
+
+toc()
 
 summary(ssf_static_gam)
 ```
@@ -530,14 +527,11 @@ tibble(
   mutate(difference = fit_issf - cox_ph_gam)
 ```
 
-Identical to numerical precision, as expected.
+Both models give essentially identical results (with slight differences due to numerical precision).
 
 ## Response curves
 
-We express habitat selection as **relative selection strength** (RSS): how much more likely the
-animal is to select a location with a given covariate value, relative to a reference value, all
-else equal [@Fieberg2021-wx]. On the log scale this is just the coefficient multiplied by the
-covariate value.
+We express habitat selection as **relative selection strength** (RSS): how much more likely the animal is to select a location with a given covariate value, relative to a reference value, all else equal [@Fieberg2021-wx]. On the log scale this is just the coefficient multiplied by the covariate value.
 
 ```{r}
 #| label: static_response_curves
@@ -591,32 +585,21 @@ ggplot(static_curves, aes(x = value)) +
   theme_classic()
 ```
 
-All three coefficients are negative, so on average across the whole day this animal avoided
-greener, more wooded and steeper locations. Hold on to the phrase *on average across the whole
-day* — it is exactly what the next model relaxes.
+All three coefficients are negative, so on average across the whole day this animal avoided greener, more wooded and steeper locations. But, this is *on average across the whole day*, which we change in the next model.
 
 # 5. Model B — a temporally dynamic step selection function
 
 ## The idea
 
-Animals do not behave the same way at 3 am as at 3 pm. A buffalo may seek shade in the heat of the
-day and forage in open grassland in the evening. A static model averages over all of that,
-producing a coefficient that may describe no hour of the day particularly well.
+Animals do not behave the same way at 3 am as at 3 pm. A buffalo may seek shade in the heat of the day and forage in open grassland in the evening. A static model averages over all of that, producing a coefficient that may describe no hour of the day particularly well.
 
 The fix is to let each coefficient be a *function of time of day*:
 
-$$
-\omega(\mathbf{X}(s); \boldsymbol{\beta}(\tau)) = \exp\big(\beta_{1}(\tau) X_1(s) + \cdots + \beta_{n}(\tau) X_n(s)\big)
-$$
+$$\omega(\mathbf{X}(s); \boldsymbol{\beta}(\tau)) = \exp\big(\beta_{1}(\tau) X_1(s) + \cdots + \beta_{n}(\tau) X_n(s)\big)$$
 
-where $\tau$ is the hour of day. @Forrest2025-le expressed each $\beta_i(\tau)$ as a sum of
-harmonic (sine and cosine) terms. Here we use a **cyclic penalised spline** instead, following
-@Klappstein2024-ax — the idea is identical, but the smoothness is chosen automatically by the
-model rather than by us picking a number of harmonics.
+where $\tau$ is the hour of day. In @Forrest2025-le, we expressed each $\beta_i(\tau)$ as a sum of harmonic (sine and cosine) terms. Here we use a **cyclic penalised spline** instead, following @Klappstein2024-ax — the idea is the same, but the smoothness is chosen automatically by the model rather than by us picking a number of harmonics, and the `mgcv` and `gratia` packages contain many helpful functions for GAMs.
 
-In `mgcv`, `s(hour, by = ndvi)` fits exactly this: a *varying-coefficient* term, in which the
-coefficient on `ndvi` is a smooth function of `hour`. Using `bs = "cc"` makes that function cyclic,
-so it joins up smoothly at midnight.
+In `mgcv`, `s(hour, by = ndvi)` fits exactly this: a *varying-coefficient* term, in which the coefficient on `ndvi` is a smooth function of `hour`. Using `bs = "cc"` makes that function cyclic, so it joins up smoothly at midnight.
 
 ## Fitting the model
 
@@ -652,10 +635,7 @@ summary(ssf_dynamic)
 
 ### Why `knots = list(hour = c(0, 24))`?
 
-Without this argument, `mgcv` places the endpoints of the cyclic basis at the *range of the data*.
-Our `hour` variable takes integer values 0 to 23, so the endpoints would be placed at 0 and 23 —
-wrapping hour 23 onto hour 0, and squeezing an hour out of the daily cycle. We can see this
-directly in the knot locations:
+Without this argument, `mgcv` places the endpoints of the cyclic basis at the *range of the data*. Our `hour` variable takes integer values 0 to 23, so the endpoints would be placed at 0 and 23 — wrapping hour 23 onto hour 0, and squeezing an hour out of the daily cycle. We can see this directly in the knot locations:
 
 ```{r}
 #| label: knots_demonstration
@@ -672,34 +652,6 @@ smoothCon(s(hour, bs = "cc", k = 6), data = demo,
 
 The second is what we want: the cycle spans a full 24 hours.
 
-### Do we need a parametric main effect alongside each smooth?
-
-A reasonable worry: `mgcv` applies a sum-to-zero identifiability constraint to smooth terms, so
-would `s(hour, by = ndvi)` be forced to *average* to zero across the day — throwing away the
-overall strength of selection, and leaving only its shape?
-
-It would, if the `by` variable were a factor. But for a **numeric** `by` variable `mgcv` does not
-apply the centring constraint, because the smooth is already identifiable. We can confirm this by
-counting the basis columns that survive the constraint:
-
-```{r}
-#| label: centring_demonstration
-
-demo <- data.frame(hour = 0:23, z = rnorm(24))
-
-# A plain smooth: one column is removed by the centring constraint (k - 2)
-ncol(smoothCon(s(hour, bs = "cc", k = 6), data = demo,
-               knots = list(hour = c(0, 24)), absorb.cons = TRUE)[[1]]$X)
-
-# A smooth with a numeric `by` variable: no centring constraint applied (k - 1)
-ncol(smoothCon(s(hour, by = z, bs = "cc", k = 6), data = demo,
-               knots = list(hour = c(0, 24)), absorb.cons = TRUE)[[1]]$X)
-```
-
-Five columns rather than four: the constraint is not applied. So `s(hour, by = ndvi)` gives us
-$\beta_{\text{NDVI}}(\tau)$ complete, including its overall level, and there is no need to add a
-parametric `ndvi` term alongside it. (Doing so would simply add a redundant parameter.)
-
 ## Model comparison
 
 ```{r}
@@ -713,8 +665,7 @@ tibble(
   mutate(delta_AIC = AIC - min(AIC))
 ```
 
-The dynamic model is overwhelmingly preferred. That is a statement about *fit*, though — whether
-it also predicts better is the question we take up in section 11.
+The dynamic model is overwhelmingly preferred. That is a statement` about *fit*, though — not necessarily whether it produces more accurate predictions.
 
 ## Model diagnostics
 
@@ -729,21 +680,13 @@ gratia::draw(ssf_dynamic, rug = FALSE) &
 
 # 6. From fitted models to hourly coefficients
 
-This section is the bridge between model fitting and simulation, and it is where the two models
-converge onto a common representation.
+This step could be simplified if only using a static model, but as we have the temporally dynamic model, we put them both into the same format so they can be simulated from using the same process.
 
-We reduce **each** model to the same object: a 24-row table with one row per hour of the day, and
-columns for the three habitat coefficients plus the three movement parameters. Model A's table has
-identical values in every row; Model B's cycles. Everything downstream then works for either model
-without modification.
+We reduce **each** model to the same object: a 24-row table with one row per hour of the day, and columns for the three habitat coefficients plus the three movement parameters. Model A's table has identical values in every row; Model B's cycles according to the coefficients. Everything downstream then works for either model without modification.
 
 ## Extracting habitat coefficients
 
-A neat trick makes this uniform across both models. Because neither model has an intercept, if we
-predict the linear predictor at a point where `ndvi = 1` and every other covariate is zero, the
-prediction *is* $\beta_{\text{NDVI}}(\tau)$. The same call works for the static model (giving a
-constant) and the dynamic one (giving the smooth), and `se.fit = TRUE` gives us confidence
-intervals for free.
+Because neither model has an intercept, the prediction for `ndvi = 1`, and everything else set to 0, is $\beta_{\text{NDVI}}(\tau)$. We can set therefore set each coefficient to 1 in turn. The same call works for the static model (giving a constant for each hour) and the dynamic one (giving the smooth), and `se.fit = TRUE` gives us confidence intervals for free.
 
 ```{r}
 #| label: beta_extraction_function
@@ -760,6 +703,8 @@ beta_by_hour <- function(model, var, hours = 0:23) {
   # The linear predictor then equals the coefficient on that covariate.
   nd <- data.frame(hour = hours, ndvi = 0, canopy = 0, slope = 0,
                    sl_ = 0, log_sl_ = 0, cos_ta_ = 0)
+  
+  # change the variable of interest to 1
   nd[[var]] <- 1
 
   p <- predict(model, newdata = nd, type = "link", se.fit = TRUE)
@@ -773,19 +718,24 @@ beta_by_hour <- function(model, var, hours = 0:23) {
 }
 ```
 
+We map the function over all of the covariates, and combine the results into a single data frame. 
+
 ```{r}
 #| label: extract_betas
 
 model_terms <- c("ndvi", "canopy", "slope", "sl_", "log_sl_", "cos_ta_")
 
+# static model
 betas_static  <- map_dfr(model_terms, ~ beta_by_hour(ssf_static_gam, .x)) %>%
   mutate(model = "A: static")
+head(betas_static)
+
+# dynamic model
 betas_dynamic <- map_dfr(model_terms, ~ beta_by_hour(ssf_dynamic, .x)) %>%
   mutate(model = "B: temporally dynamic")
+head(betas_dynamic)
 
 betas_all <- bind_rows(betas_static, betas_dynamic)
-
-head(betas_all)
 ```
 
 ```{r}
@@ -808,27 +758,17 @@ ggplot(betas_all, aes(x = hour, y = estimate, colour = model, fill = model)) +
   theme(legend.position = "bottom")
 ```
 
-This is the figure that motivates the whole exercise. The static model's NDVI coefficient is a
-slightly negative constant. The dynamic model shows that this average conceals a strong daily
-cycle: the animal *selects* for high NDVI around the middle of the day and *avoids* it in the late
-afternoon and evening. Averaging those two opposite behaviours together produces a number that
-describes neither.
+The static model's NDVI coefficient is a slightly negative constant. The dynamic model shows that this average conceals a strong daily cycle: the animal *selects* for high NDVI around the middle of the day and *avoids* it in the late afternoon and evening. Averaging those two opposite behaviours together produces a number that describes neither.
 
 ## Correcting the movement parameters
 
-The movement coefficients are not selection coefficients — they are *corrections* to the tentative
-distributions we fitted in section 3. The update rules for a gamma step-length distribution and a
-von Mises turning-angle distribution are [@Avgar2016-pb; @Fieberg2021-wx]:
+The movement coefficients are not selection coefficients — they are *corrections* to the tentative distributions we fitted in section 3. The update rules for a gamma step-length distribution and a von Mises turning-angle distribution are [@Avgar2016-pb; @Fieberg2021-wx; @Klappstein2023-ov; @Klappstein2024-ax]:
 
-$$
-\text{shape}(\tau) = \text{shape}_{\text{tentative}} + \beta_{\log(\text{sl})}(\tau)
-$$
-$$
-\text{scale}(\tau) = \frac{1}{\ \dfrac{1}{\text{scale}_{\text{tentative}}} - \beta_{\text{sl}}(\tau)\ }
-$$
-$$
-\kappa(\tau) = \kappa_{\text{tentative}} + \beta_{\cos(\text{ta})}(\tau)
-$$
+$$\text{shape}(\tau) = \text{shape}_{\text{tentative}} + \beta_{\log(\text{sl})}(\tau)$$
+
+$$\text{scale}(\tau) = \frac{1}{\ \dfrac{1}{\text{scale}_{\text{tentative}}} - \beta_{\text{sl}}(\tau)\ }$$
+
+$$\kappa(\tau) = \kappa_{\text{tentative}} + \beta_{\cos(\text{ta})}(\tau)$$
 
 ```{r}
 #| label: build_hourly_coefs
@@ -853,14 +793,13 @@ build_hourly_coefs <- function(model) {
 hourly_coefs_static  <- build_hourly_coefs(ssf_static_gam)
 hourly_coefs_dynamic <- build_hourly_coefs(ssf_dynamic)
 
+# show the dynamic model's hourly coefficients and movement parameters
 hourly_coefs_dynamic
 ```
 
 ## Checking the update rules against `amt`
 
-These update rules are the single most important piece of arithmetic in the script: if they are
-wrong, every simulated step length is wrong and nothing downstream means anything. `amt` implements
-them directly, so for the static model we can check our hand-computed values against the package.
+These update rules are the single most important piece of arithmetic in the script: if they are wrong, every simulated step length is wrong and nothing downstream means anything. `amt` implements them directly, so for the static model we can check our hand-computed values against the package.
 
 ```{r}
 #| label: check_update_rules
@@ -877,8 +816,6 @@ tibble(
 ) %>%
   mutate(difference = manual - amt)
 ```
-
-Identical. We can trust the hourly tables.
 
 ```{r}
 #| label: plot_movement_params
@@ -904,17 +841,12 @@ bind_rows(
   theme(legend.position = "bottom")
 ```
 
-The dynamic model recovers a clear daily activity cycle: short steps through the middle of the day
-(resting) and long, directed steps in the early evening. The static model, by construction, has the
-animal moving the same way at every hour.
+The dynamic model recovers a clear daily activity cycle: short steps through the middle of the day (resting) and long, directed steps in the early evening. The static model, by construction, has the animal moving the same way at every hour.
 
-::: {.callout-note}
+::: callout-note
 ## Check that the corrected parameters are valid
 
-The update rules involve a subtraction, so it is possible in principle for them to produce an
-invalid distribution — a negative shape, or a negative scale if
-$\beta_{\text{sl}}(\tau) > 1/\text{scale}_{\text{tentative}}$. It is worth checking explicitly
-before simulating, rather than discovering it as an obscure error inside the simulation loop.
+The update rules involve a subtraction, so it is possible in principle for them to produce an invalid distribution — a negative shape, or a negative scale if $\beta_{\text{sl}}(\tau) > 1/\text{scale}_{\text{tentative}}$. It is worth checking explicitly before simulating, rather than discovering it as an obscure error inside the simulation loop. A negative kappa is valid, but it means the animal is turning *away* from its previous direction rather than towards it, so we check the range of kappa as well.
 :::
 
 ```{r}
@@ -934,14 +866,9 @@ hourly_coefs_dynamic %>%
 
 For the simulation we need, at every candidate step, the value of the habitat selection function
 
-$$
-\log \omega(\mathbf{X}(s); \boldsymbol{\beta}(\tau)) = \beta_{\text{NDVI}}(\tau)\,\text{NDVI}(s) + \beta_{\text{canopy}}(\tau)\,\text{canopy}(s) + \beta_{\text{slope}}(\tau)\,\text{slope}(s)
-$$
+$$\log \omega(\mathbf{X}(s); \boldsymbol{\beta}(\tau)) = \beta_{\text{NDVI}}(\tau)\,\text{NDVI}(s) + \beta_{\text{canopy}}(\tau)\,\text{canopy}(s) + \beta_{\text{slope}}(\tau)\,\text{slope}(s)$$
 
-Rather than evaluating this at each of the millions of candidate steps we will generate, we
-compute it **once per hour** across the whole landscape, producing a 24-layer raster stack. The
-simulation then just looks up a value. We keep everything on the log scale and exponentiate only
-when sampling, which is both faster and numerically safer.
+Rather than evaluating this at each of the millions of candidate steps we will generate, we compute it **once per hour** across the whole landscape, producing a 24-layer raster stack. The simulation then just looks up a value. We keep everything on the log scale and exponentiate only when sampling, which is both faster and numerically safer.
 
 ```{r}
 #| label: rsf_surfaces
@@ -974,7 +901,9 @@ surfaces_dynamic
 #| fig-cap: "Log habitat selection surfaces at four times of day. The static model is identical at every hour; the dynamic model changes markedly."
 
 # A shared, symmetric colour scale so the panels are comparable
-sel_range <- range(c(values(surfaces_dynamic), values(surfaces_static)), na.rm = TRUE)
+# sel_range <- range(c(values(surfaces_dynamic), values(surfaces_static)), na.rm = TRUE) 
+# there are some extreme outliers so we'll take the 0.5% and 99.5% quantiles instead
+sel_range <- quantile(c(values(surfaces_dynamic), values(surfaces_static)), probs = c(0.005, 0.995), na.rm = TRUE)
 sel_max   <- max(abs(sel_range))
 
 plot_hours <- c(3, 9, 15, 21)
@@ -1005,7 +934,7 @@ surface_gif_path <- file.path(figure_save_path, "hourly_selection_surfaces.gif")
 # shows genuine change rather than rescaling
 frame_files <- map_chr(0:23, function(h) {
   f <- file.path(plot_save_path, sprintf("surface_frame_%02d.png", h))
-  png(f, width = 110, height = 110, units = "mm", res = 150)
+  png(f, width = 150, height = 150, units = "mm", res = 150)
   plot(surfaces_dynamic[[h + 1]],
        main = sprintf("Habitat selection, %02d:00", h),
        range = c(-sel_max, sel_max), col = brewer.pal(11, "RdBu"))
@@ -1027,23 +956,15 @@ unlink(frame_files)
 
 ## The redistribution kernel
 
-Simulating from a fitted SSF means repeatedly sampling the next location from a **redistribution
-kernel**, which is the product of two parts:
+Simulating from a fitted SSF means repeatedly sampling the next location from a **redistribution kernel**, which is the product of two parts:
 
-$$
-\underbrace{\phi(s' \mid s, \tau)}_{\text{movement kernel}} \times \underbrace{\omega(\mathbf{X}(s'); \boldsymbol{\beta}(\tau))}_{\text{habitat kernel}}
-$$
+$$\underbrace{\phi(s' \mid s, \tau)}_{\text{movement kernel}} \times \underbrace{\omega(\mathbf{X}(s'); \boldsymbol{\beta}(\tau))}_{\text{habitat kernel}}$$
 
-In practice we approximate this by sampling: propose `r n_ch` candidate steps from the movement
-kernel, weight each by its habitat value, and choose one with probability proportional to that
-weight. This is exactly the structure of the model we fitted — the same conditional-logistic
-machinery, run forwards instead of backwards.
+In practice we approximate this by sampling: propose `r n_ch` candidate steps from the movement kernel, weight each by its habitat value, and choose one with probability proportional to that weight. This is exactly the structure of the model we fitted.
 
 ## A fast raster lookup
 
-The simulation needs tens of millions of raster lookups. `terra::extract()` is convenient but
-carries a per-call overhead that dominates when it is called hundreds of thousands of times, so we
-extract the raster values into a plain matrix once, and index into it with arithmetic.
+The simulation needs tens of millions of raster lookups. `terra::extract()` is convenient but carries a per-call overhead that creates a bottleneck when it is called hundreds of thousands of times, so we extract the raster values into a plain matrix once, and index into it with arithmetic.
 
 ```{r}
 #| label: fast_extract
@@ -1052,16 +973,16 @@ extract the raster values into a plain matrix once, and index into it with arith
 #'
 #' `terra::values()` returns a matrix with one row per cell (in row-major order)
 #' and one column per layer, which is exactly what we need for fast indexing.
-prepare_lookup <- function(stk) {
-  list(vals = terra::values(stk),
-       xmin = xmin(stk), ymax = ymax(stk),
-       nrow = nrow(stk), ncol = ncol(stk),
-       resx = res(stk)[1], resy = res(stk)[2])
+prepare_lookup <- function(cov_stack) {
+  list(vals = terra::values(cov_stack),
+       xmin = xmin(cov_stack), ymax = ymax(cov_stack),
+       nrow = nrow(cov_stack), ncol = ncol(cov_stack),
+       resx = res(cov_stack)[1], resy = res(cov_stack)[2])
 }
 
 #' Look up values at coordinates in a given layer
 #'
-#' Equivalent to `terra::extract(stk[[layer]], cbind(x, y))[, 1]`, but without the
+#' Equivalent to `terra::extract(cov_stack[[layer]], cbind(x, y))[, 1]`, but without the
 #' per-call overhead. Coordinates outside the raster return NA.
 lookup <- function(lk, x, y, layer) {
   col <- floor((x - lk$xmin) / lk$resx) + 1
@@ -1216,32 +1137,20 @@ simulate_ssf <- function(n_steps, n_ch, coefs, xy0, lk,
 }
 ```
 
-::: {.callout-warning}
+::: callout-warning
 ## A note on `Rfast::rvonmises`
 
-The code in `dynamic_SSF_sims` draws turning angles with `Rfast::rvonmises()`, and the obvious
-port of it to this script is what we started with. Two problems showed up once the simulation was
-run at scale, both worth knowing about if you are adapting that code:
+The code in `dynamic_SSF_sims` draws turning angles with `Rfast::rvonmises()`. Two problems showed up once the simulation was run at scale, both worth knowing about if you are adapting that code:
 
-- **It does not respect `set.seed()`.** `Rfast` uses its own random number generator, so the
-  simulations are not reproducible no matter what seed you set. For a teaching script — or any
-  analysis you intend someone to be able to re-run — that is disqualifying on its own.
-- **It very occasionally returns `NaN`**: about 1 draw in 8 million, at small positive
-  concentrations. That sounds negligible until you count the draws. At
-  `r n_traj` × `r n_steps` × `r n_ch` we make around 9 million per model, so roughly one `NaN`
-  per run — enough that it appeared, killed a render, and then refused to reproduce.
+- **It does not respect `set.seed()`.** `Rfast` uses its own random number generator, so the simulations are not reproducible no matter what seed you set.
+- **It very occasionally returns `NaN`**: about 1 draw in 8 million, at small positive concentrations. That sounds negligible until you count the draws. At `r n_traj` × `r n_steps` × `r n_ch` we make around 9 million per model, so roughly one `NaN` per run — enough that it stops the simulations.
 
-`circular::rvonmises()` is reproducible, produced no non-finite values in 4.8 × 10⁷ draws with
-these parameters, and is slightly faster, so that is what we use. The `lookup()` function above
-also guards against non-finite coordinates regardless, since a candidate step that cannot be
-evaluated should simply never be selected rather than halting the simulation.
+`circular::rvonmises()` is reproducible, produced no non-finite values in 4.8 × 10⁷ draws with these parameters, and is slightly faster, so that is what we use. 
 :::
 
 ## Shifting the origin
 
-The wrapped boundary uses the modulo operator, which requires the landscape origin to be at
-$(0,0)$. We shift the rasters accordingly, and remember the offset so we can shift the simulated
-coordinates back afterwards.
+The wrapped boundary uses the modulo operator, which requires the landscape origin to be at $(0,0)$. We shift the rasters accordingly, and remember the offset so we can shift the simulated coordinates back afterwards.
 
 ```{r}
 #| label: shift_origin
@@ -1265,8 +1174,16 @@ lookup_dynamic <- prepare_lookup(surfaces_dynamic_shifted)
 
 ## Choosing starting locations
 
-Where the simulated animals start is not a technical detail — it determines what question the
-simulation answers.
+Depending on the goal of the predictions, you might want to start the simulations from different starting locations. 
+
+### Observed
+If we were replicating a single animal's behaviour, such as for *animal-centric* questions like how many times a road was crossed, we might want to start every trajectory at the animal's actual location at the beginning of the period, and run for the same number of steps. This is what the `observed` option does. If you are using this option, you might want to set the number of **burn-in steps** to be 0.
+
+### Observed sample
+Similar to the approach above, except that the starting locations are drawn from **any** of the observed data. You might use this if you want to start the simulations in the same general area the animal actually used, but not all from a single point. 
+
+### Random
+If you are interested in the *landscape-centric* predictions like utilisation distributions or landscape connectivity, our predictions are typically independent of where the animals start. We therefore seed the simulations uniformly across the landscape, so that they explore all available habitat rather than being biased towards a single starting point. If there are features that are inaccessible, such as water, you may want an additional mask to resample or remove those starting locations.
 
 ```{r}
 #| label: start_locations
@@ -1309,16 +1226,11 @@ make_start_locations <- function(mode, n) {
 }
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ## How starting location, boundary and burn-in interact
 
-- `"random"` + `"wrapped"` + a short burn-in converges to the **stationary distribution** of the
-  movement process. This is what sections 9 and 11 need.
-- `"observed"` + `"reflective"` keeps the trajectory anchored where the animal really was, which is
-  what you want for a **home-range** question or for plotting an illustrative path.
-- Burn-in matters a great deal when every trajectory starts at the same point — the early steps all
-  carry the memory of that shared origin. It matters much less when starts are drawn uniformly,
-  because the trajectories are already spread across the landscape.
+- `"random"` + `"wrapped"` + a burn-in converges to the **stationary distribution** of the movement process. 
+- `"observed"` + `"reflective"` keeps the trajectory anchored where the animal really was, which is what you might want for an **animal-centric** question or for plotting illustrative paths to compare against the observed data.
 :::
 
 ## Running the simulations
@@ -1334,7 +1246,7 @@ make_start_locations <- function(mode, n) {
 #' the simulation starts from, so adding a plot or changing the number of
 #' available steps silently changes the simulated trajectories too. Seeding here
 #' isolates each simulation set from everything upstream of it.
-run_simulation_set <- function(lk, coefs, mode, n_traj, n_steps, boundary, label,
+run_simulation_set <- function(lk, coefs, mode, n_traj, n_steps, boundary, burn_in, label,
                                seed) {
 
   set.seed(seed)
@@ -1371,32 +1283,21 @@ run_simulation_set <- function(lk, coefs, mode, n_traj, n_steps, boundary, label
 # landscape, with a wrapped boundary. These are what we aggregate and validate.
 sims_static <- run_simulation_set(
   lk = lookup_static, coefs = hourly_coefs_static, mode = "random",
-  n_traj = n_traj, n_steps = n_steps, boundary = "wrapped",
+  n_traj = n_traj, n_steps = n_steps, boundary = "wrapped", burn_in = burn_in,
   label = "A: static", seed = 101)
 
 sims_dynamic <- run_simulation_set(
   lk = lookup_dynamic, coefs = hourly_coefs_dynamic, mode = "random",
-  n_traj = n_traj, n_steps = n_steps, boundary = "wrapped",
+  n_traj = n_traj, n_steps = n_steps, boundary = "wrapped", burn_in = burn_in,
   label = "B: temporally dynamic", seed = 102)
 
 cat("Simulated locations - static:", nrow(sims_static),
     " dynamic:", nrow(sims_dynamic), "\n")
 ```
 
-```{r}
-#| label: simulate_observed_start
-
-# A third set, seeded from the animal's actual starting location, to illustrate
-# how the choice of starting location changes what the simulation represents.
-sims_dynamic_obs <- run_simulation_set(
-  lk = lookup_dynamic, coefs = hourly_coefs_dynamic, mode = "observed",
-  n_traj = n_traj, n_steps = n_steps, boundary = "wrapped",
-  label = "B: dynamic, observed start", seed = 103)
-```
-
 ## Example trajectories
 
-For plotting we use a reflective boundary, purely so that paths do not jump across the frame.
+For plotting we simulate some additional trajectories with a reflective boundary, just so that paths do not jump across the frame.
 
 ```{r}
 #| label: example_trajectories
@@ -1404,7 +1305,7 @@ For plotting we use a reflective boundary, purely so that paths do not jump acro
 
 example_trajs <- run_simulation_set(
   lk = lookup_dynamic, coefs = hourly_coefs_dynamic, mode = "observed",
-  n_traj = 5, n_steps = 500, boundary = "reflective",
+  n_traj = 5, n_steps = 250, boundary = "reflective", burn_in = 0,
   label = "example", seed = 104)
 
 ndvi_df <- as.data.frame(ndvi_crop, xy = TRUE)
@@ -1413,9 +1314,11 @@ ggplot() +
   geom_raster(data = ndvi_df, aes(x = x, y = y, fill = ndvi)) +
   geom_path(data = example_trajs,
             aes(x = x, y = y, colour = factor(traj_id)),
-            alpha = 0.8, linewidth = 0.3) +
+            alpha = 0.8, linewidth = 0.75) +
+  geom_point(data = buffalo_id, aes(x = x_[1], y = y_[1]),
+             colour = "red", size = 1.5, alpha = 0.5) +
   scale_fill_gradientn(colours = brewer.pal(9, "Greens"), name = "NDVI") +
-  scale_colour_viridis_d("Trajectory", guide = "none") +
+  scale_colour_viridis_d("Trajectory", guide = "none", option = "G") +
   coord_equal() +
   labs(x = "Easting (m)", y = "Northing (m)") +
   theme_classic()
@@ -1450,14 +1353,11 @@ bind_rows(
   theme(legend.position = "bottom")
 ```
 
-An immediate and encouraging result: the dynamic model reproduces the observed daily activity cycle
-closely, while the static model — which cannot do otherwise — predicts a flat line.
+An immediate and encouraging result: the dynamic model reproduces the observed daily activity cycle closely, while the static model — which cannot do otherwise — predicts a flat line.
 
 # 9. Aggregating simulations into utilisation distributions
 
-A single simulated trajectory is one realisation of a stochastic process and tells us little. The
-prediction is in the *ensemble*: count how often simulated animals occupy each cell of the
-landscape, and the result is a predicted utilisation distribution (UD).
+A single simulated trajectory is one realisation of a stochastic process and tells us little. The prediction is in the *ensemble*: count how often simulated animals occupy each cell of the landscape, and the result is a predicted utilisation distribution (UD).
 
 ```{r}
 #| label: aggregate_function
@@ -1491,7 +1391,6 @@ aggregate_to_ud <- function(sims, resolution, hours = NULL) {
 tic("Aggregating simulations")
 ud_static      <- aggregate_to_ud(sims_static,      ud_res)
 ud_dynamic     <- aggregate_to_ud(sims_dynamic,     ud_res)
-ud_dynamic_obs <- aggregate_to_ud(sims_dynamic_obs, ud_res)
 toc()
 
 # Check that each normalises to 1
@@ -1503,7 +1402,7 @@ cat("Sum of UD values - static:",
 
 ```{r}
 #| label: plot_uds
-#| fig-height: 4.5
+#| fig-height: 6
 #| fig-cap: "Predicted utilisation distributions (log scale) with observed locations in red."
 
 plot_ud <- function(ud, title) {
@@ -1522,31 +1421,14 @@ plot_ud <- function(ud, title) {
           plot.title = element_text(size = 10))
 }
 
-plot_ud(ud_static, "A: static") + plot_ud(ud_dynamic, "B: temporally dynamic")
+plot_ud(ud_static, "A: static") / plot_ud(ud_dynamic, "B: temporally dynamic")
 ```
-
-## The effect of the starting location
-
-```{r}
-#| label: plot_start_comparison
-#| fig-height: 4.5
-#| fig-cap: "The same model, seeded uniformly at random across the landscape (left) and from the animal's observed starting location (right)."
-
-plot_ud(ud_dynamic, "Random starts (stationary distribution)") +
-  plot_ud(ud_dynamic_obs, "Observed start (home-range-like)")
-```
-
-Two quite different predictions, from the same fitted model. Seeded at random, the simulation
-describes where an animal following this movement process would be found *anywhere* in this
-landscape over the long run. Seeded from the observed start, it describes where *this* animal was
-likely to range over the following 30 days. Neither is more correct; they answer different
-questions, and it is worth being explicit about which one is being asked.
 
 ## Has the simulation converged?
 
-How many trajectories are enough? We can answer empirically, and cheaply, by reusing the
-trajectories we already have: build UDs from increasing subsets and see how quickly they stabilise
-towards the full result.
+How many trajectories are enough? We can answer empirically, and cheaply, by reusing the trajectories we already have: build UDs from increasing subsets and see how quickly they stabilise towards the full result.
+
+We are comparing all of the subsets to the full set - so it should start to plateau towards 1.0 as the number of trajectories increases (and ideally reach it with a subset). If it does not, the simulation has still not converged and needs more simulations.
 
 ```{r}
 #| label: convergence
@@ -1556,7 +1438,8 @@ towards the full result.
 # Subset sizes to check, kept valid for whatever `n_traj` is set to: drop any
 # that exceed the number of trajectories actually simulated (they would silently
 # duplicate the full set), and always include `n_traj` itself.
-subset_sizes <- c(10, 25, 50, 100, 250, 1000, 5000, n_traj)
+# subset_sizes <- c(10, 25, 50, 100, 250, 1000, 5000, n_traj)
+subset_sizes <- seq(1, log(n_traj), length.out = 10) %>% exp() %>% round()
 subset_sizes <- sort(unique(subset_sizes[subset_sizes <= n_traj]))
 
 # Run the check at two aggregation resolutions, because the number of
@@ -1577,6 +1460,7 @@ convergence <- map_dfr(c(ud_res, ud_res_hourly), function(resolution) {
 ggplot(convergence, aes(x = n_trajectories, y = correlation, colour = resolution)) +
   geom_line(linewidth = 0.9) +
   geom_point(size = 2) +
+  geom_hline(yintercept = 1, linetype = "dashed", colour = "grey40") +
   scale_x_log10("Number of trajectories") +
   scale_y_continuous("Spearman correlation with full UD", limits = c(0, 1)) +
   scale_colour_manual(values = c("steelblue", "darkorange"), name = "Aggregation") +
@@ -1611,37 +1495,26 @@ conv_coarse <- half_way %>% filter(resolution == paste0(ud_res_hourly, " m")) %>
 converged <- length(conv_fine) > 0 && conv_fine > 0.95
 ```
 
-::: {.callout-important}
+::: callout-important
 ## Has this simulation converged?
 
-At the `r ud_res` m aggregation, a distribution built from half the trajectories correlates
-`r sprintf("%.2f", conv_fine)` with the full one; at `r ud_res_hourly` m it is
-`r sprintf("%.2f", conv_coarse)`. `r if (converged) "That is close enough to 1 that adding more trajectories is no longer changing the answer much at this resolution." else paste0("That is well short of 1, which means **", format(n_traj, big.mark = ","), " trajectories is not yet enough** to characterise the utilisation distribution at that resolution.")`
+At the `r ud_res` m aggregation, a distribution built from half the trajectories correlates `r sprintf("%.2f", conv_fine)` with the full one; at `r ud_res_hourly` m it is `r sprintf("%.2f", conv_coarse)`. `r if (converged) "That is close enough to 1 that adding more trajectories is no longer changing the answer much at this resolution." else paste0("That is well short of 1, which means **", format(n_traj, big.mark = ","), " trajectories is not yet enough** to characterise the utilisation distribution at that resolution.")`
 
-With `r format(nrow(sims_dynamic), big.mark = ",")` simulated locations spread over a `r ud_res` m
-grid, each cell holds only a limited number of points, so a fine-resolution map carries more
-sampling noise than a coarse one — which is exactly what the gap between the two curves shows.
+With `r format(nrow(sims_dynamic), big.mark = ",")` simulated locations spread over a `r ud_res` m grid, each cell holds only a limited number of points, so a fine-resolution map carries more sampling noise than a coarse one — which is exactly what the gap between the two curves shows.
 
-Two levers are available if the answer is still moving, and the second curve shows the second of
-them:
+Two levers are available if the answer is still moving, and the second curve shows the second of them:
 
-- **More trajectories.** @Forrest2025-le used 100,000 trajectories of 3,000 steps, run on a
-  computing cluster. Increase `n_traj` in the parameter block.
-- **Coarser aggregation.** The same simulations converge faster at `r ud_res_hourly` m, because
-  each cell collects more points. If the ecological question does not require `r ud_res` m
-  resolution, this is free.
+- **More trajectories.** @Forrest2025-le used 100,000 trajectories of 3,000 steps, run on a computing cluster. Increase `n_traj` in the parameter block.
+- **Coarser aggregation.** The same simulations converge faster at `r ud_res_hourly` m, because each cell collects more points. If the ecological question does not require `r ud_res` m resolution, this is free.
 
-Run this check before interpreting anything downstream. Nothing about the utilisation distribution
-maps themselves reveals whether they have settled — they look equally plausible either way.
+Run this check before interpreting anything downstream. Nothing about the utilisation distribution maps themselves reveals whether they have settled — they can look equally plausible either way.
 
-Note also that this is a *self-consistency* check: it asks whether the answer has stopped changing,
-not whether it is right. A converged UD can still be a converged estimate of a bad model.
+Note also that this is a *self-consistency* check: it asks whether the answer has stopped changing, not whether it is right. A converged UD can still be a converged estimate of a bad model.
 :::
 
 ## Hourly utilisation distributions
 
-The dynamic model's real claim is not just about where the animal goes, but about *when*. We
-therefore also aggregate separately for each hour of the day.
+The dynamic model's real claim is not just about where the animal goes, but about *when*. We therefore also aggregate separately for each hour of the day.
 
 ```{r}
 #| label: hourly_uds
@@ -1669,7 +1542,7 @@ ud_limits <- range(log10(hourly_vals[hourly_vals > 0]), na.rm = TRUE)
 
 ud_frames <- map_chr(0:23, function(h) {
   f <- file.path(plot_save_path, sprintf("ud_frame_%02d.png", h))
-  png(f, width = 110, height = 110, units = "mm", res = 150)
+  png(f, width = 150, height = 150, units = "mm", res = 150)
   plot(log10(uds_hourly_dynamic[[h + 1]]),
        main = sprintf("Predicted use, %02d:00", h),
        range = ud_limits, col = viridis(100, option = "magma"))
@@ -1686,15 +1559,11 @@ unlink(ud_frames)
 
 ![Hourly predicted utilisation distributions from the temporally dynamic model.](figures/walkthrough/hourly_uds.gif)
 
-This is the payoff of the whole exercise. Predicted use is not a fixed map but a landscape that
-shifts through the day, as the simulated animals move between the habitats they select at different
-times.
+Predicted use for the dynamic model is not a fixed map but a landscape that shifts through the day, as the simulated animals move between the habitats they select at different times.
 
 # 10. Hourly summaries — does the simulated behaviour match?
 
-Before asking whether the models predict the right *places*, it is worth asking whether they
-reproduce the right *behaviour*. We extract covariate values at the simulated locations and compare
-hourly summaries against the observed data.
+Before asking whether the models predict the right *places*, it is worth asking whether they reproduce the right *behaviour*. We extract covariate values at the simulated locations and compare hourly summaries against the observed data.
 
 ```{r}
 #| label: extract_sim_covariates
@@ -1711,10 +1580,7 @@ toc()
 head(sim_covs)
 ```
 
-With a single individual there is no between-animal variation to display, so a single observed
-curve would appear to have no uncertainty at all. To give a fair sense of the observed variability,
-we split the observed track into weekly blocks and compute hourly means within each — giving a
-distribution of observed curves comparable to the distribution of simulated ones.
+With a single individual there is no between-animal variation to display, so a single observed curve would appear to have no uncertainty at all. To give a fair sense of the observed variability, we split the observed track into weekly blocks and compute hourly means within each — giving a distribution of observed curves comparable to the distribution of simulated ones.
 
 ```{r}
 #| label: hourly_summaries
@@ -1802,26 +1668,19 @@ ggplot() +
   theme(legend.position = "bottom")
 ```
 
-The static model produces flat lines for everything, which is the only thing it can do. The dynamic
-model tracks the shape of the observed daily cycles. The match is not perfect — the simulated
-animals roam over the whole landscape while the observed animal was confined to part of it, so the
-absolute levels differ — but the *timing* of activity and habitat use is recovered.
+The static model produces flat lines for everything, which is the only thing it can do. The dynamic model tracks the shape of the observed daily cycles. The match is not perfect — the simulated animals roam over the whole landscape while the observed animal was confined to part of it, so the absolute levels differ — but the *timing* of activity and habitat use is recovered.
 
 # 11. Assessing the predictions
 
-Finally, the question the whole pipeline was built to answer: do the predicted utilisation
-distributions match where the animal actually was?
+Finally, the question the whole pipeline was built to answer: do the predicted utilisation distributions match where the animal actually was?
+
+**Note that we are using the same data to build the model and to validate it.** This is not a proper out-of-sample validation, and the results are therefore optimistic. A proper validation would require a second animal, or a second year of data from the same animal. Here we just illustrate the process.
 
 ## The Boyce index
 
-For presence-only data the standard tool is the **continuous Boyce index**
-[@Boyce2002-xr; @Hirzel2006-hu]. It divides the range of predicted values into overlapping bins
-and, for each, computes the ratio of observed locations to the area available at that predicted
-value. For a good model this ratio increases monotonically with the prediction: places predicted to
-be used more, are used more.
+For presence-only data a standard tool is the **continuous Boyce index** [@Boyce2002-xr; @Hirzel2006-hu]. It divides the range of predicted values into overlapping bins and, for each, computes the ratio of observed locations to the area available at that predicted value. For a good model this ratio increases monotonically with the prediction: places predicted to be used more, are used more.
 
-The index itself is the rank (Spearman) correlation between that ratio and the predicted value. It
-ranges from −1 to 1, where values near zero indicate a model no better than random.
+The index itself is the rank (Spearman) correlation between that ratio and the predicted value. It ranges from −1 to 1, where values near zero indicate a model no better than random.
 
 ```{r}
 #| label: boyce_function
@@ -1888,13 +1747,9 @@ boyce_results
 
 ## Is that number stable?
 
-Before reading anything into those figures, we should ask whether they would come out the same
-again. The convergence check told us the utilisation distributions are still noisy, and a Boyce
-index computed on a noisy surface is itself noisy.
+Before reading anything into those figures, we should ask whether they would come out the same again. The convergence check told us the utilisation distributions are still noisy, and a Boyce index computed on a noisy surface is itself noisy.
 
-A cheap way to find out, using only the simulations we already have: split the trajectories into
-two halves, build a utilisation distribution from each, and compute the index separately for both.
-Two halves of the same simulation, under the same model, should agree.
+A cheap way to find out, using only the simulations we already have: split the trajectories into two halves, build a utilisation distribution from each, and compute the index separately for both. Two halves of the same simulation, under the same model, should agree.
 
 ```{r}
 #| label: boyce_stability
@@ -1913,102 +1768,6 @@ split_half_boyce <- map_dfr(
 
 split_half_boyce
 ```
-
-The halves agree to within
-`r sprintf("%.3f", min(split_half_boyce$difference))` for one of the models, which looks
-reassuring.
-
-**It is weaker evidence than it appears.** The two halves are not as independent as they look: both
-are drawn under the same starting locations and the same simulation setup, so they share whatever
-that particular run happens to be doing. A split-half check measures *within-run* sampling noise
-only.
-
-The check that actually matters is to re-run the whole simulation from scratch, several times, and
-see how far the answer moves. That is more expensive, which is why it is tempting to skip — so we
-do it at reduced scale rather than not at all.
-
-```{r}
-#| label: boyce_repeat_runs
-
-# Repeat the entire simulation a few times, with independent starting locations
-# and independent random draws each time. Reduced scale to keep the runtime
-# sensible - which, if anything, understates the stability of the full run.
-n_repeat      <- 3
-n_repeat_traj <- 200
-
-model_specs <- list(
-  "A: static"             = list(lk = lookup_static,  cf = hourly_coefs_static),
-  "B: temporally dynamic" = list(lk = lookup_dynamic, cf = hourly_coefs_dynamic)
-)
-
-repeat_runs <- map_dfr(seq_len(n_repeat), function(run_i) {
-  imap_dfr(model_specs, function(m, model_name) {
-    sims_rep <- run_simulation_set(
-      lk = m$lk, coefs = m$cf, mode = "random",
-      n_traj = n_repeat_traj, n_steps = n_steps, boundary = "wrapped",
-      label = "repeat",
-      # A distinct seed per (run, model), so every run is genuinely independent
-      seed = 5000 + run_i * 17 + match(model_name, names(model_specs)))
-    data.frame(
-      model = model_name,
-      run   = run_i,
-      boyce = compute_boyce(aggregate_to_ud(sims_rep, ud_res), obs_locations)$spearman
-    )
-  })
-})
-
-repeat_runs %>%
-  pivot_wider(names_from = run, values_from = boyce, names_prefix = "run_") %>%
-  rowwise() %>%
-  mutate(spread = max(c_across(starts_with("run_"))) -
-                  min(c_across(starts_with("run_")))) %>%
-  ungroup()
-```
-
-::: {.callout-important}
-## A single run is not a result
-
-Compare the two tables. The split-half spread was at most
-`r sprintf("%.3f", max(split_half_boyce$difference))`; across fully independent re-runs it is
-`r sprintf("%.3f", max(repeat_runs %>% group_by(model) %>% summarise(s = max(boyce) - min(boyce)) %>% pull(s)))`.
-Same models, same data, same code — only the random draws differ.
-
-The robust finding, which has held across every version of this analysis, is that **the whole-day
-Boyce index is not stable enough at this simulation scale to rank the two models from a single
-run**. A separate experiment run outside this document — 5 independent seeds per model, at 500
-trajectories of 720 steps — gives a sense of the spread involved:
-
-| Model | mean | sd | min | max |
-|---|---|---|---|---|
-| A: static | 0.524 | 0.350 | −0.040 | 0.840 |
-| B: temporally dynamic | 0.773 | 0.118 | 0.632 | 0.909 |
-
-Five runs of the *identical* static model on the *identical* data returned values from −0.04 to
-0.84. This document's own successive drafts returned 0.729, −0.034 and 0.755 for that same
-comparison, as incidental things changed upstream — a different random-number generator, an added
-diagnostic. Every one of those sits inside the range above.
-
-That is also why `run_simulation_set()` takes an explicit `seed`: a single `set.seed()` at the top
-of a script does not survive edits made anywhere above the code you care about, so results drift
-between renders for reasons that have nothing to do with the analysis.
-
-::: {.callout-warning}
-## Do not over-read the two small tables above
-
-The split-half and repeat-run checks in this document are deliberately cheap — three runs at a
-reduced number of trajectories. Three runs give a very noisy estimate of a spread, and which model
-appears more variable will itself change from render to render. They are enough to demonstrate
-*that* the answer moves; they are not enough to establish *which* model's estimate is better
-determined, and no conclusion of that kind should be drawn from them. The table above, with more
-runs, is the properly powered version.
-:::
-
-Two things follow. Averaged over repeated runs the dynamic model does score higher on this
-comparison (0.773 against 0.524), plausibly because its selection surface has real structure while
-the static model's is nearly flat — but you could not have learned that from one run, and one run
-is what most analyses report. And the honest reading of the single-run table above is not a ranking
-at all: it is that this comparison needs far more trajectories before it can support one.
-:::
 
 ```{r}
 #| label: plot_f_ratio
@@ -2029,64 +1788,13 @@ bind_rows(
   theme(legend.position = "bottom")
 ```
 
-The F-ratio curve is more informative than the single index value, because it shows *where* a model
-succeeds or fails. A model can achieve a respectable correlation while badly over-predicting use in
-the very highest-suitability cells, and that shows up here as a curve that flattens or turns down
-at the right-hand end.
-
-## Correlation with a kernel density estimate
-
-A complementary check: compare the predicted UD against a kernel density estimate of the observed
-locations, which gives a smooth empirical surface rather than a set of points.
-
-```{r}
-#| label: kde_comparison
-#| fig-height: 4.5
-#| fig-cap: "Observed kernel density estimate alongside the dynamic model's prediction."
-
-# Kernel density estimate of the observed locations, on the same grid as the
-# predicted UDs so the two can be compared cell by cell
-kde_template <- rast(extent = ext(ndvi_crop), resolution = ud_res, crs = crs(ndvi_crop))
-
-obs_kde <- hr_kde(buffalo_id, trast = kde_template)
-
-# Normalise to sum to 1, matching the predicted UDs. Kernel density estimation
-# can return tiny negative values through numerical error, so clamp at zero first.
-kde_rast <- obs_kde$ud
-kde_rast[kde_rast < 0] <- 0
-kde_rast <- kde_rast / global(kde_rast, "sum", na.rm = TRUE)[[1]]
-
-kde_correlations <- tibble(
-  model = c("A: static", "B: temporally dynamic"),
-  spearman_vs_kde = c(
-    cor(values(ud_static)[, 1],  values(kde_rast)[, 1],
-        use = "complete.obs", method = "spearman"),
-    cor(values(ud_dynamic)[, 1], values(kde_rast)[, 1],
-        use = "complete.obs", method = "spearman")
-  )
-)
-
-kde_correlations
-
-kde_df <- as.data.frame(kde_rast, xy = TRUE)
-names(kde_df)[3] <- "density"
-
-p_kde <- ggplot(kde_df, aes(x = x, y = y, fill = log10(density + 1e-8))) +
-  geom_raster() +
-  scale_fill_viridis_c("log10\ndensity", option = "magma") +
-  coord_equal() +
-  labs(title = "Observed (KDE)", x = NULL, y = NULL) +
-  theme_classic() +
-  theme(axis.text = element_text(size = 6), plot.title = element_text(size = 10))
-
-p_kde + plot_ud(ud_dynamic, "Predicted (dynamic model)")
-```
+The F-ratio curve is more informative than the single index value, because it shows *where* a model succeeds or fails. A model can achieve a respectable correlation while badly over-predicting use in the very highest-suitability cells, and that shows up here as a curve that flattens or turns down at the right-hand end.
 
 ## Validation by hour of day
 
-The overall UD averages over the day, which is precisely the comparison least likely to reveal an
-advantage for the dynamic model. The sharper test is hour by hour: for each hour, we compare that
-hour's predicted UD against the locations the animal actually occupied at that hour.
+The overall UD averages over the day, but we can also check hour by hour. For each hour, we compare that hour's predicted UD against the locations the animal actually occupied at that hour.
+
+**Note that in this case, our simulated trajectories are split into 24 (hourly) groups, meaning each of the hourly UDs are created with 1/24 of the number of locations, which may be a lot noisier depending on the number of trajectories simulated.** 
 
 ```{r}
 #| label: hourly_validation
@@ -2104,14 +1812,16 @@ hourly_validation <- map_dfr(0:23, function(h) {
   data.frame(
     hour = h,
     n_observed = nrow(obs_h),
-    `A: static` = bi_static$spearman,
-    `B: temporally dynamic` = bi_dynamic$spearman,
+    `A: static` = bi_static$spearman,               # change to pearson if desired
+    `B: temporally dynamic` = bi_dynamic$spearman,  # change to pearson if desired
     check.names = FALSE
   )
 })
 
 hourly_validation
 ```
+
+Instead of plotting the F-ratio curves for every hour, we just show the Spearman rank correlation for each hour (this can be switched out for the Pearson correlation in the chunk above).
 
 ```{r}
 #| label: plot_hourly_validation
@@ -2144,26 +1854,9 @@ hourly_validation %>%
   )
 ```
 
-This is the comparison the temporally dynamic approach is built for, and it is a miniature version
-of the central result in @Forrest2025-le. The dynamic model scores substantially higher in the
-large majority of hours.
-
-Two caveats keep this honest. First, these hourly distributions are built from a *fraction* of the
-simulated locations that the whole-day one used, so they are noisier still — the gap is large and
-consistent across hours, which is why it is worth reporting, but the individual hourly values are
-not precise. Second, this is not an out-of-sample test: the models were fitted to these same
-observed locations, so what we are checking is whether a fitted model can reproduce the pattern it
-was fitted to, not whether it would predict a held-out period or a different animal.
-
-With those caveats, the direction of the result is what the model structure predicts. The static
-model cannot represent a daily cycle at all, so it has one map to offer for every hour; the dynamic
-model has twenty-four, and the animal's location does in fact depend on the hour.
-
 # 12. Doing the same thing with `amt`
 
-Everything above simulates by hand, so that each part of the redistribution kernel is visible. In
-practice, `amt` implements this directly [@Signer2023-wm], and for a static model you can go from a
-fitted object to simulated paths in a few lines.
+Everything above simulates by hand, so that each part of the redistribution kernel is visible. In practice, `amt` implements this directly [@Signer2023-wm], and for a static model you can go from a fitted object to simulated paths in a few lines.
 
 ```{r}
 #| label: amt_simulation
@@ -2183,20 +1876,11 @@ cat("manual - shape:", round(hourly_coefs_static$shape[1], 6),
 
 ## Building a redistribution kernel
 
-Two details are needed to make this work, and both are worth knowing about because neither is
-obvious from the error messages you get without them.
+Two details are needed to make this work, and both are worth knowing about because neither is obvious from the error messages you get without them.
 
-**The extraction function.** By default `redistribution_kernel()` extracts covariates at *both*
-ends of each step, producing columns named `ndvi_start` and `ndvi_end`. Our model refers simply to
-`ndvi`, so we supply a custom `fun` that extracts at the end of the step only. That function also
-has to compute the derived movement terms `log_sl_` and `cos_ta_`, since the kernel provides only
-`sl_` and `ta_`.
+**The extraction function.** By default `redistribution_kernel()` extracts covariates at *both* ends of each step, producing columns named `ndvi_start` and `ndvi_end`. Our model refers simply to `ndvi`, so we supply a custom `fun` that extracts at the end of the step only. That function also has to compute the derived movement terms `log_sl_` and `cos_ta_`, since the kernel provides only `sl_` and `ta_`.
 
-**The extent.** We use the *full* covariate rasters here rather than the cropped simulation extent.
-`amt` terminates a path once too many proposed steps fall outside the map — on our 14 × 14 km crop,
-paths stop after roughly 150 steps. This is the edge-effect problem that the wrapped boundary in
-our own sampler was designed to avoid; `amt`'s kernel has no toroidal option, so we give it room
-instead.
+**The extent.** We use the *full* covariate rasters here rather than the cropped simulation extent. `amt` terminates a path once too many proposed steps fall outside the map — on our subset crop, paths soon terminate.
 
 ```{r}
 #| label: amt_redistribution_kernel
@@ -2256,14 +1940,9 @@ ggplot() +
 
 ## Why we wrote the sampler by hand
 
-`amt::redistribution_kernel()` builds its kernel from **one** fitted model evaluated against a
-**fixed** map. That is exactly right for a static model, and it is the tool to reach for in that
-case. Our dynamic model, though, has coefficients that change every hour — so there is no single
-set of coefficients, and no single habitat surface, to hand it.
+`amt::redistribution_kernel()` builds its kernel from **one** fitted model evaluated against a **fixed** map. That is exactly right for a static model, and it is the tool to reach for in that case. Our dynamic model, though, has coefficients that change every hour — so there is no single set of coefficients, and no single habitat surface, to hand it.
 
-The custom `fun` above is most of the way to a solution. Since it receives the proposed steps,
-including their timestamps, it can select the layer matching the hour rather than using a fixed
-map:
+The custom `fun` above is most of the way to a solution. Since it receives the proposed steps, including their timestamps, it can select the layer matching the hour rather than using a fixed map:
 
 ```{r}
 #| label: amt_custom_fun
@@ -2286,61 +1965,20 @@ hourly_extract <- function(xy, map) {
 }
 ```
 
-That works, but note what it costs: a per-row `terra::extract()` call, which is precisely the
-overhead our matrix lookup in section 8 was written to avoid. The alternative is to rebuild the
-kernel for each hour and step through them.
-
-Either approach amounts to the bookkeeping that `simulate_ssf()` does explicitly. For a
-walkthrough, doing it by hand has the advantage that nothing is hidden — and it generalises
-immediately to whatever other kind of temporal, seasonal or individual variation you want the
-coefficients to have.
+That works, but note what it costs: a per-row `terra::extract()` call, which is the overhead our matrix lookup in section 8 was written to avoid. The alternative is to rebuild the kernel for each hour and step through them.
 
 # Summary
 
 Starting from a single animal's GPS trajectory and three environmental layers, we:
 
-1. Generated used and available steps, and fitted **two** step selection functions — a static one
-   and a temporally dynamic GAM with cyclic smooths.
-2. Reduced both models to a common representation: a table of habitat coefficients and corrected
-   movement parameters for each hour of the day, cross-checked against `amt`.
-3. Pre-computed hourly habitat selection surfaces and simulated stochastic trajectories from each
-   model, being explicit about how the choice of starting location and boundary determines what
-   question the simulation answers.
-4. Aggregated those trajectories into utilisation distributions, overall and by hour, and checked
-   that the number of trajectories was sufficient.
-5. Compared simulated and observed hourly movement and habitat use.
-6. Validated the predicted distributions against the observed locations, overall and hour by hour.
+1.  Generated used and available steps, and fitted **two** step selection functions — a static one and a temporally dynamic GAM with cyclic smooths.
+2.  Reduced both models to a common representation: a table of habitat coefficients and corrected movement parameters for each hour of the day, cross-checked against `amt`.
+3.  Pre-computed hourly habitat selection surfaces and simulated stochastic trajectories from each model, being explicit about how the choice of starting location and boundary determines what question the simulation answers.
+4.  Aggregated those trajectories into utilisation distributions, overall and by hour, and checked that the number of trajectories was sufficient.
+5.  Compared simulated and observed hourly movement and habitat use.
+6.  Validated the predicted distributions against the observed locations, overall and hour by hour.
 
-The recurring theme is that fitting is only the beginning. A model that fits better by AIC has not
-yet earned the claim that it *predicts* better — that claim has to be tested, and simulation is what
-makes testing it possible.
-
-This example makes the point more sharply than intended, in a way worth being explicit about.
-
-The dynamic model was preferred by over 1,200 AIC units, reproduced the observed daily activity
-cycle that the static model cannot represent at all, and scored substantially better hour by hour.
-But the whole-day comparison — the one that looks most like a headline result — turned out not to
-be stable enough to rank the models from a single run. In a repeated-seed experiment, five runs of
-the same static model on the same data returned Boyce indices from −0.04 to 0.84. Whichever one
-happened to appear in a given render, it would have been easy to build a tidy story around it.
-
-Three cautions to carry away, in roughly the order they catch people out:
-
-- **Check convergence, and believe it.** A utilisation distribution map looks equally plausible
-  whether or not the simulation behind it has settled. Section 9 is the only thing that tells you.
-- **Check stability by re-running, not by splitting.** Splitting one run in half is cheap and
-  reassuring, but the halves share a starting-location draw and a simulation setup, so the check
-  is blind to exactly the variability that matters. Re-running from scratch is the check that
-  counts.
-- **The validation has to match the claim.** A metric that pools over the dimension a model is
-  built to capture cannot detect that the model captures it. Choose the comparison from the
-  question, not from the results.
-
-None of this argues against the temporally dynamic approach. Its advantage is real: it is visible
-in the fit, in the reproduced activity cycle, in the hourly validation, and in the *average* of
-repeated whole-day comparisons. What the example argues is that a simulation study needs the same
-scepticism applied to its outputs that was applied to its inputs — because a simulated prediction
-will always produce a number, whether or not that number means anything.
+The dynamic model was preferred by AIC, reproduced the observed daily activity cycle that the static model cannot represent at all, and scored substantially better hour by hour. But the whole-day comparison was more similar. 
 
 ## References
 
